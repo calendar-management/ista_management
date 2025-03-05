@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Administrateur Dashboard</title>
+    <title>SB Admin 2 - Dashboard</title>
 
     <!-- Custom fonts for this template-->
     <link href="admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -20,28 +20,27 @@
     <!-- Custom styles for this template-->
     <link href="admin/css/sb-admin-2.min.css" rel="stylesheet">
 
-    <!-- Bootstrap CSS (Optional for grid responsiveness) -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         @media (max-width: 333px) {
             .card-body .d-flex {
-                flex-direction: column;
-                align-items: flex-start;
+                flex-direction: column; /* Stack elements vertically */
+                align-items: flex-start; /* Align items to the left */
             }
 
             .card-body .fs-4 {
-                margin-bottom: 10px;
+                margin-bottom: 10px; /* Add space between title and icon */
             }
 
             .card-body i {
-                margin-bottom: 10px;
+                margin-bottom: 10px; /* Add space between icon and details */
             }
 
             .card-body .text-gray-800 {
-                margin-top: 5px;
+                margin-top: 5px; /* Add space between "Details" and the icon */
             }
         }
     </style>
+
 </head>
 
 <body id="page-top">
@@ -57,7 +56,7 @@
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">Administrateur </div>
+                <div class="sidebar-brand-text mx-3">Super Administrateur</div>
             </a>
 
             <!-- Divider -->
@@ -65,7 +64,7 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="" >
+                <a class="nav-link" href="">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -80,10 +79,10 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/table_formateurs" 
+                <a class="nav-link collapsed" href="/table_admin" 
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-cog"></i>
-                    <span>Gestion De Formateurs</span>
+                    <span>Gestion D'Administrateurs</span>
                 </a>
             </li>
 
@@ -106,10 +105,9 @@
 
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                    <!-- Sidebar Toggle (Topbar) -->
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
+                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                            <i class="fa fa-bars"></i>
+                        </button>
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
@@ -131,7 +129,6 @@
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
-
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
@@ -151,30 +148,27 @@
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                        <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
-                        </button>
                     </div>
 
                     <!-- Content Row -->
                     <div class="row">
 
-                        <!-- Formateur Card -->
+                        <!-- Administrateur Card -->
                         <div class="container">
-                            <div class="row justify-content-center">
+                            <div class="row justify-content-center" style="margin-right: -1.75rem;margin-left: -1.75rem;">
                                 <div class="col-12 col-sm-8 col-md-6 col-lg-4">
                                     <div class="card border-left-primary shadow h-100 py-4">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <div>
                                                     <div class="fs-4 fw-bold text-success text-uppercase mb-3">
-                                                        Formateurs
+                                                        Administrateurs
                                                     </div>
                                                 </div>
                                                 <div>
                                                     <i class="fas fa-clipboard-list fa-3x text-gray-300"></i>
                                                     <div class="mt-2 text-gray-800">
-                                                        <a href="/table_formateurs" class="text-primary fs-5">Details</a>
+                                                        <a href="//table_admin" class="text-primary fs-5">Details</a>
                                                     </div>
                                                 </div>
                                             </div>

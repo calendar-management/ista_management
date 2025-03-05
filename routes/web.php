@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FormController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,9 +15,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('calendar');
+    return view('index');
 });
 
-Route::get('/admin_dashboard',function(){
-    return view('admin.dashboard');
+Route::get('/dashboard',function(){
+    return view("admin.dashboard");
 });
+Route::get('/sup_adm_dashboard',function(){
+    return view("supadmin.dashboard");
+});
+Route::get('/adm_dashboard',function(){
+    return view("admin.dashboard");
+});
+
