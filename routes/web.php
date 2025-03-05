@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,10 +15,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
-Route::get('/', function () {
-    return view('index');
-});
+Route::view('/','index')->name('home')->middleware('auth');
 
 
 Route::get('/sup_adm_dashboard',function(){
@@ -27,7 +25,6 @@ Route::get('/adm_dashboard',function(){
     return view("admin.dashboard");
 });
 
-});
 
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
