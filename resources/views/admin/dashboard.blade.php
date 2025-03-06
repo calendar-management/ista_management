@@ -53,7 +53,7 @@
         <ul class="navbar-nav bg-danger sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/adm_dashboard">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
@@ -65,7 +65,7 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="" >
+                <a class="nav-link" href="/adm_dashboard" >
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -80,7 +80,7 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/table_formateurs" 
+                <a class="nav-link collapsed" href="/gestion_formateur" 
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-cog"></i>
                     <span>Gestion De Formateurs</span>
@@ -174,7 +174,7 @@
                                                 <div>
                                                     <i class="fas fa-clipboard-list fa-3x text-gray-300"></i>
                                                     <div class="mt-2 text-gray-800">
-                                                        <a href="/table_formateurs" class="text-primary fs-5">Details</a>
+                                                        <a href="/gestion_formateur" class="text-primary fs-5">Details</a>
                                                     </div>
                                                 </div>
                                             </div>

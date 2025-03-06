@@ -45,14 +45,15 @@
 
 <body id="page-top">
 
-    <!-- Page Wrapper -->
+
+<!-- Page Wrapper -->
     <div id="wrapper">
 
         <!-- Sidebar -->
         <ul class="navbar-nav bg-danger sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/sup_adm_dashboard">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
@@ -64,7 +65,7 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="">
+                <a class="nav-link" href="/sup_adm_dashboard">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -145,41 +146,11 @@
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                    </div>
+                    <main>
+                        @yield("main")
+                    </main>
 
-                    <!-- Content Row -->
-                    <div class="row">
-
-                        <!-- Administrateur Card -->
-                        <div class="container">
-                            <div class="row justify-content-center" style="margin-right: -1.75rem;margin-left: -1.75rem;">
-                                <div class="col-12 col-sm-8 col-md-6 col-lg-4">
-                                    <div class="card border-left-primary shadow h-100 py-4">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <div class="fs-4 fw-bold text-success text-uppercase mb-3">
-                                                        Administrateurs
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <i class="fas fa-clipboard-list fa-3x text-gray-300"></i>
-                                                    <div class="mt-2 text-gray-800">
-                                                        <a href="/gestion_adm" class="text-primary fs-5">Details</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> 
-                            </div>
-                        </div>
-
-                    </div>
-
+                    
                 </div>
                 <!-- End of Page Content -->
 
@@ -192,6 +163,8 @@
     </div>
     <!-- End of Page Wrapper -->
 
+
+    
     <!-- Bootstrap core JavaScript-->
     <script src="admin/vendor/jquery/jquery.min.js"></script>
     <script src="admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
