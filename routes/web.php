@@ -1,7 +1,9 @@
 <?php
 
-
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,9 +16,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
-Route::get('/', function () {
-    return view('index');
+Route::get('/',function(){
+    return redirect()->route('dashboard');
 });
 
 
@@ -27,16 +28,17 @@ Route::get('/adm_dashboard',function(){
     return view("admin.dashboard");
 });
 
-});
 
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
 })->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/logout',[AuthenticatedSessionController::class,'destroy']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
 
 require __DIR__.'/auth.php';
