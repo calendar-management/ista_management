@@ -1,9 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,13 +19,16 @@ Route::get('/',function(){
 });
 
 
+
 Route::get('/sup_adm_dashboard',function(){
     return view("supadmin.dashboard");
 });
+
 Route::get('/adm_dashboard',function(){
     return view("admin.dashboard");
 });
 
+Route::view('/formateur_login','formateur.login');
 
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
