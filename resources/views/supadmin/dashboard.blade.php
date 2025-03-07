@@ -168,7 +168,7 @@
                                                 <div>
                                                     <i class="fas fa-clipboard-list fa-3x text-gray-300"></i>
                                                     <div class="mt-2 text-gray-800">
-                                                        <a href="//table_admin" class="text-primary fs-5">Details</a>
+                                                        <a href="/table_admin" class="text-primary fs-5">Details</a>
                                                     </div>
                                                 </div>
                                             </div>

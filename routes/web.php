@@ -24,6 +24,7 @@ Route::get('/',function(){
 Route::get('/sup_adm_dashboard',function(){
     return view("supadmin.dashboard");
 });
+
 Route::get('/adm_dashboard',function(){
     return view("admin.dashboard");
 });
