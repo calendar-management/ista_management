@@ -150,6 +150,7 @@
             </div>
 
         </ul>
+        
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
