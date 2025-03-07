@@ -138,7 +138,7 @@ $(document).ready(function() {
         $('#progressDisplayContainer').html(html);
     }
 
-    // Function to update all modules progress section
+    // Progress bar
     function updateAllModulesProgress() {
         var html = `
             <div class="card mt-4 mb-4">
