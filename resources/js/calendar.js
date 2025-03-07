@@ -1,5 +1,6 @@
 $(document).ready(function() {
     var date = new Date();
+    var hasUnsavedChanges = false; // Track if there are unsaved changes
 
     // Fetch module data from the database (replace with your API endpoint)
     function fetchModules() {
@@ -21,6 +22,17 @@ $(document).ready(function() {
                 totalHours: 45,
                 weeklyHours: 6,
                 startDate: '2025-03-15', // Example start date (YYYY-MM-DD)
+                completedHours: 0, // Track actual completed hours
+                weeklyProgress: Array(Math.ceil(45 / 6)).fill(null), // Initialize with null
+                examDate: null, // No default exam date
+                customSessionDates: [] // Track custom dates for sessions
+            },
+            {
+                id: 3,
+                name: 'Module 3',
+                totalHours: 45,
+                weeklyHours: 6,
+                startDate: '2025-03-05', // Example start date (YYYY-MM-DD)
                 completedHours: 0, // Track actual completed hours
                 weeklyProgress: Array(Math.ceil(45 / 6)).fill(null), // Initialize with null
                 examDate: null, // No default exam date
@@ -102,8 +114,8 @@ $(document).ready(function() {
         // Update all modules progress section
         updateAllModulesProgress();
 
-        // Save to database (mock function)
-        saveToDatabase();
+        // Mark that there are unsaved changes
+        setUnsavedChanges(true);
 
         // Return updated module data
         return {
@@ -295,6 +307,7 @@ $(document).ready(function() {
                 $('#updateStatus').html(`
                     <div class="alert alert-success">
                         <strong>Success!</strong> Week ${weekIndex+1} updated with ${hoursCompleted} hours.
+                        <br><small>Remember to click "Save All Changes" to save to database.</small>
                     </div>
                 `);
             } else {
@@ -393,11 +406,109 @@ $(document).ready(function() {
         $('#calendar').fullCalendar('addEventSource', events);
     }
 
-    // Mock function to simulate saving to database
+    // New function to handle the save to database action
     function saveToDatabase() {
         var moduleData = prepareModulesForDatabase(modules);
         console.log("Saving to database:", moduleData);
-        // Here you would actually make an AJAX call to your backend
+        
+        // Show loading state
+        $('#saveAllChangesBtn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+        $('#saveAllChangesBtn').prop('disabled', true);
+        
+        // Simulate an AJAX call (replace this with your actual AJAX call)
+        setTimeout(function() {
+            // Simulate successful save
+            showSaveSuccess();
+            setUnsavedChanges(false);
+            
+            // Reset the button state
+            $('#saveAllChangesBtn').html('<i class="fas fa-save mr-1"></i> Save All Changes');
+            $('#saveAllChangesBtn').prop('disabled', !hasUnsavedChanges);
+        }, 800); // Simulate a 800ms delay for the save operation
+        
+        // Example AJAX call (uncomment and modify as needed):
+        /*
+        $.ajax({
+            url: '/api/updateModules',
+            type: 'POST',
+            data: JSON.stringify(moduleData),
+            contentType: 'application/json',
+            success: function(response) {
+                showSaveSuccess();
+                setUnsavedChanges(false);
+                
+                // Reset the button state
+                $('#saveAllChangesBtn').html('<i class="fas fa-save mr-1"></i> Save All Changes');
+                $('#saveAllChangesBtn').prop('disabled', !hasUnsavedChanges);
+            },
+            error: function(error) {
+                showSaveError(error);
+                
+                // Reset the button state even if there's an error
+                $('#saveAllChangesBtn').html('<i class="fas fa-save mr-1"></i> Save All Changes');
+                $('#saveAllChangesBtn').prop('disabled', !hasUnsavedChanges);
+            }
+        });
+        */
+    }
+
+    // Function to show save success message
+    function showSaveSuccess() {
+        // Create a notification that auto-dismisses
+        var notification = $(`
+            <div class="alert alert-success save-notification" role="alert">
+                <strong>Success!</strong> All changes saved to database.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        `);
+        
+        $('#saveNotificationArea').html(notification);
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(function() {
+            notification.alert('close');
+        }, 3000);
+    }
+
+    // Function to show save error message
+    function showSaveError(error) {
+        var notification = $(`
+            <div class="alert alert-danger save-notification" role="alert">
+                <strong>Error!</strong> Failed to save changes to database. Please try again.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        `);
+        
+        $('#saveNotificationArea').html(notification);
+    }
+
+    // Function to update the unsaved changes status
+    function setUnsavedChanges(value) {
+        hasUnsavedChanges = value;
+        
+        // Update the save button state
+        if (hasUnsavedChanges) {
+            $('#saveAllChangesBtn').removeClass('btn-outline-primary').addClass('btn-primary').prop('disabled', false);
+        } else {
+            $('#saveAllChangesBtn').removeClass('btn-primary').addClass('btn-outline-primary').prop('disabled', true);
+        }
+        
+        // Update the notification area
+        if (hasUnsavedChanges) {
+            if ($('#unsavedChangesAlert').length === 0) {
+                $('#saveNotificationArea').append(`
+                    <div class="alert alert-warning" id="unsavedChangesAlert" role="alert">
+                        <strong>Unsaved Changes!</strong> Click "Save All Changes" to save your changes to the database.
+                    </div>
+                `);
+            }
+        } else {
+            $('#unsavedChangesAlert').remove();
+        }
     }
 
     // Function to handle module/exam date changes
@@ -428,8 +539,8 @@ $(document).ready(function() {
         // Update all modules progress
         updateAllModulesProgress();
 
-        // Save changes to the database
-        saveToDatabase();
+        // Mark that we have unsaved changes
+        setUnsavedChanges(true);
 
         return true;
     }
@@ -469,8 +580,8 @@ $(document).ready(function() {
             $('#moduleSelect').trigger('change');
         }
 
-        // Save to database (mock function)
-        saveToDatabase();
+        // Mark that there are unsaved changes
+        setUnsavedChanges(true);
 
         return true;
     }
@@ -527,6 +638,47 @@ $(document).ready(function() {
 
             if (updated) {
                 $('#addEventModal').modal('hide');
+                setUnsavedChanges(true);
+            }
+        });
+    }
+
+    // Function to create the "Save All Changes" button and notification area
+    function createSaveAllChangesButton() {
+        var buttonHTML = `
+            <div class="mt-4 card mb-4" id="saveChangesCard">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div id="saveNotificationArea"></div>
+                        <button id="saveAllChangesBtn" class="btn btn-outline-primary" disabled>
+                            <i class="fas fa-save mr-1"></i> Save All Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Insert the button after the calendar
+        $(buttonHTML).insertAfter('#call');
+
+        // Add event listener for save button
+        $('#saveAllChangesBtn').on('click', function() {
+            if (hasUnsavedChanges) {
+                // Show loading state
+                $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+                $(this).prop('disabled', true);
+                
+                // Call save function
+                saveToDatabase();
+            }
+        });
+    }
+
+    // Add window beforeunload event to warn about unsaved changes
+    function setupUnsavedChangesWarning() {
+        $(window).on('beforeunload', function() {
+            if (hasUnsavedChanges) {
+                return "You have unsaved changes. Are you sure you want to leave without saving?";
             }
         });
     }
@@ -536,6 +688,9 @@ $(document).ready(function() {
 
     // Create the add event dialog
     createAddEventDialog();
+
+    // Create the save all changes button
+    createSaveAllChangesButton();
 
     // Initialize the calendar
     $('#calendar').fullCalendar({
@@ -602,21 +757,14 @@ $(document).ready(function() {
     // Initialize the all modules progress section
     updateAllModulesProgress();
 
-    // Add CSS styles for the different event types
-    $('<style>')
-        .text(`
-            .fc-event.module-start {color: #000000; background-color: #ffff; border-color: #007bff; }
-            .fc-event.module-exam {color: #000000; background-color: #dc3545; border-color: #dc3545; }
-            .fc-event.progress {color: #000000; background-color: #28a745; border-color: #28a745; }
-            .fc-event.absence {color: #000000; background-color: #ffc107; border-color: #ffc107; }
-            .fc-event.planned-session {color: #000000; background-color: #FFFF; border-color: #6c757d; opacity: 0.7; }
-            /* Add a visual cue for draggable events */
-            .fc-event {cursor: pointer;}
-        `)
-        .appendTo('head');
+    // Setup unsaved changes warning
+    setupUnsavedChangesWarning();
 
     // Initial calendar update
     updateCalendar();
+
+    // Set initial state for unsaved changes
+    setUnsavedChanges(false);
 
     // Log the initial data
     console.log("Initial module data:", prepareModulesForDatabase(modules));

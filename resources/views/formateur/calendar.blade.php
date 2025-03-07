@@ -3,7 +3,7 @@
 
 <head>
     <title>Professor's Calendar</title>
-    @vite('resources/js/app.jsx')
+    {{-- @vite('resources/js/app.jsx') --}}
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -49,6 +49,13 @@
 
     .fc-event {
         cursor: pointer;
+    }
+    .cal-scroll{
+        width: 100%;
+    overflow-x: auto;  /* Enables horizontal scrolling */
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column
     }
     </style>
 </head>
@@ -108,7 +115,7 @@
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
                     <!-- Sidebar Toggle (Topbar) -->
-                    <button id="sid     ebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
 
@@ -128,14 +135,6 @@
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Activity Log
-                                </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
@@ -148,10 +147,14 @@
 
                 <!-- Calendar -->
                 <div class="container">
-                    <div class="call">
-                        <div class="col-md-12">
+                    <div class="call" >
+                        <div class="cal-scroll col-md-12">
                             <div id='calendar'></div>
                             <div style='clear:both'></div>
+
+                        </div>
+                        <div id="call">
+
                         </div>
                         <hr>
                         <div class="col-md-12">
