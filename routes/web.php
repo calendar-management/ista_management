@@ -47,3 +47,8 @@ Route::get('/edit_adm/{id}',[AdministrateurController::class, 'edit'])->name('ed
 Route::put('/edit_adm/{id}',[AdministrateurController::class, 'update'])->name("update_admin");
 Route::delete('/delete_admin/{id}',[AdministrateurController::class, 'delete'])->name("delete_admin");
 
+Route::view('/add_formateur','admin.add_frm')->name('add_formateur');
+Route::post('/add_formateur',[FormateurController::class, 'add']);
+Route::post('/gestion_formateur',[FormateurController::class, 'import'])->name('import_file');
+Route::view('/gestion_calendrier', 'admin.gestion_calendrier')->name('gestion_calendrier');
+
