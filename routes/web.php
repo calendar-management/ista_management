@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdministrateurController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\FormateurController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -23,10 +24,11 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-
+Route::view('/import','import.import');
+Route::post('/register-import', [RegisteredUserController::class, 'store'])->name('register.import');
 
 Route::middleware('auth')->group(function () {
-    Route::post('/logout',[AuthenticatedSessionController::class,'destroy']);
+    // abdo
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -34,14 +36,13 @@ Route::middleware('auth')->group(function () {
     Route::view('/sup_adm_dashboard',"supadmin.dashboard");
     Route::view('/adm_dashboard',"admin.dashboard");    
 
+
+
+
+    //mns
     Route::get('/gestion_formateur', [FormateurController::class, 'index']);
-
     Route::get('/gestion_adm', [AdministrateurController::class, 'index']);
-
-
-
     Route::view('/add_admin','supadmin.add_adm')->name('add_admin');
-
     Route::post('/add_admin',[AdministrateurController::class, 'add']);
     Route::get('/edit_adm/{id}',[AdministrateurController::class, 'edit'])->name('edit_adm');
     Route::put('/edit_adm/{id}',[AdministrateurController::class, 'update'])->name("update_admin");
