@@ -37,8 +37,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/gestion_formateur', [FormateurController::class, 'index']);
 
     Route::get('/gestion_adm', [AdministrateurController::class, 'index']);
-
-
+    // hsnnnnnnnnnnnn
+    Route::get('/formateur_calendar',function(){
+        return view("formateur.calendar");
+    });
 
     Route::view('/add_admin','supadmin.add_adm')->name('add_admin');
 
