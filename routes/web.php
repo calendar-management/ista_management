@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdministrateurController;
 use App\Http\Controllers\FormateurController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -48,6 +49,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/delete_admin/{id}',[AdministrateurController::class, 'delete'])->name("delete_admin");
 
 });
+
+Route::get('/calendar', function () {
+    return view('calendar');
+});
+Route::post('/calendar',[TestController::class, 'store']);
+Route::get('/calendar',[TestController::class, 'index']);
 
 require __DIR__.'/auth.php';
 
