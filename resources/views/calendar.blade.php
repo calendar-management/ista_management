@@ -89,6 +89,27 @@
                 </div>
             </div>
 
+            <!-- Add this after your calendar table -->
+            <div class="task-details-section mt-4 d-none">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Task Details</h5>
+                        <button type="button" class="btn-close" aria-label="Close"
+                            onclick="hideTaskDetails()"></button>
+                    </div>
+                    <div class="card-body">
+                        <div class="task-info">
+                            <h6 class="task-title mb-3"></h6>
+                            <p class="task-date mb-2"></p>
+                            <p class="task-hours mb-3"></p>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-edit">Edit</button>
+                            <button class="btn btn-danger btn-delete">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
 
@@ -101,7 +122,7 @@
                                 aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="taskForm" method="POST" action="/calendar">
+                            <form id="taskForm" method="POST" action="{{ route('tasks.store') }}">
                                 @csrf
                                 <input type="hidden" id="taskDate" name="date">
                                 <div class="mb-3">
@@ -109,11 +130,9 @@
                                     <input type="text" class="form-control" id="taskTitle" name="title" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="taskDescription" class="form-label">Nombre des heures</label>
-                                    <input type="text" class="form-control" id="taskDescription" name="hours"
-                                        required>
+                                    <label for="taskHours" class="form-label">Nombre des heures</label>
+                                    <input type="text" class="form-control" id="taskHours" name="hours" required>
                                 </div>
-
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary"
                                         data-bs-dismiss="modal">Close</button>
@@ -121,7 +140,43 @@
                                 </div>
                             </form>
                         </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editTaskForm" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" id="editTaskId" name="id">
+                                <input type="hidden" id="editTaskDate" name="date">
+
+                                <div class="mb-3">
+                                    <label for="editTaskTitle" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="editTaskTitle" name="title"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTaskHours" class="form-label">Nombre des heures</label>
+                                    <input type="text" class="form-control" id="editTaskHours" name="hours"
+                                        required>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Update Task</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -208,7 +263,7 @@
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
                     margin-bottom: 4px;
                     flex-shrink: 0;
-                    cursor: move;
+                    cursor: pointer;
                     width: 100%;
                     box-sizing: border-box;
                 }
@@ -306,319 +361,419 @@
                     background-color: #e3f2fd;
                     border: 2px dashed #0d6efd;
                 }
+
+                .task-details-section {
+                    scroll-margin-top: 2rem;
+                }
+
+                .task-item:active {
+                    transform: scale(0.98);
+                }
+
+                .card {
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+
+                .card-header {
+                    background-color: #f8f9fa;
+                    border-bottom: 1px solid #dee2e6;
+                }
+
+                .btn-group {
+                    gap: 8px;
+                }
+
+                .btn-edit:hover {
+                    background-color: #0b5ed7;
+                }
+
+                .btn-delete:hover {
+                    background-color: #bb2d3b;
+                }
             </style>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
 
 
 
         </main>
-    </div>
-
-    <script>
-        const fetchedDates = JSON.parse(`{!! json_encode($data) !!}`);
-        let currentDate = new Date();
-        let currentView = 'month';
-
-        // Initialize view toggle handlers
-        document.getElementById('monthView').addEventListener('click', function() {
-            currentView = 'month';
-            this.classList.add('active');
-            document.getElementById('weekView').classList.remove('active');
-            updateCalendar(currentDate);
-        });
-
-        document.getElementById('weekView').addEventListener('click', function() {
-            currentView = 'week';
-            this.classList.add('active');
-            document.getElementById('monthView').classList.remove('active');
-            updateCalendar(currentDate);
-        });
-
-        // Navigation handlers
-        document.getElementById('prevMonth').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (currentView === 'month') {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-            } else {
-                currentDate.setDate(currentDate.getDate() - 7);
-            }
-            updateCalendar(currentDate);
-        });
-
-        document.getElementById('nextMonth').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (currentView === 'month') {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-            } else {
-                currentDate.setDate(currentDate.getDate() + 7);
-            }
-            updateCalendar(currentDate);
-        });
-
-        function updateCalendar(date) {
-            if (currentView === 'month') {
-                updateMonthView(date);
-            } else {
-                updateWeekView(date);
-            }
-        }
-
-        function updateMonthView(date) {
-            // Update header
-            const monthYearStr = date.toLocaleString('default', {
-                month: 'long',
-                year: 'numeric'
-            });
-            document.getElementById('currentMonthYear').textContent = monthYearStr;
-
-            const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-            const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-
-            let calendarBody = document.querySelector('.calendar-table tbody');
-            calendarBody.innerHTML = '';
-
-            let day = 1;
-            let currentRow = document.createElement('tr');
-
-            // Add empty cells for days before the first of the month
-            for (let i = 0; i < firstDay; i++) {
-                currentRow.appendChild(document.createElement('td'));
-            }
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            // Fill in the days of the month
-            while (day <= daysInMonth) {
-                if (currentRow.children.length === 7) {
-                    calendarBody.appendChild(currentRow);
-                    currentRow = document.createElement('tr');
-                }
-
-                let cell = document.createElement('td');
-                cell.className = 'calendar-cell';
-
-                const cellDate = new Date(date.getFullYear(), date.getMonth(), day);
-                const isPastDate = cellDate < today;
-
-                if (isPastDate) {
-                    cell.classList.add('past-date');
-                }
-
-                if (day === today.getDate() &&
-                    date.getMonth() === today.getMonth() &&
-                    date.getFullYear() === today.getFullYear()) {
-                    cell.classList.add('today');
-                }
-
-                const formattedDate =
-                    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                cell.dataset.date = formattedDate;
 
 
-                let myDate =
-                    `${cellDate.getFullYear()}-${String(cellDate.getMonth() + 1).padStart(2, '0')}-${String(cellDate.getDate()).padStart(2, '0')}`;
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            const fetchedDates = JSON.parse(`{!! json_encode($data) !!}`);
+            let currentDate = new Date();
+            let currentView = 'month';
 
-                function renderTasks(date, container) {
-                    const tasksForDate = fetchedDates.filter(task => task.date === date);
-                    container.innerHTML = ''; // Clear existing tasks
-
-                    tasksForDate.forEach(task => {
-                        const taskElement = document.createElement('div');
-                        taskElement.className = 'task-item';
-                        taskElement.draggable = true;
-                        taskElement.setAttribute('data-date', date);
-                        taskElement.innerHTML = `${task.title} - ${task.hours}h`;
-                        container.appendChild(taskElement);
-                    });
-                }
-                let taskContainer = document.createElement('div');
-                taskContainer.className = 'task-container';
-                cell.appendChild(taskContainer);
-                renderTasks(myDate, taskContainer);
-
-                if (!isPastDate) {
-                    cell.addEventListener('click', function() {
-                        document.getElementById('taskDate').value = this.dataset.date;
-                        const modal = new bootstrap.Modal(document.getElementById('taskModal'));
-                        modal.show();
-                    });
-                }
-
-                currentRow.appendChild(cell);
-                day++;
-            }
-
-            // Fill remaining cells
-            while (currentRow.children.length < 7) {
-                currentRow.appendChild(document.createElement('td'));
-            }
-            calendarBody.appendChild(currentRow);
-            initializeDragAndDrop();
-
-        }
-
-        function updateWeekView(date) {
-            const startOfWeek = new Date(date);
-            startOfWeek.setDate(date.getDate() - date.getDay());
-
-            // Update header for week view
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
-            const weekStr =
-                `${startOfWeek.toLocaleString('default', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleString('default', { month: 'long', day: 'numeric', year: 'numeric' })}`;
-            document.getElementById('currentMonthYear').textContent = weekStr;
-
-            let calendarBody = document.querySelector('.calendar-table tbody');
-            calendarBody.innerHTML = '';
-            let row = document.createElement('tr');
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            // Create week view
-            for (let i = 0; i < 7; i++) {
-                const currentDate = new Date(startOfWeek);
-                currentDate.setDate(startOfWeek.getDate() + i);
-
-                const isPastDate = currentDate < today;
-
-                let cell = document.createElement('td');
-                cell.className = 'calendar-cell';
-
-                if (isPastDate) {
-                    cell.classList.add('past-date');
-                }
-
-                if (currentDate.toDateString() === today.toDateString()) {
-                    cell.classList.add('today');
-                }
-
-                const formattedDate =
-                    `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-                cell.dataset.date = formattedDate;
-
-                function renderTasks(date, container) {
-                    const tasksForDate = fetchedDates.filter(task => task.date === date);
-                    container.innerHTML = ''; // Clear existing tasks
-
-                    tasksForDate.forEach(task => {
-                        const taskElement = document.createElement('div');
-                        taskElement.className = 'task-item';
-                        taskElement.draggable = true;
-                        taskElement.setAttribute('data-date', date);
-                        taskElement.innerHTML = `${task.title} - ${task.hours}h`;
-                        container.appendChild(taskElement);
-                    });
-                }
-                let taskContainer = document.createElement('div');
-                taskContainer.className = 'task-container';
-                cell.appendChild(taskContainer);
-                renderTasks(formattedDate, taskContainer);
-
-                if (!isPastDate) {
-                    cell.addEventListener('click', function() {
-                        document.getElementById('taskDate').value = this.dataset.date;
-                        const modal = new bootstrap.Modal(document.getElementById('taskModal'));
-                        modal.show();
-                    });
-                }
-
-                row.appendChild(cell);
-            }
-
-            calendarBody.appendChild(row);
-            initializeDragAndDrop();
-        }
-
-        // Initialize calendar
-        document.getElementById('monthView').classList.add('active');
-        updateCalendar(currentDate);
-
-        function initializeDragAndDrop() {
-            // Add drag events to tasks
-            document.querySelectorAll('.task-item').forEach(task => {
-                task.addEventListener('dragstart', handleDragStart);
-                task.addEventListener('dragend', handleDragEnd);
+            // Initialize view toggle handlers
+            document.getElementById('monthView').addEventListener('click', function() {
+                currentView = 'month';
+                this.classList.add('active');
+                document.getElementById('weekView').classList.remove('active');
+                updateCalendar(currentDate);
             });
 
-            // Add drag events to calendar cells
-            document.querySelectorAll('.calendar-cell').forEach(cell => {
-                if (!cell.classList.contains('past-date')) {
-                    cell.addEventListener('dragover', handleDragOver);
-                    cell.addEventListener('dragenter', handleDragEnter);
-                    cell.addEventListener('dragleave', handleDragLeave);
-                    cell.addEventListener('drop', handleDrop);
-                }
+            document.getElementById('weekView').addEventListener('click', function() {
+                currentView = 'week';
+                this.classList.add('active');
+                document.getElementById('monthView').classList.remove('active');
+                updateCalendar(currentDate);
             });
-        }
 
-        function handleDragStart(e) {
-            e.target.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', JSON.stringify({
-                date: e.target.getAttribute('data-date'),
-                title: e.target.textContent.split(' - ')[0]
-            }));
-        }
-
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
-            document.querySelectorAll('.calendar-cell').forEach(cell => {
-                cell.classList.remove('drag-over');
-            });
-        }
-
-        function handleDragOver(e) {
-            if (!e.currentTarget.classList.contains('past-date')) {
+            // Navigation handlers
+            document.getElementById('prevMonth').addEventListener('click', function(e) {
                 e.preventDefault();
-            }
-        }
+                if (currentView === 'month') {
+                    currentDate.setMonth(currentDate.getMonth() - 1);
+                } else {
+                    currentDate.setDate(currentDate.getDate() - 7);
+                }
+                updateCalendar(currentDate);
+            });
 
-        function handleDragEnter(e) {
-            if (!e.currentTarget.classList.contains('past-date')) {
-                e.currentTarget.classList.add('drag-over');
-            }
-        }
+            document.getElementById('nextMonth').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentView === 'month') {
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                } else {
+                    currentDate.setDate(currentDate.getDate() + 7);
+                }
+                updateCalendar(currentDate);
+            });
 
-        function handleDragLeave(e) {
-            e.currentTarget.classList.remove('drag-over');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('drag-over');
-
-            const sourceTask = document.querySelector('.task-item.dragging');
-            const targetContainer = e.currentTarget.querySelector('.task-container');
-
-            if (sourceTask && targetContainer) {
-                const taskDate = sourceTask.getAttribute('data-date');
-                const taskInfo = fetchedDates.find(task =>
-                    task.date === taskDate &&
-                    task.title === sourceTask.textContent.split(' - ')[0]
-                );
-
-                if (taskInfo) {
-                    // Create new task element with original data
-                    const newTask = document.createElement('div');
-                    newTask.className = 'task-item';
-                    newTask.draggable = true;
-                    newTask.setAttribute('data-date', e.currentTarget.dataset.date);
-                    newTask.innerHTML = `${taskInfo.title} - ${taskInfo.hours}h`;
-
-                    // Remove original task
-                    sourceTask.remove();
-
-                    // Add new task to target container
-                    targetContainer.appendChild(newTask);
-
-                    // Reinitialize drag events
-                    initializeDragAndDrop();
+            function updateCalendar(date) {
+                if (currentView === 'month') {
+                    updateMonthView(date);
+                } else {
+                    updateWeekView(date);
                 }
             }
-        }
-    </script>
+
+            function updateMonthView(date) {
+                // Update header
+                const monthYearStr = date.toLocaleString('default', {
+                    month: 'long',
+                    year: 'numeric'
+                });
+                document.getElementById('currentMonthYear').textContent = monthYearStr;
+
+                const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+                const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+                let calendarBody = document.querySelector('.calendar-table tbody');
+                calendarBody.innerHTML = '';
+
+                let day = 1;
+                let currentRow = document.createElement('tr');
+
+                // Add empty cells for days before the first of the month
+                for (let i = 0; i < firstDay; i++) {
+                    currentRow.appendChild(document.createElement('td'));
+                }
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // Fill in the days of the month
+                while (day <= daysInMonth) {
+                    if (currentRow.children.length === 7) {
+                        calendarBody.appendChild(currentRow);
+                        currentRow = document.createElement('tr');
+                    }
+
+                    let cell = document.createElement('td');
+                    cell.className = 'calendar-cell';
+
+                    const cellDate = new Date(date.getFullYear(), date.getMonth(), day);
+                    const isPastDate = cellDate < today;
+
+                    if (isPastDate) {
+                        cell.classList.add('past-date');
+                    }
+
+                    if (day === today.getDate() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getFullYear() === today.getFullYear()) {
+                        cell.classList.add('today');
+                    }
+
+                    const formattedDate =
+                        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    cell.dataset.date = formattedDate;
+
+
+                    let myDate =
+                        `${cellDate.getFullYear()}-${String(cellDate.getMonth() + 1).padStart(2, '0')}-${String(cellDate.getDate()).padStart(2, '0')}`;
+
+                    function renderTasks(date, container) {
+                        const tasksForDate = fetchedDates.filter(task => task.date === date);
+                        container.innerHTML = '';
+
+                        tasksForDate.forEach(task => {
+                            const taskElement = document.createElement('div');
+                            taskElement.className = 'task-item';
+                            taskElement.draggable = true;
+                            taskElement.setAttribute('data-task-id', task.id);
+                            taskElement.setAttribute('data-date', date);
+                            taskElement.innerHTML = `${task.title} - ${task.hours}h`;
+
+                            // Add event listeners
+                            taskElement.addEventListener('dragstart', handleDragStart);
+                            taskElement.addEventListener('dragend', handleDragEnd);
+                            taskElement.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                showTaskDetails(task);
+                            });
+
+                            container.appendChild(taskElement);
+                        });
+                    }
+                    let taskContainer = document.createElement('div');
+                    taskContainer.className = 'task-container';
+                    cell.appendChild(taskContainer);
+                    renderTasks(myDate, taskContainer);
+
+                    function handleCellClick(cell, date) {
+                        if (!cell.classList.contains('past-date')) {
+                            document.getElementById('taskDate').value = date;
+                            const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+                            modal.show();
+                        }
+                    }
+                    if (!isPastDate) {
+                        cell.addEventListener('click', function(e) {
+                            // Only trigger if clicking the cell itself, not a task
+                            if (e.target === cell || e.target.classList.contains('date-number')) {
+                                handleCellClick(this, formattedDate);
+                            }
+                        });
+                    }
+
+                    currentRow.appendChild(cell);
+                    day++;
+                }
+
+                // Fill remaining cells
+                while (currentRow.children.length < 7) {
+                    currentRow.appendChild(document.createElement('td'));
+                }
+                calendarBody.appendChild(currentRow);
+                initializeDragAndDrop();
+
+            }
+
+            function updateWeekView(date) {
+                const startOfWeek = new Date(date);
+                startOfWeek.setDate(date.getDate() - date.getDay());
+
+                // Update header for week view
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+                const weekStr =
+                    `${startOfWeek.toLocaleString('default', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleString('default', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+                document.getElementById('currentMonthYear').textContent = weekStr;
+
+                let calendarBody = document.querySelector('.calendar-table tbody');
+                calendarBody.innerHTML = '';
+                let row = document.createElement('tr');
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // Create week view
+                for (let i = 0; i < 7; i++) {
+                    const currentDate = new Date(startOfWeek);
+                    currentDate.setDate(startOfWeek.getDate() + i);
+
+                    const isPastDate = currentDate < today;
+
+                    let cell = document.createElement('td');
+                    cell.className = 'calendar-cell';
+
+                    if (isPastDate) {
+                        cell.classList.add('past-date');
+                    }
+
+                    if (currentDate.toDateString() === today.toDateString()) {
+                        cell.classList.add('today');
+                    }
+
+                    const formattedDate =
+                        `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+                    cell.dataset.date = formattedDate;
+
+                    function renderTasks(date, container) {
+                        const tasksForDate = fetchedDates.filter(task => task.date === date);
+                        container.innerHTML = '';
+
+                        tasksForDate.forEach(task => {
+                            const taskElement = document.createElement('div');
+                            taskElement.className = 'task-item';
+                            taskElement.draggable = true;
+                            taskElement.setAttribute('data-date', date);
+                            taskElement.innerHTML = `${task.title} - ${task.hours}h`;
+
+                            // Add click handler
+                            taskElement.addEventListener('click', (e) => {
+                                e.stopPropagation(); // Prevent cell click handler
+                                showTaskDetails(task);
+                            });
+
+                            container.appendChild(taskElement);
+                        });
+                    }
+                    let taskContainer = document.createElement('div');
+                    taskContainer.className = 'task-container';
+                    cell.appendChild(taskContainer);
+                    renderTasks(formattedDate, taskContainer);
+
+                    if (!isPastDate) {
+                        cell.addEventListener('click', function() {
+                            document.getElementById('taskDate').value = this.dataset.date;
+                            const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+                            modal.show();
+                        });
+                    }
+
+                    row.appendChild(cell);
+                }
+
+                calendarBody.appendChild(row);
+                initializeDragAndDrop();
+            }
+
+            // Initialize calendar
+            document.getElementById('monthView').classList.add('active');
+            updateCalendar(currentDate);
+
+            function initializeDragAndDrop() {
+                // Add drag events to tasks
+                document.querySelectorAll('.task-item').forEach(task => {
+                    task.addEventListener('dragstart', handleDragStart);
+                    task.addEventListener('dragend', handleDragEnd);
+                });
+
+                // Add drag events to calendar cells
+                document.querySelectorAll('.calendar-cell').forEach(cell => {
+                    if (!cell.classList.contains('past-date')) {
+                        cell.addEventListener('dragover', handleDragOver);
+                        cell.addEventListener('dragenter', handleDragEnter);
+                        cell.addEventListener('dragleave', handleDragLeave);
+                        cell.addEventListener('drop', handleDrop);
+                    }
+                });
+            }
+
+            function handleDragStart(e) {
+                e.target.classList.add('dragging');
+                const taskData = {
+                    id: e.target.getAttribute('data-task-id'),
+                    title: e.target.textContent.split(' - ')[0],
+                    hours: e.target.textContent.split(' - ')[1].replace('h', ''),
+                    date: e.target.getAttribute('data-date')
+                };
+                e.dataTransfer.setData('text/plain', JSON.stringify(taskData));
+            }
+
+            function handleDragEnd(e) {
+                e.target.classList.remove('dragging');
+                document.querySelectorAll('.calendar-cell').forEach(cell => {
+                    cell.classList.remove('drag-over');
+                });
+            }
+
+            function handleDragOver(e) {
+                if (!e.currentTarget.classList.contains('past-date')) {
+                    e.preventDefault();
+                }
+            }
+
+            function handleDragEnter(e) {
+                if (!e.currentTarget.classList.contains('past-date')) {
+                    e.currentTarget.classList.add('drag-over');
+                }
+            }
+
+            function handleDragLeave(e) {
+                e.currentTarget.classList.remove('drag-over');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                e.currentTarget.classList.remove('drag-over');
+
+                try {
+                    const taskData = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    const sourceTask = document.querySelector('.task-item.dragging');
+                    const targetContainer = e.currentTarget.querySelector('.task-container');
+
+                    if (sourceTask && targetContainer) {
+                        // Move the task instead of creating a new one
+                        sourceTask.setAttribute('data-date', e.currentTarget.dataset.date);
+                        targetContainer.appendChild(sourceTask);
+                        sourceTask.classList.remove('dragging');
+                    }
+                } catch (error) {
+                    console.error('Error handling drop:', error);
+                }
+            }
+
+            function showTaskDetails(task) {
+                const detailsSection = document.querySelector('.task-details-section');
+                const taskTitle = detailsSection.querySelector('.task-title');
+                const taskDate = detailsSection.querySelector('.task-date');
+                const taskHours = detailsSection.querySelector('.task-hours');
+
+                taskTitle.textContent = task.title;
+                taskDate.textContent = `Date: ${formatDate(task.date)}`;
+                taskHours.textContent = `Hours: ${task.hours}`;
+
+                detailsSection.classList.remove('d-none');
+                detailsSection.scrollIntoView({
+                    behavior: 'smooth'
+                });
+
+                // Add event listeners for edit and delete buttons
+                const editBtn = detailsSection.querySelector('.btn-edit');
+                const deleteBtn = detailsSection.querySelector('.btn-delete');
+
+                editBtn.onclick = () => editTask(task);
+                deleteBtn.onclick = () => deleteTask(task);
+            }
+
+            function hideTaskDetails() {
+                const detailsSection = document.querySelector('.task-details-section');
+                detailsSection.classList.add('d-none');
+            }
+
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+
+            // Replace the existing editTask function
+            function editTask(task) {
+                // Populate edit form fields
+                document.getElementById('editTaskId').value = task.id;
+                document.getElementById('editTaskTitle').value = task.title;
+                document.getElementById('editTaskHours').value = task.hours;
+                document.getElementById('editTaskDate').value = task.date;
+
+                // Set the form action
+                const form = document.getElementById('editTaskForm');
+                form.action = "{{ route('tasks.update', '') }}/" + task.id;
+
+                // Show edit modal
+                const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+                modal.show();
+            }
+        </script>
 </body>
 
 </html>

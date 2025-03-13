@@ -50,11 +50,7 @@ Route::middleware('auth')->group(function () {
 
 });
 
-Route::get('/calendar', function () {
-    return view('calendar');
-});
-Route::post('/calendar',[TestController::class, 'store']);
-Route::get('/calendar',[TestController::class, 'index']);
+Route::resource('tasks',TestController::class);
 
 require __DIR__.'/auth.php';
 
