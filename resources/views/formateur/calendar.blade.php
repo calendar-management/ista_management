@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 
 <head>
@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
@@ -23,6 +24,12 @@
     <script src='assets/js/jquery-1.10.2.js' type="text/javascript"></script>
     <script src='assets/js/jquery-ui.custom.min.js' type="text/javascript"></script>
     <script src='assets/js/fullcalendar.js' type="text/javascript"></script>
+    <script>
+        
+        const data = JSON.parse('{!! json_encode($modules) !!}');
+        
+
+    </script>
 
     @vite('resources/js/calendar.js')
 
@@ -154,7 +161,8 @@
                             <div style='clear:both'></div>
 
                         </div>
-                        <div id="call"></div>   
+                        <div id="call"></div>
+
                         <hr>
                         <div class="col-md-12">
                             <!-- This is where the weekly hours entry form will appear -->
@@ -163,6 +171,13 @@
 
                         </div>
                         <br>
+                        <!-- Hidden form to submit moduleData -->
+                        <form id="saveChangesForm" style="display: none;">
+                            @csrf
+                            <input type="hidden" name="moduleData" id="moduleDataInput">
+                        </form>
+
+                        
                         
                     </div>
                 </div>
@@ -178,6 +193,7 @@
             </div>
         </div>
     </div>
+
     <!-- Bootstrap core JavaScript-->
     {{-- <script src="admin/vendor/jquery/jquery.min.js"></script>  --}}
     <script src="admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -189,11 +205,11 @@
     <script src="admin/js/sb-admin-2.min.js"></script>
 
     <!-- Page level plugins -->
-    <script src="admin/vendor/chart.js/Chart.min.js"></script>
+    {{-- <script src="admin/vendor/chart.js/Chart.min.js"></script> --}}
 
     <!-- Page level custom scripts -->
-    <script src="admin/js/demo/chart-area-demo.js"></script>
-    <script src="admin/js/demo/chart-pie-demo.js"></script>
+    {{-- <script src="admin/js/demo/chart-area-demo.js"></script> --}}
+    {{-- <script src="admin/js/demo/chart-pie-demo.js"></script> --}}
 
 </body>
 
