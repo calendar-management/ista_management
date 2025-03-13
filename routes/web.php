@@ -51,4 +51,4 @@ Route::view('/add_formateur','admin.add_frm')->name('add_formateur');
 Route::post('/add_formateur',[FormateurController::class, 'add']);
 Route::post('/gestion_formateur',[FormateurController::class, 'import'])->name('import_file');
 Route::view('/gestion_calendrier', 'admin.gestion_calendrier')->name('gestion_calendrier');
-
+Route::get('/avancement_formateur/{formateur}', [FormateurController::class, 'suivie'])->name('suivie_formateur');

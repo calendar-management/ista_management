@@ -5,7 +5,7 @@
         <script>
             alert('{{ session('import_success') }}');
         </script>
-    
+
     @endif
     <div>
         <h1 class="text-success m-3">Gestion Des Formateurs:</h1>
@@ -15,18 +15,19 @@
                     <a href="/add_formateur" class="btn btn-primary w-100">Ajouter Formateur</a>
                 </div>
 
-                
-                <div class="col-12 d-md-none my-3 border-bottom"></div> 
+
+                <div class="col-12 d-md-none my-3 border-bottom"></div>
 
                 <div class="col-md-1 d-none d-md-block">
-                    <div class="border-start h-100"></div> 
+                    <div class="border-start h-100"></div>
                 </div>
 
                 <div class="col-md-6 text-center text-md-start">
                     <form action="{{ route('import_file') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <label for="data" class="form-label fw-bold">Import Fichier Excel:</label>
-                        <input type="file" name="data" id="data" class="form-control btn btn-primary" style="padding-bottom: 2.25rem;">
+                        <input type="file" name="data" id="data" class="form-control btn btn-primary"
+                            style="padding-bottom: 2.25rem;">
                         <button type="submit" class="btn btn-primary m-3">Import</button>
                     </form>
                 </div>
@@ -51,8 +52,10 @@
                     <td>{{ strtoupper($formateur->groupe) }}</td>
                     <td>{{ $formateur->type_seances }}</td>
 
-                    <td><a href="/edit_formateur" class=" text-danger">Edit</a> <a href="/avancement_formateur"
-                            class=" text-primary ml-2">Suivie</a></td>
+                    <td>
+                        <a href="/edit_formateur" class="text-danger">Edit</a>
+                        <a href="{{ route('suivie_formateur', $formateur) }}" class="text-primary ml-2">Suivie</a>
+                    </td>
                 </tbody>
             @endforeach
         </table>
