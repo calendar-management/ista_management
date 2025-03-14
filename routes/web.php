@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdministrateurController;
 use App\Http\Controllers\FormateurController;
+use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -56,7 +57,32 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
+Route::prefix('modules')->group(function () {
+    // Get all modules for current user
+    Route::get('/', [ModuleController::class, 'getModules']);
+    Route::get('/modules/{groupId}', [ModuleController::class, 'getModules']);
+    
+    // Update weekly progress for a module
+    Route::post('/update-progress', [ModuleController::class, 'updateWeeklyProgress']);
+    
+    // Update module dates (start date or exam date)
+    Route::post('/update-date', [ModuleController::class, 'updateModuleDate']);
+    
+    // Update progress session date (for custom scheduling)
+    Route::post('/update-session-date', [ModuleController::class, 'updateProgressSessionDate']);
+    
+    // Save all changes to database
+    Route::post('/save-all', [ModuleController::class, 'saveAllChanges']);
+});
 
+Route::get('/formateur_calendar', [ModuleController::class, 'showCalendar'])->name('calendar');
+
+
+
+Route::post('/save-calendar-data', [ModuleController::class, 'saveCalendarData'])->name('calendar.save');
+// Route::get('/formateur_calendar',function(){
+//     return view("formateur.calendar");
+// });
 
 
 

@@ -79,8 +79,4 @@ class FormateurController extends Controller
         return back()->with('import_success', 'Les donnees va inserter avec success!');
 
     }
-    public function suivie($id){
-        $formateur = Formateur::find($id);
-        return view('admin.suivie_frm', compact('formateur'));
-    }
 }

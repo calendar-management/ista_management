@@ -48,9 +48,9 @@
                 <tbody>
                     <td>{{ $formateur->id }}</td>
                     <td>{{ $formateur->name }}</td>
-                    <td>{{ $formateur->module }}</td>
-                    <td>{{ strtoupper($formateur->groupe) }}</td>
-                    <td>{{ $formateur->type_seances }}</td>
+                    <td>{{ $formateur->email }}</td>
+                    {{-- <td>{{ strtoupper($formateur->groupe) }}</td>
+                    <td>{{ $formateur->type_seances }}</td> --}}
 
                     <td>
                         <a href="/edit_formateur" class="text-danger">Edit</a>
