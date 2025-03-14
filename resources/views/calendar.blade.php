@@ -485,6 +485,15 @@
                     let cell = document.createElement('td');
                     cell.className = 'calendar-cell';
 
+                    let dateNumber = document.createElement('div');
+                    dateNumber.className = 'date-number';
+                    dateNumber.textContent = day;
+                    cell.appendChild(dateNumber);
+
+                    let taskContainer = document.createElement('div');
+                    taskContainer.className = 'task-container';
+                    cell.appendChild(taskContainer);
+
                     const cellDate = new Date(date.getFullYear(), date.getMonth(), day);
                     const isPastDate = cellDate < today;
 
@@ -501,6 +510,8 @@
                     const formattedDate =
                         `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     cell.dataset.date = formattedDate;
+
+                    renderTasks(formattedDate, taskContainer);
 
 
                     let myDate =
@@ -529,10 +540,6 @@
                             container.appendChild(taskElement);
                         });
                     }
-                    let taskContainer = document.createElement('div');
-                    taskContainer.className = 'task-container';
-                    cell.appendChild(taskContainer);
-                    renderTasks(myDate, taskContainer);
 
                     function handleCellClick(cell, date) {
                         if (!cell.classList.contains('past-date')) {
@@ -543,9 +550,11 @@
                     }
                     if (!isPastDate) {
                         cell.addEventListener('click', function(e) {
-                            // Only trigger if clicking the cell itself, not a task
-                            if (e.target === cell || e.target.classList.contains('date-number')) {
-                                handleCellClick(this, formattedDate);
+                            // Check if the click was on the cell itself or the date number
+                            if (e.target === cell || e.target === dateNumber || e.target === taskContainer) {
+                                document.getElementById('taskDate').value = formattedDate;
+                                const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+                                modal.show();
                             }
                         });
                     }
@@ -591,6 +600,11 @@
                     let cell = document.createElement('td');
                     cell.className = 'calendar-cell';
 
+                    let dateNumber = document.createElement('div');
+                    dateNumber.className = 'date-number';
+                    dateNumber.textContent = currentDate.getDate();
+                    cell.appendChild(dateNumber);
+
                     if (isPastDate) {
                         cell.classList.add('past-date');
                     }
@@ -602,6 +616,12 @@
                     const formattedDate =
                         `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
                     cell.dataset.date = formattedDate;
+
+                    let taskContainer = document.createElement('div');
+                    taskContainer.className = 'task-container';
+                    cell.appendChild(taskContainer);
+
+                    renderTasks(formattedDate, taskContainer);
 
                     function renderTasks(date, container) {
                         const tasksForDate = fetchedDates.filter(task => task.date === date);
@@ -623,16 +643,19 @@
                             container.appendChild(taskElement);
                         });
                     }
-                    let taskContainer = document.createElement('div');
-                    taskContainer.className = 'task-container';
-                    cell.appendChild(taskContainer);
-                    renderTasks(formattedDate, taskContainer);
+                    // let taskContainer = document.createElement('div');
+                    // taskContainer.className = 'task-container';
+                    // cell.appendChild(taskContainer);
+                    // renderTasks(formattedDate, taskContainer);
 
                     if (!isPastDate) {
-                        cell.addEventListener('click', function() {
-                            document.getElementById('taskDate').value = this.dataset.date;
-                            const modal = new bootstrap.Modal(document.getElementById('taskModal'));
-                            modal.show();
+                        cell.addEventListener('click', function(e) {
+                            // Check if the click was on the cell itself or the date number
+                            if (e.target === cell || e.target === dateNumber || e.target === taskContainer) {
+                                document.getElementById('taskDate').value = formattedDate;
+                                const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+                                modal.show();
+                            }
                         });
                     }
 
