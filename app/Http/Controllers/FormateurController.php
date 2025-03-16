@@ -3,51 +3,44 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Box\Spout\Common\Type;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Illuminate\Http\Request;
-use App\Models\Formateur;
+use App\Models\User;
 
 class FormateurController extends Controller
 {
     public function index()
     {
-        $formateurs = Formateur::paginate(5);
-
+        $formateurs = User::where('role', 'formateur')->paginate(5);
         return view('admin.gestion_formateur', compact('formateurs'));
     }
+
     public function add(Request $request)
     {
-        Formateur::create([
+        User::create([
             'name' => $request->name,
-            'groupe' => $request->groupe,
-            'module' => $request->module,
-            'type_seances' => $request->type_seances,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => 'formateur',
         ]);
+
         $nm = $request->name;
         return back()->with("add_frm_success", "ajouter $nm avec success!!");
     }
+
     public function import(Request $request)
     {
-
         $request->validate([
             'data' => 'required|mimes:xlsx,xls,csv|max:2048',
         ]);
 
-
         $file = $request->file('data');
-
-
         $filePath = $file->storeAs('uploads', $file->getClientOriginalName());
-
-
         $fullPath = storage_path("app/" . $filePath);
-
 
         $reader = ReaderEntityFactory::createReaderFromFile($fullPath);
         $reader->open($fullPath);
 
-        $data = [];
         $firstRow = true;
 
         foreach ($reader->getSheetIterator() as $sheet) {
@@ -59,24 +52,55 @@ class FormateurController extends Controller
 
                 $cells = $row->getCells();
 
-                if (count($cells) >= 5) {
-                    $formateur = Formateur::create([
+                if (count($cells) >= 3) {
+                    User::create([
                         'name' => $cells[1]->getValue(),
-                        'groupe' => $cells[2]->getValue(),
-                        'module' => $cells[3]->getValue(),
-                        'type_seances' => $cells[4]->getValue(),
+                        'email' => $cells[2]->getValue(),
+                        'password' => bcrypt('password123'), // default password
+                        'role' => 'formateur',
                     ]);
-
-                    $data[] = $formateur;
                 }
             }
         }
 
-
         $reader->close();
 
+        return back()->with('import_success', 'Les données ont été insérées avec succès!');
+    }
 
-        return back()->with('import_success', 'Les donnees va inserter avec success!');
+    public function edit($id)
+    {
+        $formateur = User::findOrFail($id);
+        return view('admin.edit_formateur', compact('formateur'));
 
     }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+        ]);
+
+        $formateur = User::findOrFail($id);
+        $formateur->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        return redirect()->route('gestion_formateur')->with('success', 'Formateur mis à jour avec succès');
+    }
+
+    public function destroy($id)
+{
+    // Trouver le formateur avec l'ID
+    $formateur = User::findOrFail($id);
+
+    // Supprimer le formateur
+    $formateur->delete();
+
+    // Rediriger avec un message de succès
+    return redirect()->route('gestion_formateur')->with('success', 'Formateur supprimé avec succès');
+}
+
 }

@@ -5,8 +5,14 @@
         <script>
             alert('{{ session('import_success') }}');
         </script>
-    
     @endif
+
+    @if (session('success'))
+        <script>
+            alert("{{ session('success') }}");
+        </script>
+    @endif
+
     <div>
         <h1 class="text-success m-3">Gestion Des Formateurs:</h1>
         <div class="border p-4 m-4 rounded shadow bg-light">
@@ -15,7 +21,6 @@
                     <a href="/add_formateur" class="btn btn-primary w-100">Ajouter Formateur</a>
                 </div>
 
-                
                 <div class="col-12 d-md-none my-3 border-bottom"></div> 
 
                 <div class="col-md-1 d-none d-md-block">
@@ -37,26 +42,29 @@
             <tr>
                 <th>Id</th>
                 <th>Nom</th>
-                <th>Module</th>
-                <th>Groupe</th>
-                <th>Type(prt_syn)</th>
+                <th>Email</th>
                 <th>Actions</th>
             </tr>
             @foreach ($formateurs as $formateur)
-
                 <tbody>
                     <td>{{ $formateur->id }}</td>
                     <td>{{ $formateur->name }}</td>
-                    <td>{{ $formateur->module }}</td>
-                    <td>{{ strtoupper($formateur->groupe) }}</td>
-                    <td>{{ $formateur->type_seances }}</td>
+                    <td>{{ $formateur->email }}</td>
 
-                    <td><a href="/edit_formateur" class=" text-danger">Edit</a> <a href="/avancement_formateur"
-                            class=" text-primary ml-2">Suivie</a></td>
+                    <td>
+                        <a href="{{ route('formateurs.edit', $formateur->id) }}" class="text-danger">Edit</a>
+                        <a href="/avancement_formateur" class=" text-primary ml-2">Suivie</a>
+                        
+                        <!-- Suppression -->
+                        <form action="{{ route('formateurs.destroy', $formateur->id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-dark text-secondary ml-2">Supprimer</button>
+                        </form>
+                    </td>
                 </tbody>
             @endforeach
         </table>
         <div>{{ $formateurs->links('pagination::bootstrap-4') }}</div>
-
     </div>
 @endsection

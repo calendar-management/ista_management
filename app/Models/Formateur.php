@@ -12,3 +12,5 @@ class Formateur extends Model
     protected $fillable = ['id', 'name', 'module', 'groupe', 'type_seances']; 
 }
 
+
+

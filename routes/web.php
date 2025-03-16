@@ -52,3 +52,8 @@ Route::post('/add_formateur',[FormateurController::class, 'add']);
 Route::post('/gestion_formateur',[FormateurController::class, 'import'])->name('import_file');
 Route::view('/gestion_calendrier', 'admin.gestion_calendrier')->name('gestion_calendrier');
 
+Route::get('/formateurs/{id}/edit', [FormateurController::class, 'edit'])->name('formateurs.edit');
+Route::put('/formateurs/{id}', [FormateurController::class, 'update'])->name('formateurs.update');
+Route::delete('/formateurs/{id}', [FormateurController::class, 'destroy'])->name('formateurs.destroy');
+
+Route::get('/gestion_formateur', [FormateurController::class, 'index'])->name('gestion_formateur');
