@@ -8,39 +8,44 @@ use Illuminate\Database\Eloquent\Model;
 class Teaching extends Model
 {
     use HasFactory;
-
+    
     protected $table = 'teaching';
-
     protected $primaryKey = 'id_teaching';
+    
     protected $fillable = [
         'id_user',
         'id_group',
         'id_module',
         'id_fillier',
+        'type_seance',
         'creneau',
-        'type_seance'
     ];
-
-    public function formateur()
+    
+    protected $casts = [
+        'final_exam_date' => 'date',
+        'module_start_date' => 'date',
+    ];
+    
+    public function user()
     {
-        return $this->belongsTo(User::class, 'id_user')->where('role', 'formateur');
+        return $this->belongsTo(User::class, 'id_user');
     }
-
-    public function groupe()
+    
+    public function group()
     {
         return $this->belongsTo(Groupe::class, 'id_group');
     }
-
+    
     public function module()
     {
         return $this->belongsTo(Module::class, 'id_module');
     }
-
+    
     public function fillier()
     {
         return $this->belongsTo(Fillier::class, 'id_fillier');
     }
-
+    
     public function progress()
     {
         return $this->hasOne(Progress::class, 'id_teaching');

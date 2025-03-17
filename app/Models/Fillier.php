@@ -8,12 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 class Fillier extends Model
 {
     use HasFactory;
-
+    
+    protected $table = 'filliers';
     protected $primaryKey = 'id_fillier';
-    protected $fillable = ['name', 'code_fillier'];
-
+    
+    protected $fillable = [
+        'name',
+        'code_fillier',
+    ];
+    
     public function groupes()
     {
         return $this->hasMany(Groupe::class, 'id_fillier');
+    }
+    
+    public function teachings()
+    {
+        return $this->hasMany(Teaching::class, 'id_fillier');
     }
 }

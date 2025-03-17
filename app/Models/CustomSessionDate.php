@@ -9,14 +9,12 @@ class CustomSessionDate extends Model
 {
     use HasFactory;
 
+    protected $table = 'custom_session_dates';
+
     protected $fillable = [
         'id_progress',
         'week_index',
         'session_date'
-    ];
-
-    protected $casts = [
-        'session_date' => 'date'
     ];
 
     public function progress()
