@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Administrateur Dashboard</title>
 
@@ -22,6 +23,55 @@
 
     <!-- Bootstrap CSS (Optional for grid responsiveness) -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <link href="admin/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href='assets/css/fullcalendar.css' rel='stylesheet' />
+    <link href='assets/css/fullcalendar.print.css' rel='stylesheet' media='print' />
+    <script src='assets/js/jquery-1.10.2.js' type="text/javascript"></script>
+    <script src='assets/js/jquery-ui.custom.min.js' type="text/javascript"></script>
+    <script src='assets/js/fullcalendar.js' type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+
+    @vite('resources/js/vacances.js')
+    <style>
+    body {
+        text-align: center;
+        display: flex;
+        font-size: 14px;
+        font-family: "Helvetica Nueue", Arial, Verdana, sans-serif;
+        background-color: #DDDDDD;
+    }
+
+    #wrapper {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    #calendar {
+        margin: 0 auto;
+        width: 900px;
+        background-color: #FFFFFF;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px #C3C3C3;
+    }
+
+    .fc-event {
+        cursor: pointer;
+        color: white;
+    }
+    .cal-scroll{
+        width: 100%;
+    overflow-x: auto;  /* Enables horizontal scrolling */
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column
+    }
+    </style>
+
+
     <style>
         @media (max-width: 333px) {
             .card-body .d-flex {
@@ -134,16 +184,18 @@
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="/profile">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
 
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <form action="{{route('logout')}}" method="post">
+                                    <button class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
-                                </a>
+                                    </button>
+                                </form>
                             </div>
                         </li>
 
@@ -188,6 +240,15 @@
     <!-- Page level custom scripts -->
     <script src="../admin/js/demo/chart-area-demo.js"></script>
     <script src="../admin/js/demo/chart-pie-demo.js"></script>
+    <!-- jQuery (required for FullCalendar) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- FullCalendar JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+
+<!-- FullCalendar CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
+
 
 </body>
 

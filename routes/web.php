@@ -1,8 +1,11 @@
 <?php
-use App\Http\Controllers\AdministrateurController;
 
+use App\Http\Controllers\AdministrateurController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\FormateurController;
-use App\Http\Controllers\FormController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\CalendarController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -10,45 +13,70 @@ use Illuminate\Support\Facades\Route;
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
+| These routes are loaded by the RouteServiceProvider within a group 
+| containing the "web" middleware. 
 |
 */
 
+// Redirect root to dashboard
 Route::get('/', function () {
-    return view('index');
+    return redirect()->route('dashboard');
 });
 
-Route::get('/dashboard',function(){
-    return view("admin.dashboard");
+// Authenticated routes
+Route::middleware('auth')->group(function () {
+    // Logout route
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Dashboard routes
+    Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
+    Route::view('/sup_adm_dashboard', "supadmin.dashboard");
+    Route::view('/adm_dashboard', "admin.dashboard");
+
+    // Administrator Management
+    Route::view('/formateur_calendar', "formateur.calendar");
+    Route::get('/gestion_adm', [AdministrateurController::class, 'index']);
+    Route::view('/add_admin', 'supadmin.add_adm')->name('add_admin');
+    Route::post('/add_admin', [AdministrateurController::class, 'add']);
+    Route::get('/edit_adm/{id}', [AdministrateurController::class, 'edit'])->name('edit_adm');
+    Route::put('/edit_adm/{id}', [AdministrateurController::class, 'update'])->name("update_admin");
+    Route::delete('/delete_admin/{id}', [AdministrateurController::class, 'delete'])->name("delete_admin");
+
+    // Trainer (Formateur) Management
+    Route::get('/gestion_formateur', [FormateurController::class, 'index']);
+    Route::view('/add_formateur', 'admin.add_frm')->name('add_formateur');
+    Route::post('/add_formateur', [FormateurController::class, 'add']);
+    Route::post('/gestion_formateur', [FormateurController::class, 'import'])->name('import_file');
+    Route::get('/search', [FormateurController::class, 'search'])->name('formateurs.search');
+
+    // Module and Calendar Routes
+    Route::prefix('modules')->group(function () {
+        Route::get('/', [ModuleController::class, 'getModules']);
+        Route::get('/{groupId}', [ModuleController::class, 'getModules']);
+        Route::post('/update-progress', [ModuleController::class, 'updateWeeklyProgress']);
+        Route::post('/update-date', [ModuleController::class, 'updateModuleDate']);
+        Route::post('/update-session-date', [ModuleController::class, 'updateProgressSessionDate']);
+        Route::post('/save-all', [ModuleController::class, 'saveAllChanges']);
+    });
+
+    // vacances routes
+    Route::view('/gestion_calendrier', 'admin.gestion_calendrier')->name("gestion_calendrier");
+    Route::post('/gestion_calendrier', [CalendarController::class, 'add'])->name('add_vacances');
+    Route::get('/fetch-vacations', [CalendarController::class, 'fetchVacations']);
+    Route::delete('/delete-vacation/{id}', [CalendarController::class, 'destroy'])->name('delete_vacation');
+
+    // Formateur Calendar
+
+    Route::get('/formateur_calendar', [ModuleController::class, 'showCalendar'])->name('calendar');
+    Route::post('/save-calendar-data', [ModuleController::class, 'saveCalendarData'])->name('calendar.save');
+    Route::get('/download/{filename}', [FormateurController::class, 'downloadFile']);
+
 });
-Route::get('/sup_adm_dashboard',function(){
-    return view("supadmin.dashboard");
-});
-Route::get('/adm_dashboard',function(){
-    return view("admin.dashboard");
-});
-// Route::get('/gestion_adm',function(){
-//     return view("supadmin.gestion_admin");
-// });
 
-
-Route::get('/gestion_formateur', [FormateurController::class, 'index']);
-
-Route::get('/gestion_adm', [AdministrateurController::class, 'index']);
-
-
-
-Route::view('/add_admin','supadmin.add_adm')->name('add_admin');
-
-Route::post('/add_admin',[AdministrateurController::class, 'add']);
-Route::get('/edit_adm/{id}',[AdministrateurController::class, 'edit'])->name('edit_adm');
-Route::put('/edit_adm/{id}',[AdministrateurController::class, 'update'])->name("update_admin");
-Route::delete('/delete_admin/{id}',[AdministrateurController::class, 'delete'])->name("delete_admin");
-
-Route::view('/add_formateur','admin.add_frm')->name('add_formateur');
-Route::post('/add_formateur',[FormateurController::class, 'add']);
-Route::post('/gestion_formateur',[FormateurController::class, 'import'])->name('import_file');
-Route::view('/gestion_calendrier', 'admin.gestion_calendrier')->name('gestion_calendrier');
-Route::get('/avancement_formateur/{formateur}', [FormateurController::class, 'suivie'])->name('suivie_formateur');
+// Include authentication routes
+require __DIR__ . '/auth.php';

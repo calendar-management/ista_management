@@ -20,6 +20,7 @@
                     <tr>
                         <th>Id</th>
                         <th>Nom</th>
+                        <th>email</th>
                         <th>Etablissement</th>
                         <th>Action</th>
                     </tr>
@@ -29,6 +30,7 @@
                         <tr>
                             <td>{{ $administrateur->id }}</td>
                             <td>{{ $administrateur->name }}</td>
+                            <td>{{ $administrateur->email }}</td>
                             <td>{{ $administrateur->etablissement }}</td>
                             <td class="d-flex justify-content-center">
                                 <a href="{{ route('edit_adm',$administrateur) }}" class="btn btn-success btn-md">Edit</a>
