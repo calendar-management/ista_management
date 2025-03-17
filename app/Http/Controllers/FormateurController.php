@@ -3,15 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Teaching;
 use Illuminate\Http\Request;
-use App\Models\Formateur;
 
 class FormateurController extends Controller
 {
-    public function index()
+    public function dashboard()
     {
-        $formateurs = Formateur::all(); 
-        
-        return view('admin.gestion_formateur', compact('formateurs')); 
+        $teachings = Teaching::where('id_user', auth()->id())
+            ->with([
+                'groupe.fillier',
+                'module',
+                'progress'
+            ])
+            ->get();
+
+        // Group by groupe ID directly from the relationship
+        $groupedTeachings = $teachings->groupBy(function($teaching) {
+            return $teaching->groupe->id_group;
+        });
+
+        return view('formateur.dashboard', [
+            'groupedTeachings' => $groupedTeachings
+        ]);
     }
 }

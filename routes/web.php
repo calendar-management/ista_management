@@ -32,10 +32,11 @@ Route::middleware('auth')->group(function () {
     Route::view('/dashboard','admin.dashboard')->name('dashboard');
     Route::view('/sup_adm_dashboard',"supadmin.dashboard");
     Route::view('/adm_dashboard',"admin.dashboard");    
+    Route::get('/formateur_dashboard',[FormateurController::class,'dashboard'])->name('formateur.dashboard');
 
-    Route::get('/gestion_formateur', [FormateurController::class, 'index']);
+    // Route::get('/gestion_formateur', [FormateurController::class, 'index']);
 
-    Route::get('/gestion_adm', [AdministrateurController::class, 'index']);
+    // Route::get('/gestion_adm', [AdministrateurController::class, 'index']);
     // hsnnnnnnnnnnnn
     Route::get('/formateur_calendar',function(){
         return view("formateur.calendar");
@@ -43,14 +44,14 @@ Route::middleware('auth')->group(function () {
 
     Route::view('/add_admin','supadmin.add_adm')->name('add_admin');
 
-    Route::post('/add_admin',[AdministrateurController::class, 'add']);
-    Route::get('/edit_adm/{id}',[AdministrateurController::class, 'edit'])->name('edit_adm');
-    Route::put('/edit_adm/{id}',[AdministrateurController::class, 'update'])->name("update_admin");
-    Route::delete('/delete_admin/{id}',[AdministrateurController::class, 'delete'])->name("delete_admin");
+    // Route::post('/add_admin',[AdministrateurController::class, 'add']);
+    // Route::get('/edit_adm/{id}',[AdministrateurController::class, 'edit'])->name('edit_adm');
+    // Route::put('/edit_adm/{id}',[AdministrateurController::class, 'update'])->name("update_admin");
+    // Route::delete('/delete_admin/{id}',[AdministrateurController::class, 'delete'])->name("delete_admin");
 
 });
 
-Route::resource('tasks',TestController::class);
+// Route::resource('tasks',TestController::class);
 
 require __DIR__.'/auth.php';
 

@@ -8,20 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Module extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'filiere_id', 'total_hours', 'description'];
 
-    public function filiere()
-    {
-        return $this->belongsTo(Filiere::class);
-    }
-
-    public function formateurs()
-    {
-        return $this->belongsToMany(Formateur::class);
-    }
-
-    public function progress()
-    {
-        return $this->hasMany(Progress::class);
-    }
+    protected $primaryKey = 'id_module';
+    protected $fillable = [
+        'code_module', 'name', 'hours', 
+        'mh_presentiel', 'mh_distanciel', 'regional'
+    ];
 }
