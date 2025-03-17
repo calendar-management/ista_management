@@ -53,8 +53,8 @@
 
                     <td>
                         <a href="{{ route('formateurs.edit', $formateur->id) }}" class="text-danger">Edit</a>
-                        <a href="/avancement_formateur" class=" text-primary ml-2">Suivie</a>
-                        
+                        <a href="{{ route('teacher.progress', $formateur->id) }}" class="text-primary ml-2">Suivre</a>
+                       
                         <!-- Suppression -->
                         <form action="{{ route('formateurs.destroy', $formateur->id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?');">
                             @csrf

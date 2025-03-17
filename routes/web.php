@@ -4,6 +4,9 @@ use App\Http\Controllers\AdministrateurController;
 use App\Http\Controllers\FormateurController;
 use App\Http\Controllers\FormController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\AdminController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -57,3 +60,7 @@ Route::put('/formateurs/{id}', [FormateurController::class, 'update'])->name('fo
 Route::delete('/formateurs/{id}', [FormateurController::class, 'destroy'])->name('formateurs.destroy');
 
 Route::get('/gestion_formateur', [FormateurController::class, 'index'])->name('gestion_formateur');
+
+Route::get('/teacher/{id}/progress', [TeacherController::class, 'showProgress'])->name('teacher.progress');
+Route::get('/admin/gestion-formateur', [AdminController::class, 'gestionFormateur'])->name('admin.gestion_formateur');
+
