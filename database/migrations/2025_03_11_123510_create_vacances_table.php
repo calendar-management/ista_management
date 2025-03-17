@@ -10,7 +10,7 @@ return new class extends Migration {
             $table->id('id_vacance');
             $table->string('nom_vacance');
             $table->string('type');
-            $table->string('grouoe');
+            $table->string('groupe');
             $table->string('filliere');
             $table->date('date_debut');
             $table->date('date_fin');

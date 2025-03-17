@@ -17,6 +17,10 @@ class Module extends Model
         'hours',
         'regional',
     ];
+    protected $casts = [
+        'final_exam_date' => 'date',
+        'module_start_date' => 'date',
+    ];
     
     public function teachings()
     {

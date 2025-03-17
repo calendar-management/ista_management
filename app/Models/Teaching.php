@@ -17,15 +17,9 @@ class Teaching extends Model
         'id_group',
         'id_module',
         'id_fillier',
-        'module_start_date',
-        'final_exam_date',
         'creneau',
     ];
     
-    protected $casts = [
-        'final_exam_date' => 'date',
-        'module_start_date' => 'date',
-    ];
     
     public function user()
     {
@@ -34,7 +28,7 @@ class Teaching extends Model
     
     public function group()
     {
-        return $this->belongsTo(Groupe::class, 'id_group');
+        return $this->belongsTo(Groupe::class, 'id_group', 'id_group');
     }
     
     public function module()

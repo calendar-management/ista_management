@@ -13,6 +13,7 @@ class Groupe extends Model
     protected $primaryKey = 'id_group';
     
     protected $fillable = [
+        'name',
         'id_fillier',
         'niveau',
         'effectif',
@@ -20,7 +21,7 @@ class Groupe extends Model
     
     public function fillier()
     {
-        return $this->belongsTo(Fillier::class, 'id_fillier');
+        return $this->belongsTo(Fillier::class, 'id_fillier', 'id_fillier');
     }
     
     public function teachings()

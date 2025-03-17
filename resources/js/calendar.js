@@ -1,10 +1,11 @@
 $(document).ready(function() {
-    // Calendar App - manages study modules, progress tracking and scheduling
+    // Calendar App - manages formateurs modules, progress tracking and scheduling
     class CalendarApp {
         constructor() {
             this.date = new Date();
             this.hasUnsavedChanges = false;
             this.modules = this.fetchModules();
+            this.holidays = this.fetchHolidays();
             
             // DOM element caching
             this.$calendar = $('#calendar');
@@ -29,11 +30,16 @@ $(document).ready(function() {
             this.updateCalendar();
             this.setUnsavedChanges(false);
             console.log("Initial module data:", this.prepareModulesForDatabase());
+            console.log("Holiday data:", this.holidays);
         }
         
         // Fetch module data from the database (mock)
         fetchModules() {
             return data;
+        }
+        // Add this method after fetchModules()
+        fetchHolidays() {
+            return holidays;
         }
         
         // Format date based on specified format
@@ -321,6 +327,8 @@ $(document).ready(function() {
                             bottom: 20px;
                             z-index: 100;
                             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                            display: flex;
+                            flex-diraction: column;
                         }
                         .save-notification { margin-bottom: 0; }
                         .fc-event.module-start {color: #000000; background-color: #ffff; border-color: #007bff; }
@@ -329,16 +337,37 @@ $(document).ready(function() {
                         .fc-event.absence {color: #000000; background-color: #ffc107; border-color: #ffc107; }
                         .fc-event.planned-session {color: #000000; background-color: #FFFF; border-color: #6c757d; opacity: 0.7; }
                         .fc-event {cursor: pointer;}
+                        .fc-event.holiday-event {opacity: 0.7; z-index: 1;  color:rgb(239, 222, 222); background-color:rgb(12, 3, 4);}
+                        .holiday-label {font-weight: bold; font-style: italic; z-index: 2; color:rgb(239, 222, 222);}
                     `)
                     .appendTo('head');
             }
         }
+        // check if a date is within a holiday period
+        isHolidayDate(date) {
+            const formattedDate = this.formatDate(date);
+            return this.holidays.some(holiday => {
+                const start = new Date(holiday.startDate);
+                // If endDate is present, use it, otherwise use startDate for single-day holidays
+                const end = holiday.endDate ? new Date(holiday.endDate) : new Date(holiday.startDate);
+                const checkDate = new Date(formattedDate);
+                
+                // Set all to beginning of day for proper comparison
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999); // End of day
+                checkDate.setHours(12, 0, 0, 0);
+                
+                return checkDate >= start && checkDate <= end;
+            });
+        }
         
-        // Update the calendar with the latest data
+        // Update the calendar with the latest data  
         updateCalendar() {
             this.$calendar.fullCalendar('removeEvents');
             const events = this.generateEvents();
+            const holidayEvents = this.generateHolidayEvents();
             this.$calendar.fullCalendar('addEventSource', events);
+            this.$calendar.fullCalendar('addEventSource', holidayEvents); 
         }
         
         // Generate calendar events from module data
@@ -415,6 +444,22 @@ $(document).ready(function() {
             
             return events;
         }
+
+        generateHolidayEvents() {
+            return this.holidays.map(holiday => ({
+                id: 'holiday_' + holiday.id,
+                title: holiday.name,
+                start: holiday.startDate,
+                end: holiday.endDate,
+                allDay: true,
+                className: 'holiday-event',
+                color: 'color:rgb(255, 244, 245);' ,
+                editable: false, // Holidays cannot be moved
+                type: 'holiday',
+                rendering: 'background' // Makes the event appear as a colored background
+            }));
+        }
+
         
         // Save data to database
         saveToDatabase() {
@@ -508,6 +553,12 @@ $(document).ready(function() {
         
         // Update module or exam date
         updateModuleDate(moduleId, dateType, newDate) {
+            // First check if the new date falls on a holiday
+            if (this.isHolidayDate(newDate)) {
+                alert("You cannot schedule events during holiday periods.");
+                return false;
+            }
+            
             const moduleIndex = this.modules.findIndex(m => m.id === moduleId);
             if (moduleIndex === -1) return false;
             
@@ -551,6 +602,12 @@ $(document).ready(function() {
         
         // Update progress session date
         updateProgressSessionDate(moduleId, weekIndex, newDate) {
+            // First check if the new date falls on a holiday
+            if (this.isHolidayDate(newDate)) {
+                alert("You cannot schedule events during holiday periods.");
+                return false;
+            }
+            
             const moduleIndex = this.modules.findIndex(m => m.id === moduleId);
             if (moduleIndex === -1) return false;
             
@@ -560,6 +617,7 @@ $(document).ready(function() {
                 return false;
             }
             
+            // Rest of the existing method...
             // Create the customSessionDates array if needed
             if (!this.modules[moduleIndex].customSessionDates) {
                 this.modules[moduleIndex].customSessionDates = [];
@@ -605,12 +663,19 @@ $(document).ready(function() {
                                         <select id="eventTypeSelect" class="form-control">
                                             <option value="module-start">Module Start</option>
                                             <option value="module-exam">Module Exam</option>
+                                            <option value="session">Session</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
                                         <label for="eventModuleSelect">Module:</label>
                                         <select id="eventModuleSelect" class="form-control">
                                             ${this.modules.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="form-group" id="weekNumberGroup" style="display: none;">
+                                        <label for="eventWeekSelect">Week Number:</label>
+                                        <select id="eventWeekSelect" class="form-control">
+                                            <!-- Will be populated dynamically -->
                                         </select>
                                     </div>
                                     <div class="form-group">
@@ -627,13 +692,39 @@ $(document).ready(function() {
                     </div>
                 `);
                 
+                // Add event listener for event type change
+                $('#eventTypeSelect').on('change', function() {
+                    const eventType = $(this).val();
+                    if (eventType === 'session') {
+                        $('#weekNumberGroup').show();
+                        // Update week options based on selected module
+                        self.updateEventWeekOptions();
+                    } else {
+                        $('#weekNumberGroup').hide();
+                    }
+                });
+                
+                // Add event listener for module change in event dialog
+                $('#eventModuleSelect').on('change', function() {
+                    const eventType = $('#eventTypeSelect').val();
+                    if (eventType === 'session') {
+                        self.updateEventWeekOptions();
+                    }
+                });
+                
                 // Add event listener for save button
                 $('#saveEventBtn').on('click', function() {
                     const moduleId = parseInt($('#eventModuleSelect').val());
                     const eventType = $('#eventTypeSelect').val();
                     const eventDate = new Date($('#eventDate').val());
+                    let updated = false;
                     
-                    const updated = self.updateModuleDate(moduleId, eventType, eventDate);
+                    if (eventType === 'session') {
+                        const weekIndex = parseInt($('#eventWeekSelect').val());
+                        updated = self.updateProgressSessionDate(moduleId, weekIndex, eventDate);
+                    } else {
+                        updated = self.updateModuleDate(moduleId, eventType, eventDate);
+                    }
                     
                     if (updated) {
                         $('#addEventModal').modal('hide');
@@ -642,6 +733,27 @@ $(document).ready(function() {
                 });
             }
         }
+
+
+
+        updateEventWeekOptions() {
+            const moduleId = parseInt($('#eventModuleSelect').val());
+            const module = this.modules.find(m => m.id === moduleId);
+            
+            if (!module) return;
+            
+            const weeksNeeded = Math.ceil(module.totalHours / module.weeklyHours);
+            const weekDates = this.getWeekDates(moduleId, weeksNeeded);
+            
+            const options = weekDates.map((date, i) => 
+                `<option value="${i}">Week ${i+1} - ${this.formatDate(date, 'short')}</option>`
+            ).join('');
+            
+            $('#eventWeekSelect').html(options);
+        }
+
+
+
         
         // Create "Save All Changes" button
         createSaveButton() {
@@ -704,12 +816,41 @@ $(document).ready(function() {
                 
                 // Handle selecting a day
                 select: function(start, end) {
-                    $('#eventDate').val(self.formatDate(start));
-                    $('#addEventModal').modal('show');
+                    const isHoliday = self.isHolidayDate(start);
+                    
+                    // Prevent adding events on holiday dates
+                    if (isHoliday) {
+                        alert("You cannot schedule events during holiday periods.");
+                        return;
+                    } else {
+                        $('#eventDate').val(self.formatDate(start));
+                        
+                        // Reset the form
+                        $('#eventTypeSelect').val('module-start');
+                        $('#weekNumberGroup').hide();
+                        
+                        // Show modal
+                        $('#addEventModal').modal('show');
+                    }
                 },
                 
                 // Handle event drops (dragging)
                 eventDrop: function(event, delta, revertFunc) {
+                    // Don't allow moving holiday events
+                    if (event.type === 'holiday') {
+                        revertFunc();
+                        return;
+                    }
+                    
+                    // Check if new date is a holiday
+                    const isHoliday = self.isHolidayDate(event.start);
+                    if (isHoliday) {
+                        // Show message and revert the action
+                        alert("You cannot schedule events during holiday periods.");
+                        revertFunc();
+                        return;
+                    }
+                    
                     let updated = false;
                     
                     if (event.type === 'module-start' || event.type === 'module-exam') {

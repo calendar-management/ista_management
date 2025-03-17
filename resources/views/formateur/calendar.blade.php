@@ -27,11 +27,11 @@
     <script>
         
         const data = JSON.parse('{!! json_encode($modules) !!}');
-        
-
+        const holidays = JSON.parse('{!! json_encode($holidays) !!}');
     </script>
 
     @vite('resources/js/calendar.js')
+    {{-- @vite('resources/js/vacances.js') --}}
 
     <style>
     body {

@@ -38,7 +38,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/gestion_formateur', [FormateurController::class, 'index']);
 
     Route::get('/gestion_adm', [AdministrateurController::class, 'index']);
-
+    // hsnnnnnnnnnnnn
+    Route::get('/formateur_calendar',function(){
+        return view("formateur.calendar");
+    });
 
     Route::view('/add_admin','supadmin.add_adm')->name('add_admin');
 
@@ -49,7 +52,6 @@ Route::middleware('auth')->group(function () {
 
 });
 
-// hsnnnnnnnnnnnn
 require __DIR__.'/auth.php';
 
 // Module and Calendar Routes
@@ -76,6 +78,4 @@ Route::get('/formateur_calendar', [ModuleController::class, 'showCalendar'])->na
 
 
 Route::post('/save-calendar-data', [ModuleController::class, 'saveCalendarData'])->name('calendar.save');
-Route::get('/formateur_calendar',function(){
-    return view("formateur.calendar");
-});
+

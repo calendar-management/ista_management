@@ -18,7 +18,7 @@ class Fillier extends Model
     
     public function groupes()
     {
-        return $this->hasMany(Groupe::class, 'id_fillier');
+        return $this->hasMany(Groupe::class, 'id_fillier', 'id_fillier');
     }
     
     public function teachings()

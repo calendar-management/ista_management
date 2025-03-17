@@ -13,11 +13,16 @@ class Vacance extends Model
     protected $primaryKey = 'id_vacance';
     
     protected $fillable = [
-        'nom_vacance',
+        'description_vacance',
+        'type',
+        'groupe',
+        'filliere',
         'date_debut',
         'date_fin',
-        'ajoute_par',
     ];
+   
+   
+    
     
     protected $casts = [
         'date_debut' => 'date',
@@ -26,6 +31,6 @@ class Vacance extends Model
     
     public function user()
     {
-        return $this->belongsTo(User::class, 'ajoute_par');
+        // return $this->belongsTo(User::class, 'ajoute_par');
     }
 }

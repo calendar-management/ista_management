@@ -16,6 +16,8 @@ class Progress extends Model
         'id_teaching',
         'hours_completed',
         'remaining_hours',
+        'module_start_date',
+        'final_exam_date',
         'hours_affected'
     ];
     
