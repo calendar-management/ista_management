@@ -251,4 +251,9 @@ class FormateurController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // XLSX MIME type
         ]);
     }
+
+    public function dashboard()
+    {
+        return view('formateur.dashboard');
+    }
 }

@@ -9,6 +9,7 @@ use App\Models\Fillier;
 use App\Models\CustomSessionDate;
 // use App\Models\Data;
 use App\Models\Progress;
+use App\Models\Vacance;
 use App\Models\Groupe;
 use App\Models\ProgressWeekly;
 use Illuminate\Http\Request;
@@ -68,16 +69,6 @@ class ModuleController extends Controller
         $progress->hours_completed = $totalHours;
         $progress->save();
         
-        // Update or create weekly progress
-        $weeklyProgress = ProgressWeekly::updateOrCreate(
-            [
-                'id_progress' => $progress->id_progress,
-                'week' => $weekIndex
-            ],
-            [
-                'status' => $status // Save status
-            ]
-        );
         
         // Return updated module data
         return $this->getModuleDetails($teachingId);
@@ -191,13 +182,6 @@ class ModuleController extends Controller
             ['hours_completed' => 0]
         );
         
-        // Update or create weekly progress with status
-        $weeklyProgress = ProgressWeekly::updateOrCreate(
-            [
-                'id_progress' => $progress->id_progress,
-                'week' => $weekIndex
-            ]
-        );
         
         // Update total hours in progress
         $totalHours = Progress::where('id_progress', $progress->id_progress)
@@ -213,84 +197,89 @@ class ModuleController extends Controller
      * Save all changes to the database
      */
     public function saveCalendarData(Request $request)
-{
-    $moduleData = json_decode($request->input('moduleData'), true);
+    {
+        $moduleData = json_decode($request->input('moduleData'), true);
+    
+        if (!$moduleData || !is_array($moduleData)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid data received'
+            ], 400);
+        }
+    
+        try {
+            DB::beginTransaction();
+    
+            foreach ($moduleData as $module) {
+                // 1. Insert or update in `progress` table
+                $progress = Progress::updateOrCreate(
+                    ['id_teaching' => $module['moduleId']],
+                    [
+                        'hours_completed' => $module['completedHours'],
+                        'hours_affected' => json_encode($module['weeklyProgress']), // Save weeklyProgress as JSON
+                        'remaining_hours' => $module['remainingHours'],
+                        'module_start_date' => $module['startDate'],
+                        'final_exam_date' => $module['examDate'],
+                        'weekly_hours' => $module['weeklyHours']
+                    ]
+                );
+    
+                // $teaching = ProgressWeekly::updateOrCreate(
+                //     [
+                //         'id_progress' => $progress->id_progress,
 
-    if (!$moduleData || !is_array($moduleData)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid data received'
-        ], 400);
-    }
-
-    try {
-        DB::beginTransaction();
-
-        foreach ($moduleData as $module) {
-            // 1. Insert or update in `progress` table
-            $progress = Progress::updateOrCreate(
-                ['id_teaching' => $module['moduleId']],
-                [
-                    'hours_completed' => $module['completedHours'],
-                    'hours_affected' => json_encode($module['weeklyProgress']), // Save weeklyProgress as JSON
-                    'remaining_hours' => $module['remainingHours']
-                ]
-            );
-
-            // 2. Insert or update in `teaching` table
-            $teaching = Teaching::updateOrCreate(
-                ['id_teaching' => $module['moduleId']],
-                [
-                    'module_start_date' => $module['startDate'],
-                    'final_exam_date' => $module['examDate'],
-                    'weekly_hours' => $module['weeklyHours']
-                ]
-            );
-
-            // 3. Insert or update Custom Session Dates
-            if (!empty($module['customSessionDates'])) {
-                // Remove existing session dates for this progress
-                CustomSessionDate::where('id_progress', $progress->id_progress)->delete();
-
-                foreach ($module['customSessionDates'] as $weekIndex => $sessionDate) {
-                    CustomSessionDate::create([
-                        'id_progress' => $progress->id_progress,
-                        'week_index' => $weekIndex,
-                        'session_date' => $sessionDate
-                    ]);
+                //     ]
+                // );
+    
+                // 3. Insert or update Custom Session Dates
+                if (!empty($module['customSessionDates'])) {
+                    // Remove existing session dates for this progress
+                    CustomSessionDate::where('id_progress', $progress->id_progress)->delete();
+    
+                    foreach ($module['customSessionDates'] as $weekIndex => $sessionDate) {
+                        // Skip if session_date is null or invalid
+                        if (empty($sessionDate)) {
+                            continue;
+                        }
+    
+                        CustomSessionDate::create([
+                            'id_progress' => $progress->id_progress,
+                            'week_index' => $weekIndex,
+                            'session_date' => $sessionDate
+                        ]);
+                    }
                 }
             }
+    
+            DB::commit();
+    
+            // Fetch updated data with custom session dates
+            $updatedTeachings = Teaching::with([
+                'progress.customSessionDates', // Fetch custom session dates
+                'module',
+                'group'
+            ])
+            ->where('id_user', auth()->id())
+            ->get();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Changes saved successfully',
+                'updatedData' => $updatedTeachings,
+                'timestamp' => now()->toDateTimeString()
+            ]);
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Calendar data update error: ' . $e->getMessage());
+    
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error occurred',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        DB::commit();
-
-        // Fetch updated data with custom session dates
-        $updatedTeachings = Teaching::with([
-            'progress.customSessionDates', // Fetch custom session dates
-            'module',
-            'group'
-        ])
-        ->where('id_user', auth()->id())
-        ->get();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Changes saved successfully',
-            'updatedData' => $updatedTeachings,
-            'timestamp' => now()->toDateTimeString()
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Calendar data update error: ' . $e->getMessage());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Database error occurred',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
     
 
@@ -314,58 +303,109 @@ class ModuleController extends Controller
      * Format module data for consistent output
      */
     private function formatModuleData($teaching)
-{
-    $progress = $teaching->progress;
-    $weeklyProgressData = [];
-    $weeklyStatusData = [];
-    $completedHours = 0;
-
-    // Process weekly progress data if it exists
-    if ($progress) {
-        // Decode hours_affected JSON
-        $hoursAffected = json_decode($progress->hours_affected, true) ?? [];
-
-        // Format weekly progress data for frontend
-        foreach ($hoursAffected as $weekIndex => $hours) {
-            $weeklyProgressData[$weekIndex] = $hours;
-            $completedHours += $hours ?? 0;
+    {
+        $progress = $teaching->progress;
+        $weeklyProgressData = [];
+        $weeklyStatusData = [];
+        $completedHours = 0;
+        // dd($progress);
+        // Process weekly progress data if it exists
+        if ($progress) {
+            // Decode hours_affected JSON
+            $hoursAffected = json_decode($progress->hours_affected, true) ?? [];
+    
+            // Format weekly progress data for frontend
+            foreach ($hoursAffected as $weekIndex => $hours) {
+                $weeklyProgressData[$weekIndex] = $hours;
+                $completedHours += $hours ?? 0;
+            }
         }
-    }
-
-    // Get hourly rate for this module
-    $weeklyHours = 5;
-
-    // Calculate total weeks needed
-    $totalWeeks = ceil($teaching->module->hours / $weeklyHours);
-
-    // Format weekly progress for frontend
-    $formattedWeeklyProgress = [];
-    for ($i = 0; $i < $totalWeeks; $i++) {
-        $formattedWeeklyProgress[$i] = $weeklyProgressData[$i] ?? null;
-    }
-
-    // Get custom session dates
-    $customSessionDates = [];
-    if ($progress) {
-        $customDates = $progress->customSessionDates; // Fetch from relationship
-        foreach ($customDates as $date) {
-            $customSessionDates[$date->week_index] = $date->session_date;
+    
+        // Get weekly hours from the database (assuming it's stored in the module or teaching table)
+        $weeklyHours = $progress->weekly_hours ?? 5; // Fallback to 5 if not found
+    
+        // Calculate total weeks needed
+        $totalWeeks = ceil($teaching->module->hours / $weeklyHours);
+    
+        // Format weekly progress for frontend
+        $formattedWeeklyProgress = [];
+        for ($i = 0; $i < $totalWeeks; $i++) {
+            $formattedWeeklyProgress[$i] = $weeklyProgressData[$i] ?? null;
         }
+    
+        // Get custom session dates
+        $customSessionDates = [];
+        if ($progress) {
+            $customDates = $progress->customSessionDates; // Fetch from relationship
+            foreach ($customDates as $date) {
+                $customSessionDates[$date->week_index] = $date->session_date;
+            }
+        }
+    
+        // Ensure dates are Carbon instances before formatting
+        $moduleStartDate = $progress && $progress->module_start_date ? \Carbon\Carbon::parse($progress->module_start_date) : null;
+        $finalExamDate = $progress && $progress->exam_date ? \Carbon\Carbon::parse($progress->exam_date) : null;
+    
+        return [
+            'id' => $teaching->id_teaching,
+            'name' => $teaching->module->name . '/' . $teaching->group->name,
+            'id_group' => $teaching->group->id_group,
+            'totalHours' => $teaching->module->hours,
+            'weeklyHours' => $weeklyHours,
+            'startDate' => $moduleStartDate ? $moduleStartDate->format('Y-m-d') : null,
+            'completedHours' => $completedHours,
+            'weeklyProgress' => $formattedWeeklyProgress,
+            'examDate' => $finalExamDate ? $finalExamDate->format('Y-m-d') : null,
+            'customSessionDates' => $customSessionDates
+        ];
+    }
+    private function formatHolidayData($holiday)
+    {
+        return [
+            'id' => $holiday->id_vacance,
+            'name' => $holiday->description_vacance,
+            'startDate' => $holiday->date_debut,
+            'endDate' => $holiday->date_fin,
+        ];
     }
 
-    return [
-        'id' => $teaching->id_teaching,
-        'name' => $teaching->module->name,
-        'id_group' => $teaching->group->id_group,
-        'totalHours' => $teaching->module->hours,
-        'weeklyHours' => $weeklyHours,
-        'startDate' => $teaching->module_start_date ? $teaching->module_start_date->format('Y-m-d') : null,
-        'completedHours' => $completedHours,
-        'weeklyProgress' => $formattedWeeklyProgress,
-        'examDate' => $teaching->final_exam_date ? $teaching->final_exam_date->format('Y-m-d') : null,
-        'customSessionDates' => $customSessionDates
-    ];
-}
+    private function getHolidaysForUser($userId)
+    {
+        // Fetch the user's groups and their associated fillieres
+        $userGroups = Teaching::where('id_user', $userId)
+            ->with('group.fillier') // Eager load the group and filliere relationships
+            ->get();
+
+        // Extract group IDs and filliere IDs
+        $groupIds = $userGroups->pluck('group.id_group')->toArray();
+        $filliereIds = $userGroups->pluck('group.fillier.id_fillier')->unique()->toArray();
+
+        // Fetch holidays that are visible to all users
+        $globalHolidays = Vacance::where('type', 'vacance')->get();
+
+        // Fetch holidays that are specific to the user's groups 
+        $groupHolidays = Vacance::where('type', 'stage')
+            ->whereIn('id_group', $groupIds)
+            ->get();
+
+        // Fetch holidays that are specific to the user's fillieres 
+        $examHolidays = Vacance::where('type', 'regional')
+            ->whereIn('id_fillier', $filliereIds)
+            ->get();
+
+        // Combine all holidays
+        $holidays = $globalHolidays->merge($groupHolidays)->merge($examHolidays);
+        // dd($holidays);
+        // Format the holiday data for the frontend
+        $formattedHolidays = [];
+        foreach ($holidays as $holiday) {
+            $formattedHolidays[] = $this->formatHolidayData($holiday);
+        }
+
+        return $formattedHolidays;
+    }
+
+
     
     /**
      * Show calendar view with module data
@@ -373,20 +413,22 @@ class ModuleController extends Controller
     public function showCalendar()
     {
         $userId = Auth::id();
-        // dd($userId);
+       
         
-        $teachings = Teaching::with(['progress.weeklyProgress','module','group'])
-            ->where('id_user', $userId )
+        $teachings = Teaching::with(['module','group'])
+            ->where('id_user', 2 )
             ->get();
             
-        // dd($teachings);  
+       
         $modules = [];
         
         foreach ($teachings as $teaching) {
             $modules[] = $this->formatModuleData($teaching);
         }
-        // dd($modules);
-        return view('formateur.calendar',compact('modules'));
+        $holidays = $this->getHolidaysForUser($userId);
+       
+        // Pass both modules and holidays to the view
+        return view('formateur.calendar', compact('modules', 'holidays'));
     }
 
 }

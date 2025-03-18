@@ -12,47 +12,18 @@ use Illuminate\View\View;
 
 class AccountController extends Controller
 {
-    public function edit(Request $request): View
-    {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
-    }
-
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+    public function redirectUser(){
+        if (auth()->user()){
+            if (auth()->user()->role == 'administrateur'){
+                return redirect()->route('adm_dashboard');
+            }
+            elseif (auth()->user()->role == 'formateur'){
+                return redirect()->route('formateur.dashboard');
+            }
+            else return redirect()->route('sup_adm_dashboard');
         }
-
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
-    }
-
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current-password'],
-        ]);
-
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        else{
+            return redirect()->route('login');
+        }
     }
 }

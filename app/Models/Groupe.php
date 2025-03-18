@@ -21,7 +21,7 @@ class Groupe extends Model
     
     public function fillier()
     {
-        return $this->belongsTo(Fillier::class, 'id_fillier');
+        return $this->belongsTo(Fillier::class, 'id_fillier','id_fillier');
     }
     
     public function teachings()

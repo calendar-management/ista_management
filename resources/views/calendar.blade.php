@@ -21,7 +21,6 @@
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100">
         @include('layouts.navigation')
-
         <!-- Page Heading -->
         @if (isset($header))
             <header class="bg-white shadow">
@@ -29,80 +28,57 @@
                     {{ $header }}
                 </div>
             </header>
-        @endif
+        @endif        
 
-        <!-- Page Content -->
+
         <main>
-
-            <div class="container">
-                <div class="calendar-container my-4">
-                    <div class="calendar-header d-flex justify-content-between align-items-center mb-4">
-                        <h2 id="currentMonthYear">{{ Carbon\Carbon::now()->format('F Y') }}</h2>
-
-                        <div class="btn-group mb-2">
-                            <button type="button" class="btn btn-outline-primary" id="monthView">Month</button>
-                            <button type="button" class="btn btn-outline-primary" id="weekView">Week</button>
-                        </div>
-
-                        <div>
-                            <a href="#" class="btn btn-sm btn-primary" id="prevMonth">&lt; Previous</a>
-                            <a href="#" class="btn btn-sm btn-primary" id="nextMonth">Next &gt;</a>
+            <div class="container py-4">
+                <div class="row mb-4">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="btn-group" role="group">
+                                    <button id="monthView" class="btn btn-outline-primary">Month</button>
+                                    <button id="weekView" class="btn btn-outline-primary">Week</button>
+                                </div>
+                                <h3 id="currentMonthYear" class="mb-0"></h3>
+                                <div class="btn-group" role="group">
+                                    <button id="prevMonth" class="btn btn-outline-secondary">&lt;</button>
+                                    <button id="nextMonth" class="btn btn-outline-secondary">&gt;</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <table class="calendar-table table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Sunday</th>
+                                            <th>Monday</th>
+                                            <th>Tuesday</th>
+                                            <th>Wednesday</th>
+                                            <th>Thursday</th>
+                                            <th>Friday</th>
+                                            <th>Saturday</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Calendar content will be dynamically inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                    <table class="calendar-table table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Sun</th>
-                                <th>Mon</th>
-                                <th>Tue</th>
-                                <th>Wed</th>
-                                <th>Thu</th>
-                                <th>Fri</th>
-                                <th>Sat</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php
-                                $date = Carbon\Carbon::now()->startOfMonth();
-                                $daysInMonth = Carbon\Carbon::now()->daysInMonth;
-                                $firstDayOfWeek = $date->dayOfWeek;
-                            @endphp
-
-                            @for ($i = 0; $i < ceil(($daysInMonth + $firstDayOfWeek) / 7); $i++)
-                                <tr>
-                                    @for ($j = 0; $j < 7; $j++)
-                                        @php
-                                            $currentDay = $i * 7 + $j - $firstDayOfWeek + 1;
-                                        @endphp
-                                        <td class="calendar-cell {{ $currentDay == Carbon\Carbon::now()->day ? 'today' : '' }}"
-                                            @if ($currentDay > 0 && $currentDay <= $daysInMonth) data-date="{{ Carbon\Carbon::now()->format('Y-m-') . $currentDay }}" @endif>
-                                            @if ($currentDay > 0 && $currentDay <= $daysInMonth)
-                                                <div class="date-number">{{ $currentDay }}</div>
-                                                <div class="task-container"></div>
-                                            @endif
-                                        </td>
-                                    @endfor
-                                </tr>
-                            @endfor
-                        </tbody>
-                    </table>
                 </div>
-            </div>
-
-            <!-- Add this after your calendar table -->
-            <div class="task-details-section mt-4 d-none">
-                <div class="card">
+        
+                <!-- Task Details Section -->
+                <div class="task-details-section card d-none">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Task Details</h5>
-                        <button type="button" class="btn-close" aria-label="Close"
-                            onclick="hideTaskDetails()"></button>
+                        <h4 class="mb-0">Task Details</h4>
+                        <button type="button" class="btn-close" onclick="hideTaskDetails()"></button>
                     </div>
                     <div class="card-body">
-                        <div class="task-info">
-                            <h6 class="task-title mb-3"></h6>
-                            <p class="task-date mb-2"></p>
-                            <p class="task-hours mb-3"></p>
-                        </div>
+                        <h5 class="task-title"></h5>
+                        <p class="task-date"></p>
+                        <p class="task-hours"></p>
                         <div class="btn-group">
                             <button class="btn btn-primary btn-edit">Edit</button>
                             <button class="btn btn-danger btn-delete">Delete</button>
@@ -110,294 +86,138 @@
                     </div>
                 </div>
             </div>
-
-
-
+        
+            <!-- Task Modal -->
             <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="taskModalLabel">Add New Task</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                            <h5 class="modal-title" id="taskModalLabel">Add Progress</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="taskForm" method="POST" action="{{ route('tasks.store') }}">
+                            <form action="{{ route('calendar.store') }}" method="POST">
                                 @csrf
-                                <input type="hidden" id="taskDate" name="date">
+                                <input type="hidden" id="taskDate" name="module_start_date">
+                                
                                 <div class="mb-3">
-                                    <label for="taskTitle" class="form-label">Title</label>
-                                    <input type="text" class="form-control" id="taskTitle" name="title" required>
+                                    <label for="teaching" class="form-label">Module & Group</label>
+                                    <select class="form-control" id="teaching" name="id_teaching" required>
+                                        @foreach($teachings as $teaching)
+                                            <option value="{{ $teaching->id_teaching }}">
+                                                {{ $teaching->module->name }} - {{ $teaching->group->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
+        
                                 <div class="mb-3">
-                                    <label for="taskHours" class="form-label">Nombre des heures</label>
-                                    <input type="text" class="form-control" id="taskHours" name="hours" required>
+                                    <label for="hours_completed" class="form-label">Hours Completed</label>
+                                    <input type="number" class="form-control" id="hours_completed" 
+                                        name="hours_completed" required step="0.5" min="0">
                                 </div>
+        
+                                <div class="mb-3">
+                                    <label for="week" class="form-label">Week Number</label>
+                                    <input type="number" class="form-control" id="week" 
+                                        name="week" required min="1" max="52">
+                                </div>
+        
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-control" id="status" name="status" required>
+                                        <option value="planned">Planned</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+        
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Save Task</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save Progress</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel"
-                aria-hidden="true">
+        
+            <!-- Edit Task Modal -->
+            <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                            <h5 class="modal-title" id="editTaskModalLabel">Edit Progress</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <form id="editTaskForm" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" id="editTaskId" name="id">
-                                <input type="hidden" id="editTaskDate" name="date">
-
-                                <div class="mb-3">
-                                    <label for="editTaskTitle" class="form-label">Title</label>
-                                    <input type="text" class="form-control" id="editTaskTitle" name="title"
-                                        required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editTaskHours" class="form-label">Nombre des heures</label>
-                                    <input type="text" class="form-control" id="editTaskHours" name="hours"
-                                        required>
-                                </div>
+                                
+                                <!-- Add your edit form fields here similar to the create form -->
+                                
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Update Task</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Update Progress</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
-
-
-
-
-            <style>
-                .calendar-table {
-                    table-layout: fixed;
-                    width: 100%;
-                    border-collapse: collapse;
-                }
-
-                .calendar-cell {
-                    height: 120px;
-                    vertical-align: top;
-                    padding: 8px;
-                    cursor: pointer;
-                    border: 1px solid #dee2e6;
-                    transition: background-color 0.2s ease;
-                    overflow: visible;
-                }
-
-                .calendar-cell:hover:not(.past-date) {
-                    background-color: #e9ecef;
-                }
-
-                .today {
-                    background-color: #cfe2ff !important;
-                    border: 2px solid #0d6efd !important;
-                    position: relative;
-                }
-
-                .today::after {
-                    content: 'Today';
-                    position: absolute;
-                    top: 2px;
-                    right: 2px;
-                    font-size: 0.7rem;
-                    color: #0d6efd;
-                    background: rgba(255, 255, 255, 0.8);
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-
-                .date-number {
-                    font-weight: bold;
-                    margin-bottom: 8px;
-                    color: #495057;
-                }
-
-                .task-container {
-                    min-height: 60px;
-                    max-height: 100px;
-                    overflow-y: auto;
-                    padding-right: 4px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 4px;
-                }
-
-                .task-container::-webkit-scrollbar {
-                    width: 4px;
-                }
-
-                .task-container::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                }
-
-                .task-container::-webkit-scrollbar-thumb {
-                    background: #888;
-                    border-radius: 4px;
-                }
-
-                .task-item {
-                    background-color: #e3f2fd;
-                    border-left: 3px solid #0d6efd;
-                    border-radius: 4px;
-                    padding: 6px 8px;
-                    font-size: 0.85rem;
-                    color: #0d6efd;
-                    transition: all 0.2s ease;
-                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-                    margin-bottom: 4px;
-                    flex-shrink: 0;
-                    cursor: pointer;
-                    width: 100%;
-                    box-sizing: border-box;
-                }
-
-                .past-date {
-                    background-color: #f8f9fa;
-                    color: #adb5bd;
-                    cursor: not-allowed !important;
-                    position: relative;
-                }
-
-                .past-date::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: repeating-linear-gradient(45deg,
-                            rgba(0, 0, 0, 0.03),
-                            rgba(0, 0, 0, 0.03) 10px,
-                            rgba(0, 0, 0, 0.06) 10px,
-                            rgba(0, 0, 0, 0.06) 20px);
-                }
-
-                .btn-group .btn.active {
-                    background-color: #0d6efd;
-                    color: white;
-                }
-
-                .task-item:hover {
-                    background-color: #cfe2ff;
-                    transform: translateY(-1px);
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-                }
-
-                .calendar-cell {
-                    height: 120px;
-                    vertical-align: top;
-                    padding: 10px;
-                    cursor: pointer;
-                    border: 1px solid #dee2e6;
-                    transition: all 0.3s ease;
-                    position: relative;
-                    overflow: hidden;
-                }
-
-                .calendar-cell:hover:not(.past-date) {
-                    background-color: #f8f9fa;
-                    box-shadow: inset 0 0 0 2px #0d6efd;
-                }
-
-                .date-number {
-                    font-weight: 600;
-                    margin-bottom: 10px;
-                    color: #495057;
-                    font-size: 1.1rem;
-                }
-
-                .calendar-header {
-                    background-color: #f8f9fa;
-                    border-radius: 8px;
-                    padding: 15px;
-                    margin-bottom: 20px;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                }
-
-                #currentMonthYear {
-                    font-size: 1.5rem;
-                    font-weight: 600;
-                    color: #212529;
-                    margin: 0;
-                }
-
-                .btn-group .btn {
-                    border-radius: 6px;
-                    margin: 0 2px;
-                }
-
-                .calendar-table thead th {
-                    background-color: #f1f3f5;
-                    color: #495057;
-                    font-weight: 600;
-                    padding: 12px;
-                    text-align: center;
-                    border-bottom: 2px solid #dee2e6;
-                }
-
-                .task-item.dragging {
-                    opacity: 0.5;
-                    cursor: move;
-                }
-
-                .calendar-cell.drag-over {
-                    background-color: #e3f2fd;
-                    border: 2px dashed #0d6efd;
-                }
-
-                .task-details-section {
-                    scroll-margin-top: 2rem;
-                }
-
-                .task-item:active {
-                    transform: scale(0.98);
-                }
-
-                .card {
-                    border-radius: 8px;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                }
-
-                .card-header {
-                    background-color: #f8f9fa;
-                    border-bottom: 1px solid #dee2e6;
-                }
-
-                .btn-group {
-                    gap: 8px;
-                }
-
-                .btn-edit:hover {
-                    background-color: #0b5ed7;
-                }
-
-                .btn-delete:hover {
-                    background-color: #bb2d3b;
-                }
-            </style>
-
-
-
-
-
         </main>
+
+        
+        <style>
+            .calendar-cell {
+                height: 120px;
+                width: 14.28%;
+                padding: 5px;
+                vertical-align: top;
+                position: relative;
+            }
+        
+            .calendar-cell.today {
+                background-color: #e8f4ff;
+            }
+        
+            .calendar-cell.past-date {
+                background-color: #f8f9fa;
+            }
+        
+            .date-number {
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+        
+            .task-container {
+                min-height: 60px;
+            }
+        
+            .task-item {
+                background-color: #007bff;
+                color: white;
+                padding: 2px 5px;
+                margin-bottom: 2px;
+                border-radius: 3px;
+                font-size: 0.8em;
+                cursor: pointer;
+            }
+        
+            .task-item.dragging {
+                opacity: 0.5;
+            }
+        
+            .calendar-cell.drag-over {
+                background-color: #e9ecef;
+            }
+        
+            .btn-group {
+                gap: 5px;
+            }
+        </style>
 
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -790,7 +610,7 @@
 
                 // Set the form action
                 const form = document.getElementById('editTaskForm');
-                form.action = "{{ route('tasks.update', '') }}/" + task.id;
+                form.action = "{{ route('calendar.update', '') }}/" + task.id;
 
                 // Show edit modal
                 const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));

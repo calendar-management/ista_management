@@ -33,17 +33,17 @@ class Teaching extends Model
     
     public function group()
     {
-        return $this->belongsTo(Groupe::class, 'id_group');
+        return $this->belongsTo(Groupe::class, 'id_group','id_group');
     }
     
     public function module()
     {
-        return $this->belongsTo(Module::class, 'id_module');
+        return $this->belongsTo(Module::class, 'id_module','id_module');
     }
     
     public function fillier()
     {
-        return $this->belongsTo(Fillier::class, 'id_fillier');
+        return $this->belongsTo(Fillier::class, 'id_fillier','id_fillier');
     }
     
     public function progress()

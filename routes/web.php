@@ -6,6 +6,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\FormateurController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\MyCalendarController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileControllerTest;
 use Illuminate\Support\Facades\Route;
@@ -23,19 +24,17 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::get('/', function () {
-    return redirect()->route('dashboard');
-});
+Route::get('/',[AccountController::class,'redirectUser']);
 
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [AccountController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::view('/dashboard','admin.dashboard')->name('dashboard');
-    Route::view('/sup_adm_dashboard',"supadmin.dashboard");
-    Route::view('/adm_dashboard',"admin.dashboard");    
+    Route::view('/sup_adm_dashboard',"supadmin.dashboard")->name('sup_adm_dashboard');
+    Route::view('/adm_dashboard',"admin.dashboard")->name('adm_dashboard');    
     Route::get('/formateur_dashboard',[FormateurController::class,'dashboard'])->name('formateur.dashboard');
 
 
@@ -54,11 +53,20 @@ Route::middleware('auth')->group(function () {
     
 
     Route::prefix('modules')->group(function () {
+        // Get all modules for current user
         Route::get('/', [ModuleController::class, 'getModules']);
-        Route::get('/{groupId}', [ModuleController::class, 'getModules']);
+        Route::get('/modules/{groupId}', [ModuleController::class, 'getModules']);
+        
+        // Update weekly progress for a module
         Route::post('/update-progress', [ModuleController::class, 'updateWeeklyProgress']);
+        
+        // Update module dates (start date or exam date)
         Route::post('/update-date', [ModuleController::class, 'updateModuleDate']);
+        
+        // Update progress session date (for custom scheduling)
         Route::post('/update-session-date', [ModuleController::class, 'updateProgressSessionDate']);
+        
+        // Save all changes to database
         Route::post('/save-all', [ModuleController::class, 'saveAllChanges']);
     });
 
@@ -75,8 +83,6 @@ Route::middleware('auth')->group(function () {
 
 
 require __DIR__.'/auth.php';
-
-
 
 
 
