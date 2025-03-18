@@ -18,7 +18,8 @@ class Progress extends Model
         'remaining_hours',
         'module_start_date',
         'final_exam_date',
-        'hours_affected'
+        'hours_affected',
+        'weekly_hours'
     ];
     
     public function teaching()

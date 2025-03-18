@@ -234,19 +234,19 @@ class ModuleController extends Controller
                     [
                         'hours_completed' => $module['completedHours'],
                         'hours_affected' => json_encode($module['weeklyProgress']), // Save weeklyProgress as JSON
-                        'remaining_hours' => $module['remainingHours']
-                    ]
-                );
-    
-                // 2. Insert or update in `teaching` table
-                $teaching = Teaching::updateOrCreate(
-                    ['id_teaching' => $module['moduleId']],
-                    [
+                        'remaining_hours' => $module['remainingHours'],
                         'module_start_date' => $module['startDate'],
                         'final_exam_date' => $module['examDate'],
                         'weekly_hours' => $module['weeklyHours']
                     ]
                 );
+    
+                // $teaching = ProgressWeekly::updateOrCreate(
+                //     [
+                //         'id_progress' => $progress->id_progress,
+
+                //     ]
+                // );
     
                 // 3. Insert or update Custom Session Dates
                 if (!empty($module['customSessionDates'])) {
@@ -325,7 +325,7 @@ class ModuleController extends Controller
         $weeklyProgressData = [];
         $weeklyStatusData = [];
         $completedHours = 0;
-    
+        // dd($progress);
         // Process weekly progress data if it exists
         if ($progress) {
             // Decode hours_affected JSON
@@ -338,8 +338,8 @@ class ModuleController extends Controller
             }
         }
     
-        // Get hourly rate for this module
-        $weeklyHours = 5;
+        // Get weekly hours from the database (assuming it's stored in the module or teaching table)
+        $weeklyHours = $progress->weekly_hours ?? 5; // Fallback to 5 if not found
     
         // Calculate total weeks needed
         $totalWeeks = ceil($teaching->module->hours / $weeklyHours);
@@ -432,8 +432,8 @@ class ModuleController extends Controller
         $userId = Auth::id();
        
         
-        $teachings = Teaching::with(['progress.weeklyProgress','module','group'])
-            ->where('id_user', $userId )
+        $teachings = Teaching::with(['module','group'])
+            ->where('id_user', 2 )
             ->get();
             
        

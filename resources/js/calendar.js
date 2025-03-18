@@ -550,7 +550,7 @@ $(document).ready(function() {
                 $('#unsavedChangesAlert').remove();
             }
         }
-        
+                
         // Update module or exam date
         updateModuleDate(moduleId, dateType, newDate) {
             // First check if the new date falls on a holiday
@@ -563,7 +563,9 @@ $(document).ready(function() {
             if (moduleIndex === -1) return false;
             
             if (dateType === 'module-start') {
-                this.modules[moduleIndex].startDate = this.formatDate(newDate);
+                // Keep existing weekly hours when updating via drag-drop
+                const weeklyHours = this.modules[moduleIndex].weeklyHours;
+                return this.updateModuleStartDate(moduleId, newDate, weeklyHours);
             } else if (dateType === 'module-exam') {
                 this.modules[moduleIndex].examDate = this.formatDate(newDate);
             }
@@ -672,6 +674,10 @@ $(document).ready(function() {
                                             ${this.modules.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
                                         </select>
                                     </div>
+                                    <div class="form-group" id="weeklyHoursGroup" style="display: none;">
+                                        <label for="weeklyHoursInput">Weekly Hours:</label>
+                                        <input type="number" id="weeklyHoursInput" class="form-control" min="1" max="40" step="0.5">
+                                    </div>
                                     <div class="form-group" id="weekNumberGroup" style="display: none;">
                                         <label for="eventWeekSelect">Week Number:</label>
                                         <select id="eventWeekSelect" class="form-control">
@@ -695,6 +701,21 @@ $(document).ready(function() {
                 // Add event listener for event type change
                 $('#eventTypeSelect').on('change', function() {
                     const eventType = $(this).val();
+                    
+                    // Show/hide weekly hours input for module-start
+                    if (eventType === 'module-start') {
+                        $('#weeklyHoursGroup').show();
+                        // Set default value from the selected module
+                        const moduleId = parseInt($('#eventModuleSelect').val());
+                        const module = self.modules.find(m => m.id === moduleId);
+                        if (module) {
+                            $('#weeklyHoursInput').val(module.weeklyHours);
+                        }
+                    } else {
+                        $('#weeklyHoursGroup').hide();
+                    }
+                    
+                    // Show/hide week number for session
                     if (eventType === 'session') {
                         $('#weekNumberGroup').show();
                         // Update week options based on selected module
@@ -707,6 +728,16 @@ $(document).ready(function() {
                 // Add event listener for module change in event dialog
                 $('#eventModuleSelect').on('change', function() {
                     const eventType = $('#eventTypeSelect').val();
+                    
+                    // Update weekly hours input with the selected module's value
+                    if (eventType === 'module-start') {
+                        const moduleId = parseInt($(this).val());
+                        const module = self.modules.find(m => m.id === moduleId);
+                        if (module) {
+                            $('#weeklyHoursInput').val(module.weeklyHours);
+                        }
+                    }
+                    
                     if (eventType === 'session') {
                         self.updateEventWeekOptions();
                     }
@@ -719,10 +750,14 @@ $(document).ready(function() {
                     const eventDate = new Date($('#eventDate').val());
                     let updated = false;
                     
-                    if (eventType === 'session') {
+                    if (eventType === 'module-start') {
+                        // Get the weekly hours value
+                        const weeklyHours = parseFloat($('#weeklyHoursInput').val());
+                        updated = self.updateModuleStartDate(moduleId, eventDate, weeklyHours);
+                    } else if (eventType === 'session') {
                         const weekIndex = parseInt($('#eventWeekSelect').val());
                         updated = self.updateProgressSessionDate(moduleId, weekIndex, eventDate);
-                    } else {
+                    } else if (eventType === 'module-exam') {
                         updated = self.updateModuleDate(moduleId, eventType, eventDate);
                     }
                     
@@ -734,8 +769,37 @@ $(document).ready(function() {
             }
         }
 
-
-
+        // Update module start date and weekly hours
+        updateModuleStartDate(moduleId, newDate, weeklyHours) {
+            // First check if the new date falls on a holiday
+            if (this.isHolidayDate(newDate)) {
+                alert("You cannot schedule events during holiday periods.");
+                return false;
+            }
+            
+            const moduleIndex = this.modules.findIndex(m => m.id === moduleId);
+            if (moduleIndex === -1) return false;
+            
+            // Update both startDate and weeklyHours
+            this.modules[moduleIndex].startDate = this.formatDate(newDate);
+            
+            // Only update weeklyHours if it's a valid number
+            if (!isNaN(weeklyHours) && weeklyHours > 0) {
+                this.modules[moduleIndex].weeklyHours = weeklyHours;
+            }
+            
+            this.refreshUI(moduleId);
+            
+            // Update week options if this is the current module
+            const currentModuleId = parseInt($('#moduleSelect').val());
+            if (currentModuleId === moduleId) {
+                $('#moduleSelect').trigger('change');
+            }
+            
+            this.setUnsavedChanges(true);
+            return true;
+        }
+        
         updateEventWeekOptions() {
             const moduleId = parseInt($('#eventModuleSelect').val());
             const module = this.modules.find(m => m.id === moduleId);
@@ -813,8 +877,8 @@ $(document).ready(function() {
                 selectHelper: true,
                 firstDay: 1,
                 hiddenDays: [0],
-                
-                // Handle selecting a day
+                                
+                // Add this to the select function in initCalendar()
                 select: function(start, end) {
                     const isHoliday = self.isHolidayDate(start);
                     
@@ -826,8 +890,7 @@ $(document).ready(function() {
                         $('#eventDate').val(self.formatDate(start));
                         
                         // Reset the form
-                        $('#eventTypeSelect').val('module-start');
-                        $('#weekNumberGroup').hide();
+                        $('#eventTypeSelect').val('module-start').trigger('change');
                         
                         // Show modal
                         $('#addEventModal').modal('show');
