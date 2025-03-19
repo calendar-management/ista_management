@@ -26,4 +26,7 @@ class AccountController extends Controller
             return redirect()->route('login');
         }
     }
+    public function redirectUser2(){
+        return redirect()->route('login');
+    }
 }

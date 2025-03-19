@@ -23,7 +23,7 @@
                     <input type="text" class="form-control" id="matricule" name="matricule" required>
                 </div>
                 <div class="mb-3">
-                    <label for="Email" class="form-label">Email</label>
+                    <label for="Email" class="form-label">Login</label>
                     <input type="text" class="form-control" id="email" name="email" required>
                 </div>
                 <div class="d-flex justify-content-end">

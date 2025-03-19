@@ -37,38 +37,40 @@
 
     @vite('resources/js/vacances.js')
     <style>
-    body {
-        text-align: center;
-        display: flex;
-        font-size: 14px;
-        font-family: "Helvetica Nueue", Arial, Verdana, sans-serif;
-        background-color: #DDDDDD;
-    }
+        body {
+            text-align: center;
+            display: flex;
+            font-size: 14px;
+            font-family: "Helvetica Nueue", Arial, Verdana, sans-serif;
+            background-color: #DDDDDD;
+        }
 
-    #wrapper {
-        width: 100%;
-        margin: 0 auto;
-    }
+        #wrapper {
+            width: 100%;
+            margin: 0 auto;
+        }
 
-    #calendar {
-        margin: 0 auto;
-        width: 900px;
-        background-color: #FFFFFF;
-        border-radius: 6px;
-        box-shadow: 0 1px 2px #C3C3C3;
-    }
+        #calendar {
+            margin: 0 auto;
+            width: 900px;
+            background-color: #FFFFFF;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px #C3C3C3;
+        }
 
-    .fc-event {
-        cursor: pointer;
-        color: white;
-    }
-    .cal-scroll{
-        width: 100%;
-    overflow-x: auto;  /* Enables horizontal scrolling */
-    white-space: nowrap;
-    display: flex;
-    flex-direction: column
-    }
+        .fc-event {
+            cursor: pointer;
+            color: white;
+        }
+
+        .cal-scroll {
+            width: 100%;
+            overflow-x: auto;
+            /* Enables horizontal scrolling */
+            white-space: nowrap;
+            display: flex;
+            flex-direction: column
+        }
     </style>
 
 
@@ -115,7 +117,7 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="/adm_dashboard" >
+                <a class="nav-link" href="/adm_dashboard">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -130,15 +132,15 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/gestion_formateur" 
-                    aria-expanded="true" aria-controls="collapseTwo">
+                <a class="nav-link collapsed" href="/gestion_formateur" aria-expanded="true"
+                    aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-cog"></i>
                     <span>Gestion De Formateurs</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/gestion_calendrier" 
-                    aria-expanded="true" aria-controls="collapseTwo">
+                <a class="nav-link collapsed" href="/gestion_calendrier" aria-expanded="true"
+                    aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-cog"></i>
                     <span>Gestion De Calendrier</span>
                 </a>
@@ -177,9 +179,9 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{auth()->user()->name}}</span>
-                                <img class="img-profile rounded-circle"
-                                    src="../admin/img/undraw_profile.svg">
+                                <span
+                                    class="mr-2 d-none d-lg-inline text-gray-600 small">{{ auth()->user()->name }}</span>
+                                <img class="img-profile rounded-circle" src="../admin/img/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -190,11 +192,12 @@
                                 </a>
 
                                 <div class="dropdown-divider"></div>
-                                <form action="{{route('logout')}}" method="post">
+                                <form action="{{ route('logout') }}" method="post">
                                     @csrf
-                                    <button class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logout
+                                    <button class="dropdown-item" href="#" data-toggle="modal"
+                                        data-target="#logoutModal">
+                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Logout
                                     </button>
                                 </form>
                             </div>
@@ -209,9 +212,9 @@
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                      <main>
-                        @yield("main")
-                      </main>
+                    <main>
+                        @yield('main')
+                    </main>
 
                 </div>
                 <!-- End of Page Content -->
@@ -242,13 +245,13 @@
     <script src="../admin/js/demo/chart-area-demo.js"></script>
     <script src="../admin/js/demo/chart-pie-demo.js"></script>
     <!-- jQuery (required for FullCalendar) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- FullCalendar JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
 
-<!-- FullCalendar CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
+    <!-- FullCalendar CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
 
 
 </body>

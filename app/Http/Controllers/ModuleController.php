@@ -416,7 +416,7 @@ class ModuleController extends Controller
        
         
         $teachings = Teaching::with(['module','group'])
-            ->where('id_user', 2 )
+            ->where('id_user',$userId)
             ->get();
             
        

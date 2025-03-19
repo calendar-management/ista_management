@@ -13,6 +13,11 @@ class AdministrateurController extends Controller
         return view('supadmin.gestion_admin', compact('administrateurs')); 
     }
     public function add(Request $request){
+        $request->validate([
+            'name'=> ['required'],
+            'etablissement'=> ['required'],
+            'email'=> ['required','unique:users,email'],
+        ]);
         user::firstOrCreate([
             'name'=> $request->name,
             'etablissement'=> $request->etablissement,

@@ -13,8 +13,11 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
+                    <label for="email" class="form-label">Login</label>
                     <input type="text" class="form-control" id="email" name="email" required>
+                    @error('email')
+                        <p class="text-danger m-2">Ce login est déjà utilisé. Essayez un autre</p>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label for="etablissement" class="form-label">Etablissement</label>
