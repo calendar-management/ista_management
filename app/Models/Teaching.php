@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Teaching extends Model
 {
     use HasFactory;
-    protected $table = 'teaching';
 
+    protected $table = 'teaching';
     protected $primaryKey = 'id_teaching';
 
     /**
@@ -25,7 +25,8 @@ class Teaching extends Model
      */
     public function group()
     {
-        return $this->belongsTo(Group::class, 'id_group');
+        // ✅ FIXED: specify local and foreign key to match your database
+        return $this->belongsTo(Group::class, 'id_group', 'id_group');
     }
 
     /**
@@ -40,7 +41,7 @@ class Teaching extends Model
      * Get the progress associated with the teaching record.
      */
     public function progress()
-    {
-        return $this->hasOne(Progress::class, 'id_teaching');
-    }
+{
+    return $this->hasOne(Progress::class, 'id_teaching');
+}
 }
