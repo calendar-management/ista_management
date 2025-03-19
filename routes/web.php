@@ -53,6 +53,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/add_formateur', [FormateurController::class, 'add']);
     Route::post('/gestion_formateur', [FormateurController::class, 'import'])->name('import_file');
     Route::get('/search', [FormateurController::class, 'search'])->name('formateurs.search');
+    Route::get('/export-weekly-progress/{id}', [FormateurController::class, 'exportExcel'])->name('export.weekly_progress');
+
 
     // Module and Calendar Routes
     Route::prefix('modules')->group(function () {

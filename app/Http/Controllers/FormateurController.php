@@ -4,9 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Fillier;
+use App\Models\ProgressWeekly;
 use App\Models\Teaching;
+use App\Models\Progress;
+use Box\Spout\Common\Entity\Style\Color;
+use Box\Spout\Common\Entity\Style\Style;
 use Box\Spout\Common\Type;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
+use Box\Spout\Writer\CSV\Writer;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 use App\Models\Formateur;
@@ -241,7 +248,7 @@ class FormateurController extends Controller
 
     public function downloadFile($filename)
     {
-        $filePath = storage_path("app/public/$filename"); // Correct path
+        $filePath = storage_path("public/storage/$filename"); // Correct path
 
         if (!file_exists($filePath)) {
             abort(404, 'File not found');
@@ -251,4 +258,103 @@ class FormateurController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // XLSX MIME type
         ]);
     }
+
+
+    public function exportExcel($id)
+    {
+        // Fetch the teaching data associated with the user
+        $teachings = Teaching::where('id_user', $id)->get();
+        $user = User::find($id);
+
+        // Fetch progress data
+        $progressData = Progress::whereIn('id_teaching', $teachings->pluck('id_teaching'))->get();
+
+        // Prepare group and module data
+        $groupModuleData = [];
+        foreach ($teachings as $teaching) {
+            $group = Groupe::find($teaching->id_group);
+            $module = Module::find($teaching->id_module);
+            $progress = $progressData->firstWhere('id_teaching', $teaching->id_teaching);
+
+            $hoursAffected = $progress ? json_decode($progress->hours_affected, true) ?? [] : [];
+            $numWeeks = count($hoursAffected);
+            $totalHours = $progress ? $progress->remaining_hours + $progress->hours_completed : 0;
+
+            $groupModuleData[] = [
+                'group_name' => $group ? $group->name : 'N/A',
+                'module_name' => $module ? $module->name : 'N/A',
+                'module_start_date' => $progress ? $progress->module_start_date : 'N/A',
+                'final_exam_date' => $progress ? $progress->final_exam_date : 'N/A',
+                'weeks' => $hoursAffected,
+                'total_hours' => $totalHours,
+            ];
+        }
+
+        // Now, generate the Excel file
+        $filePath = storage_path('app/public/'.$user->name.'.xlsx');
+        $writer = WriterEntityFactory::createWriter(Type::XLSX);
+        $writer->openToFile($filePath);
+
+        // Add first row for "Formateur Name"
+        $writer->addRow(WriterEntityFactory::createRow([
+            WriterEntityFactory::createCell('Formateur Name: '.$user->name),
+        ], (new StyleBuilder())
+        ->setFontBold()
+        ->setFontSize(12)
+        ->setBackgroundColor('FFFF00') // Yellow background
+        ->build()));
+
+        // Create the header row dynamically based on the number of weeks
+        $header = [
+            WriterEntityFactory::createCell('Group Name'),
+            WriterEntityFactory::createCell('Module Name'),
+            WriterEntityFactory::createCell('Module Start Date'),
+            WriterEntityFactory::createCell('Final Exam Date'),
+        ];
+
+        // Determine max number of weeks
+        $maxWeeks = max(array_map(fn($data) => count($data['weeks']), $groupModuleData));
+
+        for ($i = 1; $i <= $maxWeeks; $i++) {
+            $header[] = WriterEntityFactory::createCell("Week $i");
+        }
+
+        // Add the header row
+        $writer->addRow(WriterEntityFactory::createRow($header, (new StyleBuilder())
+        ->setFontBold()
+        ->setFontSize(12)
+        ->setBackgroundColor('FFFF00') // Yellow background
+        ->build()));
+
+        // Add progress rows dynamically
+        foreach ($groupModuleData as $data) {
+            $row = [
+                WriterEntityFactory::createCell($data['group_name']),
+                WriterEntityFactory::createCell($data['module_name']),
+                WriterEntityFactory::createCell($data['module_start_date']),
+                WriterEntityFactory::createCell($data['final_exam_date']),
+            ];
+
+            // Add weekly progress dynamically
+            for ($i = 0; $i < $maxWeeks; $i++) {
+                if ($i < count($data['weeks'])) {
+                    $status = $data['weeks'][$i] > 0 ? 'Terminé' : ($data['weeks'][$i] === 0 ? 'Absent' : 'En attente');
+                } else {
+                    $status = ($i * $data['weeks'][0] < $data['total_hours']) ? '-' : '---'; // Fill remaining weeks correctly
+                }
+
+                $row[] = WriterEntityFactory::createCell($status);
+            }
+
+            $writer->addRow(WriterEntityFactory::createRow($row));
+        }
+
+        // Close the writer (this saves the file)
+        $writer->close();
+
+        // Return the Excel file for download
+        return response()->download($filePath);
+    }
+
+
 }

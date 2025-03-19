@@ -67,7 +67,8 @@
 
                     <td>
                         <a href="/edit_formateur" class="text-danger">Edit</a>
-                        <a href="" class="text-primary ml-2">Suivie</a>
+                        <a href="{{ route('export.weekly_progress', ['id' => $formateur->id]) }}" class="btn btn-primary">Export Weekly Progress</a>
+
                     </td>
                 </tbody>
             @endforeach
