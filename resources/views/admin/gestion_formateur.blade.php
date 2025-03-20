@@ -44,105 +44,9 @@
                         </div>
                         <p id="statusMessage" class="mt-2">Préparation du fichier...</p>
                     </div>
+
                 </div>
 
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const form = document.getElementById('importForm');
-                        const progressContainer = document.getElementById('progressContainer');
-                        const progressBar = document.getElementById('progressBar');
-                        const statusMessage = document.getElementById('statusMessage');
-                        const importButton = document.getElementById('importButton');
-
-                        form.addEventListener('submit', function(e) {
-                            e.preventDefault();
-
-                            // Show progress container
-                            progressContainer.style.display = 'block';
-
-                            // Disable submit button
-                            importButton.disabled = true;
-                            importButton.innerHTML = 'Importation en cours...';
-
-                            // Prepare form data
-                            const formData = new FormData(form);
-
-                            // Create AJAX request
-                            const xhr = new XMLHttpRequest();
-
-                            // Set up progress listener
-                            xhr.upload.addEventListener('progress', function(e) {
-                                if (e.lengthComputable) {
-                                    const percentComplete = Math.round((e.loaded / e.total) * 100);
-                                    progressBar.style.width = percentComplete + '%';
-                                    progressBar.textContent = percentComplete + '%';
-                                    progressBar.setAttribute('aria-valuenow', percentComplete);
-
-                                    if (percentComplete === 100) {
-                                        statusMessage.textContent =
-                                            'Fichier téléchargé, traitement des données en cours...';
-                                    }
-                                }
-                            });
-
-                            // Set up completion listener
-                            xhr.addEventListener('load', function() {
-                                if (xhr.status >= 200 && xhr.status < 300) {
-                                    progressBar.classList.remove('progress-bar-animated');
-                                    progressBar.classList.add('bg-success');
-                                    statusMessage.textContent = 'Importation réussie!';
-
-                                    // Redirect after success (optional)
-                                    setTimeout(function() {
-                                        window.location.href = window.location.href; // Refresh the page
-                                    }, 1500);
-                                } else {
-                                    progressBar.classList.remove('progress-bar-animated');
-                                    progressBar.classList.add('bg-danger');
-                                    statusMessage.textContent =
-                                        'Erreur lors de l\'importation. Veuillez réessayer.';
-                                    importButton.disabled = false;
-                                    importButton.innerHTML = 'Import';
-                                }
-                            });
-
-                            // Set up error listener
-                            xhr.addEventListener('error', function() {
-                                progressBar.classList.remove('progress-bar-animated');
-                                progressBar.classList.add('bg-danger');
-                                statusMessage.textContent = 'Erreur réseau. Veuillez réessayer.';
-                                importButton.disabled = false;
-                                importButton.innerHTML = 'Import';
-                            });
-
-                            // Open and send the request
-                            xhr.open('POST', form.action, true);
-                            xhr.send(formData);
-
-                            // Start a fake progress indicator for backend processing
-                            // This is just to give user feedback during the processing stage
-                            let fakeProgress = 0;
-                            const processingInterval = setInterval(function() {
-                                if (fakeProgress >= 95) {
-                                    clearInterval(processingInterval);
-                                } else if (fakeProgress >= 70) {
-                                    fakeProgress += 0.5;
-                                    updateFakeProgress();
-                                } else {
-                                    fakeProgress += 1;
-                                    updateFakeProgress();
-                                }
-                            }, 1000);
-
-                            function updateFakeProgress() {
-                                if (progressBar.getAttribute('aria-valuenow') === '100') {
-                                    progressBar.style.width = fakeProgress + '%';
-                                    progressBar.textContent = 'Traitement: ' + Math.round(fakeProgress) + '%';
-                                }
-                            }
-                        });
-                    });
-                </script>
             </div>
         </div>
 
@@ -182,3 +86,102 @@
 
     </div>
 @endsection
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('importForm');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const statusMessage = document.getElementById('statusMessage');
+        const importButton = document.getElementById('importButton');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Show progress container
+            progressContainer.style.display = 'block';
+
+            // Disable submit button
+            importButton.disabled = true;
+            importButton.innerHTML = 'Importation en cours...';
+
+            // Prepare form data
+            const formData = new FormData(form);
+
+            // Create AJAX request
+            const xhr = new XMLHttpRequest();
+
+            // Set up progress listener
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.textContent = percentComplete + '%';
+                    progressBar.setAttribute('aria-valuenow', percentComplete);
+
+                    if (percentComplete === 100) {
+                        statusMessage.textContent =
+                            'Fichier téléchargé, traitement des données en cours...';
+                    }
+                }
+            });
+
+            // Set up completion listener
+            xhr.addEventListener('load', function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    progressBar.classList.remove('progress-bar-animated');
+                    progressBar.classList.add('bg-success');
+                    statusMessage.textContent = 'Importation réussie!';
+
+                    // Redirect after success (optional)
+                    setTimeout(function() {
+                        window.location.href = window.location.href; // Refresh the page
+                    }, 1500);
+                } else {
+                    progressBar.classList.remove('progress-bar-animated');
+                    progressBar.classList.add('bg-danger');
+                    statusMessage.textContent =
+                        'Erreur lors de l\'importation. Veuillez réessayer.';
+                    importButton.disabled = false;
+                    importButton.innerHTML = 'Import';
+                }
+            });
+
+            // Set up error listener
+            xhr.addEventListener('error', function() {
+                progressBar.classList.remove('progress-bar-animated');
+                progressBar.classList.add('bg-danger');
+                statusMessage.textContent = 'Erreur réseau. Veuillez réessayer.';
+                importButton.disabled = false;
+                importButton.innerHTML = 'Import';
+            });
+
+            // Open and send the request
+            xhr.open('POST', form.action, true);
+            xhr.send(formData);
+
+            // Start a fake progress indicator for backend processing
+            // This is just to give user feedback during the processing stage
+            let fakeProgress = 0;
+            const processingInterval = setInterval(function() {
+                if (fakeProgress >= 95) {
+                    clearInterval(processingInterval);
+                } else if (fakeProgress >= 70) {
+                    fakeProgress += 0.5;
+                    updateFakeProgress();
+                } else {
+                    fakeProgress += 1;
+                    updateFakeProgress();
+                }
+            }, 1000);
+
+            function updateFakeProgress() {
+                if (progressBar.getAttribute('aria-valuenow') === '100') {
+                    progressBar.style.width = fakeProgress + '%';
+                    progressBar.textContent = 'Traitement: ' + Math.round(fakeProgress) + '%';
+                }
+            }
+        });
+    });
+</script>

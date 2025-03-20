@@ -356,25 +356,6 @@ $(document).ready(function () {
             });
 
             // Update progress button handler
-            // $('#updateProgressBtn').on('click', function() {
-            //     const moduleId = parseInt($('#moduleSelect').val());
-            //     const weekIndex = parseInt($('#weekSelect').val());
-            //     const hoursCompleted = parseFloat($('#hoursCompleted').val());
-
-            //     const result = self.updateWeeklyProgress(moduleId, weekIndex, hoursCompleted);
-            //     if (result) {
-            //         $('#updateStatus').html(`
-            //             <div class="alert alert-success">
-            //                 <strong>Success!</strong> Week ${weekIndex+1} updated with ${hoursCompleted} hours.
-            //                 <br><small>Remember to click "Save All Changes" to save to database.</small>
-            //             </div>
-            //         `);
-            //     } else {
-            //         $('#updateStatus').html('<div class="alert alert-danger">Failed to update progress</div>');
-            //     }
-            // });
-
-            // Update progress button handler
             $("#updateProgressBtn").on("click", function () {
                 const moduleId = parseInt($("#moduleSelect").val());
                 const weekIndex = parseInt($("#weekSelect").val());

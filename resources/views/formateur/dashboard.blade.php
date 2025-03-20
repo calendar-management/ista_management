@@ -443,40 +443,8 @@
                                                             max="{{ $module['total_hours'] }}"></progress>
                                                         <p class="text-center text-sm">
                                                             {{ $module['completed_hours'] }}h/{{ $module['total_hours'] }}h
-                                                            {{-- {{$module['completed_hours']}} --}}
                                                         </p>
                                                     </div>
-
-                                                    {{-- <div class="progress-container">
-                                                        <span class="progress-label">Presentiel
-                                                            ({{ $module['presentiel_hours'] }} hours)
-                                                        </span>
-                                                        <progress class="w-full"
-                                                            value="{{ $module['presentiel_completed'] }}"
-                                                            max="{{ $module['presentiel_hours'] }}"></progress>
-                                                        <p class="text-center text-sm">
-                                                            {{ $module['presentiel_completed'] }}h/{{ $module['presentiel_hours'] }}h
-                                                        </p>
-                                                    </div>
-
-                                                    <div class="progress-container">
-                                                        <span class="progress-label">Distanciel
-                                                            ({{ $module['distanciel_hours'] }} hours)</span>
-                                                        <progress class="w-full"
-                                                            value="{{ $module['distanciel_completed'] }}"
-                                                            max="{{ $module['distanciel_hours'] }}"></progress>
-                                                        <p class="text-center text-sm">
-                                                            {{ $module['distanciel_completed'] }}h/{{ $module['distanciel_hours'] }}h
-                                                        </p>
-                                                    </div> --}}
-                                                </div>
-
-                                                <div class="mt-4 flex justify-end">
-                                                    <button
-                                                        class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
-                                                        View Details
-                                                        <i class="fas fa-chevron-right ml-1 text-xs"></i>
-                                                    </button>
                                                 </div>
                                             </div>
                                         @endforeach
