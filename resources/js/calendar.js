@@ -34,8 +34,15 @@ $(document).ready(function() {
         }
         
         // Fetch module data from the database (mock)
+// Fetch module data from the database
         fetchModules() {
-            return data;
+            // Check if data is defined
+            if (typeof data !== 'undefined') {
+                return data;
+            } else {
+                console.warn("Module data not found. Using empty array.");
+                return [];
+            }
         }
         // Add this method after fetchModules()
         fetchHolidays() {
@@ -187,25 +194,51 @@ $(document).ready(function() {
         }
         
         // Get week dates for a module
-        getWeekDates(moduleId, numberOfWeeks) {
-            const module = this.modules.find(m => m.id === moduleId);
-            if (!module) return [];
+        // Get week dates for a module, adjusting for holidays
+ // Get week dates for a module, maintaining original weekday after holidays
+getWeekDates(moduleId, numberOfWeeks) {
+    const module = this.modules.find(m => m.id === moduleId);
+    if (!module) return [];
+    
+    const startDate = new Date(module.startDate);
+    startDate.setHours(12, 0, 0, 0);
+    
+    // Get the original weekday (0-6, where 0 is Sunday)
+    const originalWeekday = startDate.getDay();
+    
+    const weekDates = [];
+    let currentDate = new Date(startDate);
+    
+    for (let i = 0; i < numberOfWeeks; i++) {
+        // Check if this week has a custom date
+        if (module.customSessionDates && module.customSessionDates[i]) {
+            weekDates.push(new Date(module.customSessionDates[i]));
+        } else {
+            // For the first week, use the start date
+            if (i === 0) {
+                weekDates.push(new Date(currentDate));
+                continue;
+            }
             
-            const startDate = new Date(module.startDate);
-            startDate.setHours(12, 0, 0, 0);
+            // For subsequent weeks, add 7 days to the previous date
+            currentDate = new Date(weekDates[i-1]);
+            currentDate.setDate(currentDate.getDate() + 7);
             
-            return Array.from({ length: numberOfWeeks }, (_, i) => {
-                // Check if this week has a custom date
-                if (module.customSessionDates && module.customSessionDates[i]) {
-                    return new Date(module.customSessionDates[i]);
-                } else {
-                    // Otherwise use calculated date
-                    const weekDate = new Date(startDate);
-                    weekDate.setDate(startDate.getDate() + (i * 7));
-                    return weekDate;
+            // Check if this date falls on a holiday
+            if (this.isHolidayDate(currentDate)) {
+                // Find the next available date with the same weekday
+                while (this.isHolidayDate(currentDate)) {
+                    // Move to the next week
+                    currentDate.setDate(currentDate.getDate() + 7);
                 }
-            });
+            }
+            
+            weekDates.push(new Date(currentDate));
         }
+    }
+    
+    return weekDates;
+}   
         
         // Create a form for updating weekly hours
         createWeeklyUpdateForm() {
