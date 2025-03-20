@@ -1,11 +1,10 @@
-@extends("admin.bar")
+@extends('admin.bar')
 
-@section("main")
+@section('main')
     @if (session('import_success'))
         <script>
             alert('{{ session('import_success') }}');
         </script>
-
     @endif
     <div>
         <div class="d-flex justify-content-between align-items-center">
@@ -28,17 +27,125 @@
                 </div>
 
                 <div class="col-md-6 text-center text-md-start">
-                    <form action="{{ route('import_file') }}" method="POST" enctype="multipart/form-data">
+                    <form id="importForm" action="{{ route('import_file') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <label for="data" class="form-label fw-bold">Import Fichier Excel:</label>
                         <input type="file" name="data" id="data" class="form-control btn btn-primary"
                             style="padding-bottom: 2.25rem;">
-                        <button type="submit" class="btn btn-primary m-3">Import</button>
+                        <button type="submit" id="importButton" class="btn btn-primary m-3">Import</button>
                     </form>
+
+                    <!-- Progress bar container (hidden by default) -->
+                    <div id="progressContainer" class="mt-3" style="display: none;">
+                        <div class="progress" style="height: 25px;">
+                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                                style="width: 0%">0%</div>
+                        </div>
+                        <p id="statusMessage" class="mt-2">Préparation du fichier...</p>
+                    </div>
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const form = document.getElementById('importForm');
+                        const progressContainer = document.getElementById('progressContainer');
+                        const progressBar = document.getElementById('progressBar');
+                        const statusMessage = document.getElementById('statusMessage');
+                        const importButton = document.getElementById('importButton');
+
+                        form.addEventListener('submit', function(e) {
+                            e.preventDefault();
+
+                            // Show progress container
+                            progressContainer.style.display = 'block';
+
+                            // Disable submit button
+                            importButton.disabled = true;
+                            importButton.innerHTML = 'Importation en cours...';
+
+                            // Prepare form data
+                            const formData = new FormData(form);
+
+                            // Create AJAX request
+                            const xhr = new XMLHttpRequest();
+
+                            // Set up progress listener
+                            xhr.upload.addEventListener('progress', function(e) {
+                                if (e.lengthComputable) {
+                                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                                    progressBar.style.width = percentComplete + '%';
+                                    progressBar.textContent = percentComplete + '%';
+                                    progressBar.setAttribute('aria-valuenow', percentComplete);
+
+                                    if (percentComplete === 100) {
+                                        statusMessage.textContent =
+                                            'Fichier téléchargé, traitement des données en cours...';
+                                    }
+                                }
+                            });
+
+                            // Set up completion listener
+                            xhr.addEventListener('load', function() {
+                                if (xhr.status >= 200 && xhr.status < 300) {
+                                    progressBar.classList.remove('progress-bar-animated');
+                                    progressBar.classList.add('bg-success');
+                                    statusMessage.textContent = 'Importation réussie!';
+
+                                    // Redirect after success (optional)
+                                    setTimeout(function() {
+                                        window.location.href = window.location.href; // Refresh the page
+                                    }, 1500);
+                                } else {
+                                    progressBar.classList.remove('progress-bar-animated');
+                                    progressBar.classList.add('bg-danger');
+                                    statusMessage.textContent =
+                                        'Erreur lors de l\'importation. Veuillez réessayer.';
+                                    importButton.disabled = false;
+                                    importButton.innerHTML = 'Import';
+                                }
+                            });
+
+                            // Set up error listener
+                            xhr.addEventListener('error', function() {
+                                progressBar.classList.remove('progress-bar-animated');
+                                progressBar.classList.add('bg-danger');
+                                statusMessage.textContent = 'Erreur réseau. Veuillez réessayer.';
+                                importButton.disabled = false;
+                                importButton.innerHTML = 'Import';
+                            });
+
+                            // Open and send the request
+                            xhr.open('POST', form.action, true);
+                            xhr.send(formData);
+
+                            // Start a fake progress indicator for backend processing
+                            // This is just to give user feedback during the processing stage
+                            let fakeProgress = 0;
+                            const processingInterval = setInterval(function() {
+                                if (fakeProgress >= 95) {
+                                    clearInterval(processingInterval);
+                                } else if (fakeProgress >= 70) {
+                                    fakeProgress += 0.5;
+                                    updateFakeProgress();
+                                } else {
+                                    fakeProgress += 1;
+                                    updateFakeProgress();
+                                }
+                            }, 1000);
+
+                            function updateFakeProgress() {
+                                if (progressBar.getAttribute('aria-valuenow') === '100') {
+                                    progressBar.style.width = fakeProgress + '%';
+                                    progressBar.textContent = 'Traitement: ' + Math.round(fakeProgress) + '%';
+                                }
+                            }
+                        });
+                    });
+                </script>
             </div>
         </div>
-        
+
         <div class="mb-3 search">
             <form action="{{ route('formateurs.search') }}" method="GET" class="form-inline">
                 <div class="input-group">
@@ -59,7 +166,6 @@
                 <th>Actions</th>
             </tr>
             @foreach ($formateurs as $formateur)
-
                 <tbody>
                     <td>{{ $formateur->matricule }}</td>
                     <td>{{ $formateur->name }}</td>
