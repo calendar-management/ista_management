@@ -246,7 +246,7 @@
 <body>
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <div class="bg-sidebar text-white w-64 px-4 py-6 flex flex-col hidden md:block">
+        {{-- <div class="bg-sidebar text-white w-64 px-4 py-6 flex flex-col hidden md:block">
             <div class="mb-8">
                 <h2 class="text-2xl font-bold mb-6">Formateur</h2>
                 <div class="flex items-center space-x-3 mb-6">
@@ -303,7 +303,9 @@
                     <span>Logout</span>
                 </a>
             </div>
-        </div>
+        </div> --}}
+
+        <x-test/>
 
         <!-- Main Content -->
         <div class="flex-1">
