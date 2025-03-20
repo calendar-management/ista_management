@@ -32,6 +32,8 @@ Route::get('/sup_adm_dashboard',function(){
 Route::get('/adm_dashboard',function(){
     return view("admin.dashboard");
 });
+
+
 // Route::get('/gestion_adm',function(){
 //     return view("supadmin.gestion_admin");
 // });

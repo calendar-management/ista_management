@@ -79,7 +79,7 @@ class FormateurController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email',
+            'email' => 'required|string|max:255',
         ]);
 
         $formateur = User::findOrFail($id);
