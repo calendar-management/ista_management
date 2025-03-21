@@ -76,8 +76,15 @@
                     <td>{{ $formateur->email }}</td>
 
                     <td>
-                        <a href="/edit_formateur" class="text-danger">Edit</a>
-                        <a href="" class="text-primary ml-2">Suivie</a>
+                        <a href="{{route('edit_formateur',$formateur->id)}}" class="text-danger">Edit</a>
+                        <a href="{{ route('teacher.progress', $formateur->id) }}" class="text-primary ml-2">Suivre</a>
+                       
+                        <!-- Suppression -->
+                        <form action="{{ route('formateurs.destroy', $formateur->id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-dark text-secondary ml-2">Supprimer</button>
+                        </form>
                     </td>
                 </tbody>
             @endforeach

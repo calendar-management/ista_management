@@ -37,6 +37,10 @@ Route::middleware(['auth','formateur'])->group(function (){
 });
 
 Route::middleware(['auth','admin'])->group(function (){
+    Route::delete('/delete_formateur/{id}',[FormateurController::class,'destroy'])->name('formateurs.destroy');
+    Route::get('/formateur_progress/{id}',[FormateurController::class,'progress'])->name('teacher.progress');
+    Route::get('/edit_formateur/{id}',[FormateurController::class,'edit'])->name('edit_formateur');
+    Route::put('/edit_formateur/{id}',[FormateurController::class,'update'])->name('formateurs.update');
     Route::view('/adm_dashboard',"admin.dashboard")->name('adm_dashboard');    
     Route::get('/gestion_formateur', [FormateurController::class, 'index']);
     Route::view('/add_formateur', 'admin.add_frm')->name('add_formateur');

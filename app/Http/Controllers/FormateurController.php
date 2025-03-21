@@ -54,7 +54,7 @@ class FormateurController extends Controller
         $nm = $request->name;
         return back()->with("add_frm_success", "ajouter $nm avec success!!");
     }
-    
+
     public function import(Request $request)
     {
         set_time_limit(300);
@@ -235,7 +235,7 @@ class FormateurController extends Controller
         return back()->with('import_success', 'Les données ont été insérées avec succès!');
     }
 
-    
+
     public function downloadFile($filename)
     {
         $filePath = storage_path("app/public/$filename"); // Correct path
@@ -252,5 +252,42 @@ class FormateurController extends Controller
     public function dashboard()
     {
         return view('formateur.dashboard');
+    }
+
+    public function edit($id)
+    {
+        $formateur = User::find($id);
+        return view('admin.edit_formateur', compact('formateur'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|max:255',
+        ]);
+
+        $formateur = User::findOrFail($id);
+        $formateur->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        return back()->with('success', 'Formateur mis à jour avec succès');
+    }
+
+    public function destroy($id)
+    {
+        $formateur = User::findOrFail($id);
+
+        // Supprimer le formateur
+        $formateur->delete();
+
+        // Rediriger avec un message de succès
+        return back()->with('success', 'Formateur deleted avec succès');
+    }
+
+    public function progress(){
+        dd('ok');
     }
 }
