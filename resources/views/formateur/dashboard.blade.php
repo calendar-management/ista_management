@@ -305,7 +305,22 @@
             </div>
         </div> --}}
 
-        <x-test/>
+        <x-navbar>
+            <li>
+                <a href="{{route('formateur.dashboard')}}"
+                    class="sidebar-link flex items-center px-4 py-2 text-gray-300 hover:text-white">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{route('calendar')}}"
+                    class="sidebar-link flex items-center px-4 py-2 text-gray-300 hover:text-white">
+                    <i class="fas fa-calendar-alt mr-3"></i>
+                    <span>Calendrier</span>
+                </a>
+            </li>
+        </x-navbar>
 
         <!-- Main Content -->
         <div class="flex-1">
