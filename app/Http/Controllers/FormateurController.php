@@ -13,6 +13,7 @@ use App\Models\Formateur;
 use App\Models\User;
 use App\Models\Groupe;
 use App\Models\Module;
+use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 
@@ -47,7 +48,7 @@ class FormateurController extends Controller
         User::create([
             'name' => $request->name,
             'matricule' => $request->matricule,
-            'email' => $request->email,
+            'email' => $request->email.'hello',
             'password' => bcrypt("12345678"),
             'etablissement' => $auth->etablissement,
         ]);
@@ -96,18 +97,20 @@ class FormateurController extends Controller
                         // Case 1: The "Formateur Syn" is empty or is the same as "Formateur Présentiel"
                         case (empty($nameSyn) || $nameSyn === $namePres):
                             $formateur = User::firstOrCreate(
-                                ['email' => $emailPres], // Find by email
+                                ['email' => $emailPres."test",
+                                'etablissement' => $auth->etablissement,                               
+                            ], // Find by email
                                 [
                                     'matricule' => $emailPres,
                                     'name' => $namePres,
                                     'password' => bcrypt("12345678"),
-                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $fillier = Fillier::firstOrCreate(
                                 [
                                     'code_fillier' => $cells[1]->getValue(),
                                     'name' => $cells[2]->getValue(),
+                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $groupe = Groupe::firstOrCreate(
@@ -116,10 +119,14 @@ class FormateurController extends Controller
                                     'id_fillier' => $fillier->id_fillier,
                                     'niveau' => $cells[0]->getValue(),
                                     'effectif' => $cells[5]->getValue(),
+                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $module = Module::firstOrCreate(
-                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue()], // Check both values
+                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue(),
+                                'etablissement' => $auth->etablissement,
+                                
+                            ], // Check both values
                                 [
                                     'hours' => $cells[15]->getValue(),
                                     'mh_presentiel' => $cells[13]->getValue(),
@@ -145,12 +152,13 @@ class FormateurController extends Controller
                         // Case 2: The "Formateur Syn" is different from the "Formateur Présentiel"
                         case (!empty($nameSyn) && $nameSyn !== $namePres):
                             $formateur = User::firstOrCreate(
-                                ['email' => $emailPres],
+                                ['email' => $emailPres.'test',
+                                    'etablissement' => $auth->etablissement,                               
+                            ], // Find by email
                                 [
                                     'matricule' => $emailPres,
                                     'name' => $namePres,
                                     'password' => bcrypt("12345678"),
-                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
 
@@ -158,6 +166,7 @@ class FormateurController extends Controller
                                 [
                                     'code_fillier' => $cells[1]->getValue(),
                                     'name' => $cells[2]->getValue(),
+                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $groupe = Groupe::firstOrCreate(
@@ -166,10 +175,14 @@ class FormateurController extends Controller
                                     'id_fillier' => $fillier->id_fillier,
                                     'niveau' => $cells[0]->getValue(),
                                     'effectif' => $cells[5]->getValue(),
+                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $module = Module::firstOrCreate(
-                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue()], // Check both values
+                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue(),
+                                'etablissement' => $auth->etablissement,
+                                
+                            ], // Check both values
                                 [
                                     'mh_presentiel' => $cells[13]->getValue(),
                                     'mh_distanciel' => $cells[14]->getValue(),
@@ -191,7 +204,9 @@ class FormateurController extends Controller
                             // Insert "Formateur Syn" only if their email and name exist
                             if (!empty($emailSyn) && !empty($nameSyn)) {
                                 $formateur2 = User::firstOrCreate(
-                                    ['email' => $emailSyn],
+                                    ['email' => $emailSyn.'test',
+                                    'etablissement' => $auth->etablissement,                               
+                                    ], // Find by email
                                     [
                                         'matricule' => $emailSyn,
                                         'name' => $nameSyn,
@@ -287,7 +302,90 @@ class FormateurController extends Controller
         return back()->with('success', 'Formateur deleted avec succès');
     }
 
-    public function progress(){
-        dd('ok');
+    // public function progress(int $id)
+    // {
+    //     $teacher = User::with([
+    //         'teachings.module',
+    //         'teachings.group',
+    //         'teachings.progress'
+    //     ])->findOrFail($id);
+    //     // dd($teacher);
+    //     // return view('admin.progress', compact('teacher'));
+    //     return view('admin.progress')->with('teacher', [
+    //         'module' => 'test',
+    //         'group' => 'test',
+    //         'progress' => 'test',
+    //     ]);
+    // }
+
+    public function progress($id)
+    {
+        // Find the teacher
+        $teacher = User::findOrFail($id);
+        
+        // Get all teachings for this teacher with related models
+        $teachings = Teaching::with(['module', 'group', 'fillier', 'progress', 'progress.customSessionDates'])
+                            ->where('id_user', $id)
+                            ->get();
+        
+        // Format data for the view
+        $modules = [];
+        
+        foreach ($teachings as $teaching) {
+            // Skip if no progress record exists
+            if (!$teaching->progress) {
+                continue;
+            }
+            
+            $progress = $teaching->progress;
+            $module = $teaching->module;
+            $group = $teaching->group;
+            
+            // Calculate completion percentage
+            $totalHours = $module->hours;
+            $completedHours = $progress->hours_completed;
+            $completionPercentage = $totalHours > 0 ? round(($completedHours / $totalHours) * 100, 1) : 0;
+            
+            // Calculate remaining weeks
+            $today = Carbon::now();
+            $examDate = $progress->final_exam_date ? Carbon::parse($progress->final_exam_date) : null;
+            $remainingWeeks = $examDate ? max(0, $today->diffInWeeks($examDate)) : null;
+            
+            // Determine status
+            $status = 'À jour';
+            if ($examDate) {
+                if ($remainingWeeks <= 0) {
+                    $status = 'Terminé';
+                } elseif ($completionPercentage < 50 && $remainingWeeks < 4) {
+                    $status = 'En retard';
+                } elseif ($completedHours === 0) {
+                    $status = 'Non commencé';
+                }
+            }
+            
+            // Custom session dates if any
+            $customDates = $progress->customSessionDates()->orderBy('week_index')->get();
+            
+            $modules[] = [
+                'id_teaching' => $teaching->id_teaching,
+                'module_name' => $module->name,
+                'module_code' => $module->code_module,
+                'group_name' => $group->name,
+                'fillier_name' => $teaching->fillier->name ?? 'N/A',
+                'type_seance' => $teaching->type_seance,
+                'total_hours' => $totalHours,
+                'completed_hours' => $completedHours,
+                'remaining_hours' => $progress->remaining_hours,
+                'completion_percentage' => $completionPercentage,
+                'start_date' => $progress->module_start_date ? Carbon::parse($progress->module_start_date)->format('d/m/Y') : 'Non défini',
+                'exam_date' => $examDate ? $examDate->format('d/m/Y') : 'Non défini',
+                'weekly_hours' => $progress->weekly_hours,
+                'remaining_weeks' => $remainingWeeks,
+                'status' => $status,
+                'custom_session_dates' => $customDates
+            ];
+        }
+        
+        return view('admin.progress', compact('teacher', 'modules'));
     }
 }

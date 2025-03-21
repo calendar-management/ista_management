@@ -241,17 +241,4 @@ class DashboardController extends Controller
         return view('formateur.dashboard', compact('groups'));
     }
 
-    public function groupDetail($groupId)
-    {
-        $formateur = auth()->user();
-
-        $teachings = Teaching::with(['group', 'module', 'progress'])
-            ->where('id_user', $formateur->id)
-            ->where('id_group', $groupId)
-            ->get();
-
-        $group = $teachings->first()->group;
-
-        return view('formateur.group_detail', compact('teachings', 'group'));
-    }
 }
