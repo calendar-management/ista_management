@@ -1,6 +1,6 @@
-<div class="bg-sidebar text-white w-64 px-4 py-6 flex flex-col hidden md:block">
+<div class="bg-sidebar text-white w-64 px-4 py-6 flex flex-col hidden md:block min-h-screen">
     <div class="mb-8">
-        <h2 class="text-2xl font-bold mb-6">{{ ucfirst(auth()->user()->role)}}</h2>
+        <h2 class="text-2xl font-bold mb-6">{{ ucfirst(auth()->user()->role) }}</h2>
         <div class="flex items-center space-x-3 mb-6">
             <div class="avatar w-10 h-10">
                 <span class="text-white font-bold">{{ substr(auth()->user()->name ?? 'User', 0, 1) }}</span>
@@ -12,8 +12,19 @@
         </div>
     </div>
     <nav class="flex-1">
-        <ul class="space-y-2">            
-            {{$slot}}
+        <ul class="space-y-2">
+            {{ $slot }}
+            <li>
+                <form action="{{ route('logout') }}" method="post">
+                    @csrf
+                    <button href="{{ route('calendar') }}"
+                        class="sidebar-link flex items-center px-4 py-2 text-gray-300 hover:text-white w-full">
+                        <i class="fas fa-sign-out-alt mr-3"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </li>
+
         </ul>
     </nav>
 </div>
