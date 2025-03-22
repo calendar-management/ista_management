@@ -28,3 +28,37 @@
         </ul>
     </nav>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mobile sidebar toggle
+        const sidebarToggle = document.querySelector('button.md\\:hidden');
+        const sidebar = document.querySelector('.bg-sidebar');
+
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('hidden');
+            });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth < 768 && !sidebar.contains(event.target) && !sidebarToggle.contains(
+                    event.target)) {
+                sidebar.classList.add('hidden');
+            }
+        });
+
+        // Animation for progress bars
+        const progressBars = document.querySelectorAll('.progress-bar-fill');
+        setTimeout(function() {
+            progressBars.forEach(bar => {
+                const targetWidth = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = targetWidth;
+                }, 100);
+            });
+        }, 300);
+    });
+</script>

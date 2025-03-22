@@ -5,360 +5,718 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formateur Dashboard</title>
-    <!-- Include Tailwind CSS via CDN -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <!-- Include Font Awesome for icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Include Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        /* Custom styles for progress elements */
-        progress {
-            width: 100%;
-            height: 10px;
-            border-radius: 999px;
-            overflow: hidden;
-        }
-
-        /* Customize the background (unfilled part) */
-        progress::-webkit-progress-bar {
-            background-color: #e5e7eb;
-            border-radius: 999px;
-        }
-
-        /* Customize the progress bar (filled part) for each type */
-        progress::-webkit-progress-value {
-            border-radius: 999px;
-            transition: width 0.5s ease;
-        }
-
-        /* Total progress */
-        .progress-container:nth-child(1) progress::-webkit-progress-value {
-            background: linear-gradient(90deg, #10b981, #059669);
-        }
-
-        /* Presentiel progress */
-        .progress-container:nth-child(2) progress::-webkit-progress-value {
-            background: linear-gradient(90deg, #3b82f6, #2563eb);
-        }
-
-        /* Distanciel progress */
-        .progress-container:nth-child(3) progress::-webkit-progress-value {
-            background: linear-gradient(90deg, #8b5cf6, #7c3aed);
-        }
-
-        /* Firefox styling */
-        progress::-moz-progress-bar {
-            border-radius: 999px;
-        }
-
-        .progress-container:nth-child(1) progress::-moz-progress-bar {
-            background: linear-gradient(90deg, #10b981, #059669);
-        }
-
-        .progress-container:nth-child(2) progress::-moz-progress-bar {
-            background: linear-gradient(90deg, #3b82f6, #2563eb);
-        }
-
-        .progress-container:nth-child(3) progress::-moz-progress-bar {
-            background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
+            color: #333;
+            line-height: 1.5;
+            overflow-x: hidden;
         }
 
-        .bg-sidebar {
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* Layout */
+        #wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
             background-color: #0f172a;
-            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+            width: 260px;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .user-email {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 1rem 0;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(3px);
+        }
+
+        .nav-link i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        .nav-item.active .nav-link {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .sidebar.collapsed .nav-link span,
+        .sidebar.collapsed .user-details {
+            display: none;
+        }
+
+        .sidebar.collapsed .avatar {
+            margin-right: 0;
+        }
+
+        .sidebar.collapsed .user-info {
+            justify-content: center;
+        }
+
+        /* TopBar */
+        .topbar {
+            height: 70px;
+            background-color: white;
+            position: fixed;
+            width: calc(100% - 260px);
+            right: 0;
+            top: 0;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: width 0.3s ease;
+        }
+
+        .topbar.sidebar-collapsed {
+            width: calc(100% - 80px);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #475569;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            background-color: red;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+
+        
+
+        /* Content */
+        .content-wrapper {
+            flex: 1;
+            margin-left: 260px;
+            padding-top: 70px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .content-wrapper.sidebar-collapsed {
+            margin-left: 80px;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        /* Dashboard Components */
+        .header {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .page-title {
+                margin-bottom: 0;
+            }
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .export-btn {
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 0.625rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Group Cards */
+        .groups-container {
+            margin-bottom: 2rem;
+        }
+
+        .group-card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .group-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .group-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .group-header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .group-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .group-subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .group-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .options-btn {
+            color: #64748b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .options-btn:hover {
+            background-color: #f1f5f9;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Module Grid */
+        .modules-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .modules-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .modules-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .modules-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
 
         .module-card {
-            transition: all 0.25s ease;
+            background-color: white;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            border: 1px solid #e5e7eb;
+            padding: 1.25rem;
+            transition: all 0.25s ease;
         }
 
         .module-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-            border-color: #d1d5db;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
         }
 
-        .progress-bar {
-            height: 10px;
-            border-radius: 999px;
-            overflow: hidden;
-            background-color: #e5e7eb;
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
         }
 
-        .progress-container {
-            position: relative;
-            margin-top: 20px;
-            margin-bottom: 18px;
+        .module-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
         }
 
-        .progress-label {
-            font-size: 0.75rem;
-            font-weight: 500;
-            position: absolute;
-            top: -18px;
-            left: 0;
-            color: #6b7280;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            border-radius: 999px;
-            transition: width 0.5s ease;
-        }
-
-        .bg-gradient-blue {
-            background: linear-gradient(90deg, #3b82f6, #2563eb);
-        }
-
-        .bg-gradient-purple {
-            background: linear-gradient(90deg, #8b5cf6, #7c3aed);
-        }
-
-        .bg-gradient-green {
-            background: linear-gradient(90deg, #10b981, #059669);
-        }
-
-        .navbar {
-            backdrop-filter: blur(10px);
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-
-        .card-header {
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .group-card {
-            transition: all 0.3s ease;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .group-card:hover {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .sidebar-link {
-            transition: all 0.2s ease;
-            border-radius: 8px;
-            margin-bottom: 4px;
-        }
-
-        .sidebar-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-link.active {
-            background-color: rgba(59, 130, 246, 0.9);
-            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        .module-code {
+            color: #64748b;
+            font-size: 0.875rem;
         }
 
         .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 9999px;
         }
 
         .status-completed {
             background-color: rgba(16, 185, 129, 0.1);
-            color: #059669;
+            color: #047857;
         }
 
         .status-in-progress {
             background-color: rgba(245, 158, 11, 0.1);
-            color: #d97706;
+            color: #b45309;
         }
 
         .status-not-started {
             background-color: rgba(239, 68, 68, 0.1);
-            color: #dc2626;
+            color: #b91c1c;
         }
 
-        .search-input {
-            border-radius: 8px;
-            padding: 10px 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-            border-color: #3b82f6;
-        }
-
-        .btn-primary {
-            background: linear-gradient(90deg, #3b82f6, #2563eb);
-            color: white;
-            border-radius: 8px;
-            padding: 10px 18px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4);
-        }
-
-        .data-grid {
+        .module-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat-item {
+            font-size: 0.875rem;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        /* Progress Bars */
+        .progress-container {
+            position: relative;
+            margin-top: 1.25rem;
+        }
+
+        .progress-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            position: absolute;
+            top: -1.125rem;
+            left: 0;
+        }
+
+        .progress-percentage {
+            font-size: 0.75rem;
+            color: #64748b;
+            position: absolute;
+            top: -1.125rem;
+            right: 0;
+            font-weight: 600;
+        }
+
+        progress {
+            width: 100%;
+            height: 10px;
+            border-radius: 9999px;
+            overflow: hidden;
+            border: none;
+            background-color: #e2e8f0;
+        }
+
+        progress::-webkit-progress-bar {
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+        }
+
+        progress::-webkit-progress-value {
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        progress::-moz-progress-bar {
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 9999px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            background-color: white;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-icon {
+            color: #cbd5e1;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-text {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .modules-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
-            .data-grid {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 240px;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .topbar {
+                width: 100%;
+                padding: 0 1rem;
+            }
+
+            .content-wrapper {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .actions {
+                flex-wrap: wrap;
+            }
+
+            .modules-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        .avatar {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 9999px;
+        @media (max-width: 640px) {
+            main {
+                padding: 1.5rem 1rem;
+            }
         }
 
-        .stat-value {
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: #1f2937;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: #6b7280;
+        /* For keyboard users */
+        :focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
         }
     </style>
+    
 </head>
 
 <body>
-    <div class="flex min-h-screen">
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="user-role" style="color: white; font-size: 1.5rem; font-weight: bold;">{{ ucfirst(auth()->user()->role) }}</h2>
+            </div>
+            
+            <div class="user-info">
+                <div class="avatar">
+                    <span>{{ substr(auth()->user()->name ?? 'U', 0, 1) }}</span>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">{{ auth()->user()->name ?? 'User Name' }}</span>
+                    <span class="user-email">{{ auth()->user()->email ?? 'email@example.com' }}</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/profile" class="nav-link">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="/formateur_dashboard" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/formateur_calendar" class="nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Calendrier</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <form action="{{ route('logout') }}" method="post">
+                        @csrf
+                        <button type="submit" class="nav-link">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </aside>
 
-        <x-navbar>
-            <li>
-                <a href="{{route('formateur.dashboard')}}"
-                    class="sidebar-link flex items-center px-4 py-2 text-gray-300 hover:text-white">
-                    <i class="fas fa-tachometer-alt mr-3"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{route('calendar')}}"
-                    class="sidebar-link flex items-center px-4 py-2 text-gray-300 hover:text-white">
-                    <i class="fas fa-calendar-alt mr-3"></i>
-                    <span>Calendrier</span>
-                </a>
-            </li>
-        </x-navbar>
-
-        <!-- Main Content -->
-        <div class="flex-1">
-            <!-- Top navbar -->
-            <header class="navbar shadow-sm sticky top-0 z-10">
-                <div class="flex justify-between items-center py-4 px-6">
-                    <div class="flex items-center">
-                        <button class="md:hidden mr-4 text-gray-600 focus:outline-none">
-                            <i class="fas fa-bars"></i>
-                        </button>
-                        <h1 class="text-xl font-semibold text-gray-800">Formateur Dashboard</h1>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <button class="text-gray-600 hover:text-gray-800 relative">
-                            <i class="fas fa-bell"></i>
-                            <span
-                                class="absolute -top-1 -right-1 bg-red-500 text-white w-4 h-4 text-xs flex items-center justify-center rounded-full">2</span>
-                        </button>
-                        <button class="text-gray-600 hover:text-gray-800">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                        <div class="md:hidden">
-                            <button class="avatar w-8 h-8">
-                                <span
-                                    class="text-white font-bold">{{ substr(auth()->user()->name ?? 'User', 0, 1) }}</span>
-                            </button>
-                        </div>
+        <!-- Topbar -->
+        <header class="topbar" id="topbar">
+            <button id="menuToggle" class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="user-dropdown">
+                <div id="userDropdownToggle" class="dropdown-toggle">
+                    <span class="user-name-display">{{ auth()->user()->name }}</span>
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
                     </div>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <!-- Dashboard content -->
-            <main class="py-6 px-6">
-                <div class="mb-6">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Your Groups</h2>
-                        <div class="flex items-center space-x-3">
-                            <div class="relative">
-                                <input type="text" placeholder="Search modules..."
-                                    class="search-input w-full border border-gray-300 focus:outline-none focus:ring-0">
-                                <button class="absolute right-3 top-3 text-gray-500">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                            <button class="btn-primary">
-                                <i class="fas fa-plus mr-2"></i> Add Module
-                            </button>
-                        </div>
+        <!-- Content -->
+        <div class="content-wrapper" id="contentWrapper">
+            <main>
+                <div class="header">
+                    <h2 class="page-title">Your Groups</h2>
+                    
+                    <div class="actions">
+                        <button id="exportBtn" class="export-btn">
+                            <i class="fas fa-file-export"></i>
+                            <span>Export Progress</span>
+                        </button>
                     </div>
                 </div>
-
-                <!-- Group cards -->
-                <div class="space-y-6">
+                
+                <div class="groups-container">
                     @if ($groups->isEmpty())
-                        <div class="bg-white rounded-lg shadow p-6 text-center">
-                            <div class="text-gray-400 mb-4">
-                                <i class="fas fa-users fa-3x"></i>
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-users"></i>
                             </div>
-                            <h3 class="text-xl font-medium text-gray-700">No groups assigned yet</h3>
-                            <p class="text-gray-500 mt-2">You currently don't have any groups assigned to you.</p>
-                            <button class="btn-primary mt-4">
-                                Request Group Assignment
-                            </button>
+                            <h3 class="empty-title">No groups assigned yet</h3>
+                            <p class="empty-text">You currently don't have any groups assigned to you.</p>
+                            <button class="export-btn">Request Group Assignment</button>
                         </div>
                     @else
                         @foreach ($groups as $group)
-                            <div class="group-card bg-white shadow-md">
-                                <div class="card-header px-6 py-4">
-                                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                            <div class="group-card">
+                                <div class="card-header">
+                                    <div class="group-header">
                                         <div>
-                                            <h3 class="text-xl font-semibold text-gray-800">{{ $group['name'] }}</h3>
-                                            <p class="text-gray-600">{{ $group['fillier'] }} - {{ $group['niveau'] }}
-                                            </p>
+                                            <h3 class="group-title">{{ $group['name'] }}</h3>
+                                            <p class="group-subtitle">{{ $group['fillier'] }} - {{ $group['niveau'] }}</p>
                                         </div>
-                                        <div class="mt-3 md:mt-0 flex items-center space-x-2">
-                                            <span
-                                                class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                                                {{ count($group['modules']) }} Modules
-                                            </span>
-                                            <button class="text-gray-500 hover:text-gray-700">
+                                        <div class="group-meta">
+                                            <span class="badge">{{ count($group['modules']) }} Modules</span>
+                                            <button class="options-btn">
                                                 <i class="fas fa-ellipsis-v"></i>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="px-6 py-4">
-                                    <div class="data-grid">
+                                
+                                <div class="card-body">
+                                    <div class="modules-grid">
                                         @foreach ($group['modules'] as $module)
-                                            <div class="module-card bg-white p-5">
-                                                <div class="flex justify-between items-start">
+                                            <div class="module-card">
+                                                <div class="module-header">
                                                     <div>
-                                                        <h4 class="font-semibold text-gray-800">{{ $module['name'] }}
-                                                        </h4>
-                                                        <p class="text-sm text-gray-500">Code: {{ $module['code'] }}</p>
+                                                        <h4 class="module-title">{{ $module['name'] }}</h4>
+                                                        <p class="module-code">Code: {{ $module['code'] }}</p>
                                                     </div>
-                                                    <span
-                                                        class="status-badge 
+                                                    <span class="status-badge 
                                                         {{ $module['completed_hours'] >= $module['total_hours']
                                                             ? 'status-completed'
                                                             : ($module['completed_hours'] > 0
@@ -371,38 +729,31 @@
                                                                 : 'Not Started') }}
                                                     </span>
                                                 </div>
-
-                                                <div class="mt-4 space-y-3 flex flex-col gap-5">
-                                                    <div class="grid grid-cols-2 gap-3 text-sm">
-                                                        <div>
-                                                            <p class="stat-label">Total Hours</p>
-                                                            <p class="stat-value">{{ $module['total_hours'] }}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p class="stat-label">Completed</p>
-                                                            <p class="stat-value">{{ $module['completed_hours'] }}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p class="stat-label">Start Date</p>
-                                                            <p class="stat-value">
-                                                                {{ $module['start_date'] ?? 'Not set' }}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p class="stat-label">Exam Date</p>
-                                                            <p class="stat-value">
-                                                                {{ $module['exam_date'] ?? 'Not set' }}</p>
-                                                        </div>
+                                                
+                                                <div class="module-stats">
+                                                    <div class="stat-item">
+                                                        <p class="stat-label">Total Hours</p>
+                                                        <p class="stat-value">{{ $module['total_hours'] }}</p>
                                                     </div>
-
-                                                    <div class="progress-container">
-                                                        <span class="progress-label">Progress Totale</span>
-                                                        <progress class="w-ful"
-                                                            value="{{ $module['completed_hours'] }}"
-                                                            max="{{ $module['total_hours'] }}"></progress>
-                                                        <p class="text-center text-sm">
-                                                            {{ $module['completed_hours'] }}h/{{ $module['total_hours'] }}h
-                                                        </p>
+                                                    <div class="stat-item">
+                                                        <p class="stat-label">Completed</p>
+                                                        <p class="stat-value">{{ $module['completed_hours'] }}</p>
                                                     </div>
+                                                    <div class="stat-item">
+                                                        <p class="stat-label">Exam Date</p>
+                                                        <p class="stat-value">{{ $module['exam_date'] ?? 'Not set' }}</p>
+                                                    </div>
+                                                    <div class="stat-item">
+                                                        <p class="stat-label">Progress</p>
+                                                        <p class="stat-value">{{ number_format(($module['completed_hours'] / $module['total_hours']) * 100, 1) }}%</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="progress-container">
+                                                    <span class="progress-label">Progress Totale</span>
+                                                    <span class="progress-percentage">{{ number_format(($module['completed_hours'] / $module['total_hours']) * 100, 1) }}%</span>
+                                                    <progress value="{{ $module['completed_hours'] }}" max="{{ $module['total_hours'] }}"></progress>
+                                                    <p class="progress-text">{{ $module['completed_hours'] }}h/{{ $module['total_hours'] }}h</p>
                                                 </div>
                                             </div>
                                         @endforeach
@@ -417,38 +768,60 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile sidebar toggle
-            const sidebarToggle = document.querySelector('button.md\\:hidden');
-            const sidebar = document.querySelector('.bg-sidebar');
-
-            if (sidebarToggle && sidebar) {
-                sidebarToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('hidden');
-                });
+        // Sidebar toggle functionality
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menuToggle');
+        const topbar = document.getElementById('topbar');
+        const contentWrapper = document.getElementById('contentWrapper');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !menuToggle.contains(e.target) &&
+                sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
             }
-
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function(event) {
-                if (window.innerWidth < 768 && !sidebar.contains(event.target) && !sidebarToggle.contains(
-                        event.target)) {
-                    sidebar.classList.add('hidden');
-                }
-            });
-
-            // Animation for progress bars
-            const progressBars = document.querySelectorAll('.progress-bar-fill');
-            setTimeout(function() {
-                progressBars.forEach(bar => {
-                    const targetWidth = bar.style.width;
-                    bar.style.width = '0%';
-                    setTimeout(() => {
-                        bar.style.width = targetWidth;
-                    }, 100);
-                });
-            }, 300);
+        });
+        
+        // User dropdown toggle
+        const userDropdownToggle = document.getElementById('userDropdownToggle');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+        
+        userDropdownToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking elsewhere
+        document.addEventListener('click', () => {
+            if (userDropdownMenu.classList.contains('show')) {
+                userDropdownMenu.classList.remove('show');
+            }
+        });
+        
+        // Prevent closing when clicking inside dropdown
+        userDropdownMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+        
+        // Export functionality
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            // This would typically call a backend route to generate the Excel file
+            alert('Exporting progress data as Excel file...');
+            // Example: window.location.href = '/export-progress';
         });
     </script>
 </body>
-
 </html>
