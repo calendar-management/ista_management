@@ -110,18 +110,20 @@ class FormateurController extends Controller
                         // Case 1: The "Formateur Syn" is empty or is the same as "Formateur Présentiel"
                         case (empty($nameSyn) || $nameSyn === $namePres):
                             $formateur = User::firstOrCreate(
-                                ['email' => $emailPres], // Find by email
+                                ['email' => $emailPres,
+                                            'etablissement' => $auth->etablissement,
+                                ], // Find by email
                                 [
                                     'matricule' => $emailPres,
                                     'name' => $namePres,
                                     'password' => bcrypt("12345678"),
-                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $fillier = Fillier::firstOrCreate(
                                 [
                                     'code_fillier' => $cells[1]->getValue(),
                                     'name' => $cells[2]->getValue(),
+                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $groupe = Groupe::firstOrCreate(
@@ -130,10 +132,14 @@ class FormateurController extends Controller
                                     'id_fillier' => $fillier->id_fillier,
                                     'niveau' => $cells[0]->getValue(),
                                     'effectif' => $cells[5]->getValue(),
+                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $module = Module::firstOrCreate(
-                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue()], // Check both values
+                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue(),
+                                'etablissement' => $auth->etablissement,
+                            
+                                ], // Check both values
                                 [
                                     'hours' => $cells[15]->getValue(),
                                     'mh_presentiel' => $cells[13]->getValue(),
@@ -159,12 +165,13 @@ class FormateurController extends Controller
                         // Case 2: The "Formateur Syn" is different from the "Formateur Présentiel"
                         case (!empty($nameSyn) && $nameSyn !== $namePres):
                             $formateur = User::firstOrCreate(
-                                ['email' => $emailPres],
+                                ['email' => $emailPres
+                                    , 'etablissement' => $auth->etablissement,
+                                ], // Find by email
                                 [
                                     'matricule' => $emailPres,
                                     'name' => $namePres,
                                     'password' => bcrypt("12345678"),
-                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
 
@@ -172,6 +179,7 @@ class FormateurController extends Controller
                                 [
                                     'code_fillier' => $cells[1]->getValue(),
                                     'name' => $cells[2]->getValue(),
+                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $groupe = Groupe::firstOrCreate(
@@ -180,10 +188,14 @@ class FormateurController extends Controller
                                     'id_fillier' => $fillier->id_fillier,
                                     'niveau' => $cells[0]->getValue(),
                                     'effectif' => $cells[5]->getValue(),
+                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
                             $module = Module::firstOrCreate(
-                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue()], // Check both values
+                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue(),
+                                     'etablissement' => $auth->etablissement,
+                                ], // Check both values
+                                 
                                 [
                                     'hours' => $cells[15]->getValue(),
                                     'mh_presentiel' => $cells[13]->getValue(),
@@ -205,12 +217,13 @@ class FormateurController extends Controller
                             // Insert "Formateur Syn" only if their email and name exist
                             if (!empty($emailSyn) && !empty($nameSyn)) {
                                 $formateur2 = User::firstOrCreate(
-                                    ['email' => $emailSyn],
+                                    ['email' => $emailSyn
+                                        , 'etablissement' => $auth->etablissement,
+                                    ], // Find by email
                                     [
                                         'matricule' => $emailSyn,
                                         'name' => $nameSyn,
                                         'password' => bcrypt("12345678"),
-                                        'etablissement' => $auth->etablissement,
                                     ]
                                 );
                                 $teaching2 = Teaching::firstOrCreate(

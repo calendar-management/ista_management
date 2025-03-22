@@ -15,6 +15,7 @@ class Fillier extends Model
     protected $fillable = [
         'name',
         'code_fillier',
+        'etablissement',
     ];
     
     public function groupes()

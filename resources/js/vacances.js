@@ -85,7 +85,7 @@ $(document).ready(function () {
 
             return {
                 id: holiday.id,
-                title: `${holiday.type.toUpperCase()}: ${holiday.description} ${holiday.extraInfo ? '(' + holiday.extraInfo + ')' : ''}`,
+                title: `${holiday.type.toUpperCase()}: ${holiday.description ? holiday.description : ""} ${holiday.extraInfo ? '(' + holiday.extraInfo + ')' : ''}`,
                 start: holiday.startDate,
                 end: holiday.startDate === holiday.endDate ? null : endDate,
                 allDay: true,

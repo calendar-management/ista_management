@@ -10,8 +10,8 @@ return new class extends Migration {
             $table->id();
             $table->string('description_vacance');
             $table->string('type');
-            $table->string('groupe');
-            $table->string('filliere');
+            $table->string('id_group');
+            $table->string('id_fillier');
             $table->date('date_debut');
             $table->date('date_fin');
             $table->timestamps();

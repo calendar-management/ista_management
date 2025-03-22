@@ -19,6 +19,7 @@ class Module extends Model
         'mh_presentiel',
         'mh_distanciel',
         'regional',
+        'etablissement',
     ];
     
     public function teachings()

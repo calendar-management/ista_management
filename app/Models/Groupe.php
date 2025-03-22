@@ -17,6 +17,7 @@ class Groupe extends Model
         'id_fillier',
         'niveau',
         'effectif',
+        'etablissement',
     ];
     
     public function fillier()

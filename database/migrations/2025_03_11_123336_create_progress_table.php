@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->date('final_exam_date')->nullable();
             $table->date('module_start_date')->nullable();
             $table->json('hours_affected');
+            $table->float('weekly_hours')->default(5);
             $table->timestamps();
         });
     }
