@@ -184,9 +184,7 @@
             cursor: pointer;
         }
 
-        .user-dropdown {
-            position: relative;
-        }
+        
 
         .dropdown-toggle {
             display: flex;
@@ -195,17 +193,8 @@
             background: none;
             border: none;
             padding: 0.5rem;
-            background-color: red;
+            gap:15px;
         }
-
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            margin-left: 10px;
-            overflow: hidden;
-        }
-
         
 
         /* Content */
@@ -654,7 +643,7 @@
             <button id="menuToggle" class="menu-toggle">
                 <i class="fas fa-bars"></i>
             </button>
-            
+            <div></div>
             <div class="user-dropdown">
                 <div id="userDropdownToggle" class="dropdown-toggle">
                     <span class="user-name-display">{{ auth()->user()->name }}</span>

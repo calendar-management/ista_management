@@ -31,307 +31,693 @@
 
     @vite('resources/js/calendar.js')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <!-- Include Font Awesome for icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Include Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            text-align: center;
-            display: flex;
-            font-size: 14px;
-            font-family: "Helvetica Nueue", Arial, Verdana, sans-serif;
-            background-color: #DDDDDD;
-        }
+<style>
+    
 
-        #wrapper {
-            width: 100%;
-            margin: 0 auto;
-        }
+   
+    #wrapper {
+        width: 100%;
+        margin: 0 auto;
+    }
 
-        #calendar {
-            margin: 0 auto;
-            width: 900px;
-            background-color: #FFFFFF;
-            border-radius: 6px;
-            box-shadow: 0 1px 2px #C3C3C3;
-        }
+    #calendar {
+        margin: 0 auto;
+        width: 900px;
+        background-color: #FFFFFF;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px #C3C3C3;
+    }
 
-        .fc-event {
-            cursor: pointer;
-        }
+    .fc-event {
+        cursor: pointer;
+    }
 
-        .cal-scroll {
-            width: 100%;
-            overflow-x: auto;
-            /* Enables horizontal scrolling */
-            white-space: nowrap;
-            display: flex;
-            flex-direction: column
-        }
-        #accordionSidebar {
-            background: black;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            z-index: 1000;
-            width: fit-content !important;
-            padding: 10px
-        }
+    .cal-scroll {
+        width: 100%;
+        overflow-x: auto;
+        /* Enables horizontal scrolling */
+        white-space: nowrap;
+        display: flex;
+        flex-direction: column
+    }
+    
+    
+</style>
 
-        /* Adjust content wrapper for fixed sidebar */
-        #content-wrapper {
-            margin-left: 14rem;
-            transition: margin 0.3s ease;
-        }
+<style>
+    /* Reset and Base Styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        /* Adjust content wrapper when sidebar is toggled/collapsed */
-        .sidebar.toggled+#content-wrapper {
-            margin-left: 220px;
-        }
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f3f4f6;
+        color: #333;
+        line-height: 1.5;
+        overflow-x: hidden;
+    }
 
-        .sidebar-brand {
-            height: 80px;
-            background: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
 
-        .sidebar-brand-icon {
-            background-color: rgba(255, 255, 255, 0.1);
-            width: 20px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
+    ul {
+        list-style: none;
+    }
+
+    /* Layout */
+    #wrapper {
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        background-color: #0f172a;
+        width: 260px;
+        position: fixed;
+        height: 100vh;
+        z-index: 1000;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .sidebar.collapsed {
+        width: 80px;
+    }
+
+    .sidebar-header {
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 0 0.5rem;
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-right: 12px;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .user-email {
+        color: #94a3b8;
+        font-size: 0.75rem;
+    }
+
+    .sidebar-divider {
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.1);
+        margin: 1rem 0;
+    }
+
+    .nav-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        color: rgba(255, 255, 255, 0.7);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        background: none;
+        border: none;
+        width: 100% !important;
+        text-align: left;
+        cursor: pointer;
+        gap: 10px;
+    }
+    .nav-label{
+        font-size: 16px !important;
+        font-weight: 400 !important;
+    }
+
+    .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        transform: translateX(3px);
+    }
+
+    .nav-link i {
+        width: 24px;
+        text-align: center;
+    }
+
+    .nav-item.active .nav-link {
+        background-color: #3b82f6;
+        color: white;
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+    }
+
+    .sidebar.collapsed .nav-link span,
+    .sidebar.collapsed .user-details {
+        display: none;
+    }
+
+    .sidebar.collapsed .avatar {
+        margin-right: 0;
+    }
+
+    .sidebar.collapsed .user-info {
+        justify-content: center;
+    }
+
+    /* TopBar */
+    .topbar {
+        height: 70px;
+        background-color: white;
+        position: fixed;
+        width: calc(100% - 260px);
+        right: 0;
+        top: 0;
+        z-index: 900;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: width 0.3s ease;
+    }
+
+    .topbar.sidebar-collapsed {
+        width: calc(100% - 80px);
+    }
+
+    .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: #475569;
+        font-size: 1.25rem;
+        cursor: pointer;
+    }
+
+    
+
+    .dropdown-toggle {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0.5rem;
+        gap:15px;
+    }
+    
+
+    /* Content */
+    .content-wrapper {
+        flex: 1;
+        margin-left: 260px;
+        padding-top: 70px;
+        transition: margin-left 0.3s ease;
+    }
+
+    .content-wrapper.sidebar-collapsed {
+        margin-left: 80px;
+    }
+
+    main {
+        padding: 2rem;
+    }
+
+    /* Dashboard Components */
+    .header {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .header {
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
         }
+    }
 
-        .sidebar-brand-text {
-            font-weight: 600;
-            font-size: 1.2rem;
-            letter-spacing: 0.5px;
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    @media (min-width: 768px) {
+        .page-title {
+            margin-bottom: 0;
         }
+    }
 
-        .sidebar .nav-item {
-            margin: 4px 10px;
-        }
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
 
-        .sidebar .nav-item .nav-link {
-            border-radius: 8px;
-            padding: 12px 16px;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
+    .export-btn {
+        background: linear-gradient(90deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 0.625rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+        transition: all 0.3s ease;
+    }
 
-        .sidebar .nav-item .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            transform: translateX(3px);
-        }
+    .export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(16, 185, 129, 0.3);
+    }
 
-        .sidebar .nav-item.active .nav-link {
-            background-color: #3b82f6;
-            color: #fff;
-            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
-        }
+    /* Group Cards */
+    .groups-container {
+        margin-bottom: 2rem;
+    }
 
-        .sidebar .nav-item .nav-link i {
-            width: 20px;
-            text-align: center;
-            margin-right: 10px;
-            font-size: 1rem;
-            opacity: 0.8;
-        }
+    .group-card {
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
 
-        .sidebar .nav-item.active .nav-link i {
-            opacity: 1;
-        }
+    .group-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
 
-        .sidebar-divider {
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            margin: 15px 10px;
-        }
+    .card-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
 
-        .sidebar-heading {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.7rem;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            padding: 0 15px;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
+    .group-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
 
-        #sidebarToggle {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.7);
-            height: 36px;
-            width: 36px;
-            display: flex;
+    @media (min-width: 768px) {
+        .group-header {
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
+            justify-content: space-between;
+        }
+    }
+
+    .group-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .group-subtitle {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .group-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .badge {
+        background-color: #dbeafe;
+        color: #1e40af;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .options-btn {
+        color: #64748b;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+
+    .options-btn:hover {
+        background-color: #f1f5f9;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Module Grid */
+    .modules-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    @media (min-width: 640px) {
+        .modules-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .modules-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (min-width: 1280px) {
+        .modules-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    .module-card {
+        background-color: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.25rem;
+        transition: all 0.25s ease;
+    }
+
+    .module-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+        border-color: #cbd5e1;
+    }
+
+    .module-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .module-title {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+
+    .module-code {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-completed {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #047857;
+    }
+
+    .status-in-progress {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+    }
+
+    .status-not-started {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+    }
+
+    .module-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-top: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .stat-item {
+        font-size: 0.875rem;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    /* Progress Bars */
+    .progress-container {
+        position: relative;
+        margin-top: 1.25rem;
+    }
+
+    .progress-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        position: absolute;
+        top: -1.125rem;
+        left: 0;
+    }
+
+    .progress-percentage {
+        font-size: 0.75rem;
+        color: #64748b;
+        position: absolute;
+        top: -1.125rem;
+        right: 0;
+        font-weight: 600;
+    }
+
+    progress {
+        width: 100%;
+        height: 10px;
+        border-radius: 9999px;
+        overflow: hidden;
+        border: none;
+        background-color: #e2e8f0;
+    }
+
+    progress::-webkit-progress-bar {
+        background-color: #e2e8f0;
+        border-radius: 9999px;
+    }
+
+    progress::-webkit-progress-value {
+        background: linear-gradient(90deg, #10b981, #059669);
+        border-radius: 9999px;
+        transition: width 0.5s ease;
+    }
+
+    progress::-moz-progress-bar {
+        background: linear-gradient(90deg, #10b981, #059669);
+        border-radius: 9999px;
+    }
+
+    .progress-text {
+        text-align: center;
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        background-color: white;
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .empty-icon {
+        color: #cbd5e1;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: #334155;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+        color: #64748b;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 1024px) {
+        .modules-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+            width: 240px;
         }
 
-        #sidebarToggle:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
+        .sidebar.mobile-open {
+            transform: translateX(0);
         }
 
-        #sidebarToggle i {
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar.toggled #sidebarToggle i {
-            transform: rotate(180deg);
-        }
-
-        /* Collapsed sidebar styles */
-        .sidebar.toggled {
-            width: 6.5rem !important;
-        }
-
-        .sidebar.toggled .nav-item {
-            margin: 4px;
-        }
-
-        .sidebar.toggled .nav-item .nav-link {
-            /* padding: 12px 8px; */
-            display: flex;
-            align-items: center;
+        .topbar {
             width: 100%;
+            padding: 0 1rem;
         }
 
-        .sidebar.toggled .nav-item .nav-link span {
-            font-size: 15px;
+        .content-wrapper {
+            margin-left: 0;
         }
 
-        .sidebar.toggled .sidebar-brand-text {
-            display: none;
+        .menu-toggle {
+            display: block;
         }
 
-        .sidebar.toggled .sidebar-brand {
-            justify-content: center;
+        .actions {
+            flex-wrap: wrap;
         }
 
-        /* Small screens adjustments */
-        @media (max-width: 768px) {
-            #accordionSidebar {
-                position: fixed;
-                transform: translateX(-100%);
-            }
-
-            #accordionSidebar.toggled {
-                transform: translateX(0);
-            }
-
-            #content-wrapper {
-                margin-left: 0;
-            }
+        .modules-grid {
+            grid-template-columns: 1fr;
         }
-    </style>
+    }
+
+    @media (max-width: 640px) {
+        main {
+            padding: 1.5rem 1rem;
+        }
+    }
+
+    /* For keyboard users */
+    :focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+    }
+</style>
 </head>
 
 <body>
 
     <div id="wrapper">
 
-        <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar">
-            <div class="">
-                <div class="flex items-start pl-2">
-                    <h2 class="text-2xl font-bold mt-2 mb-4 text-white">{{ ucfirst(auth()->user()->role) }}</h2>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="user-role" style="color: white; font-size: 1.5rem; font-weight: bold;">{{ ucfirst(auth()->user()->role) }}</h2>
+            </div>
+            
+            <div class="user-info">
+                <div class="avatar">
+                    <span>{{ substr(auth()->user()->name ?? 'U', 0, 1) }}</span>
                 </div>
-                <div class="flex items-center space-x-3 mb-6 pl-2">
-                    <div class="avatar w-10 h-10 bg-blue-500 flex items-center justify-center rounded-full">
-                        <span class="text-white font-bold">{{ substr(auth()->user()->name ?? 'User', 0, 1) }}</span>
-                    </div>
-                    <div class="flex flex-col items-start gap-1">
-                        <p class="text-sm font-medium text-white">{{ auth()->user()->name ?? 'User Name' }}</p>
-                        <p class="text-xs text-gray-400">{{ auth()->user()->email ?? 'email@example.com' }}</p>
+                <div class="user-details">
+                    <span class="user-name">{{ auth()->user()->name ?? 'User Name' }}</span>
+                    <span class="user-email">{{ auth()->user()->email ?? 'email@example.com' }}</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/profile" class="nav-link">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="nav-label">Profile</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/formateur_dashboard" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span class="nav-label">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="/formateur_calendar" class="nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="nav-label">Calendrier</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <form action="{{ route('logout') }}" method="post">
+                        @csrf
+                        <button type="submit" class="nav-link">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span class="nav-label">Logout</span>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </aside>
+
+        <header class="topbar" id="topbar">
+            <button id="menuToggle" class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div></div>
+            <div class="user-dropdown">
+                <div id="userDropdownToggle" class="dropdown-toggle">
+                    <span class="user-name-display">{{ auth()->user()->name }}</span>
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
                     </div>
                 </div>
             </div>
-
-            <hr class="sidebar-divider my-0">
-
-            <li class="nav-item">
-                <a class="nav-link" href="/profile">
-                    <i class="fas fa-user-circle"></i>
-                    <span>Profile</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="formateur_dashboard">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-
-            <li class="nav-item active">
-                <a class="nav-link" href="/formateur_calendar">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Calendrier</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <form action="{{ route('logout') }}" method="post">
-                    @csrf
-                    <button class="nav-link" href="{{ route('calendar') }}"
-                        class="sidebar-link flex items-center px-4 py-2 text-gray-300 hover:text-white w-full">
-                        <i class="fas fa-sign-out-alt mr-3"></i>
-                        <span>Logout</span>
-                    </button>
-                </form>
-            </li>
-
-
-        </ul>
-
+        </header>
         
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow fixed w-screen" style="z-index: 500">
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item dropdown no-arrow">
-                            <button class="nav-link dropdown-toggle" id="userDropdown" role="button"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span
-                                        class="mr-2 d-none d-lg-inline text-gray-600 small">{{ auth()->user()->name }}</span>
-                                    <img class="img-profile rounded-circle" src="admin/img/person.svg">
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="/profile">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <form action="{{ route('logout') }}" method="post">
-                                    @csrf
-                                    <button class="dropdown-item" href="#" data-toggle="modal"
-                                        data-target="#logoutModal">
-                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                        Logout
-                                    </button>
-                                </form>
-                            </div>
-                        </li>
-                    </ul>
-                </nav>
+                
 
                 <div class="container mt-12 pt-10">
                     <div class="call">
@@ -350,9 +736,6 @@
                             @csrf
                             <input type="hidden" name="moduleData" id="moduleDataInput">
                         </form>
-
-
-
                     </div>
                 </div>
                 <footer class="sticky-footer bg-white col-md-12">
@@ -371,7 +754,62 @@
     <script src="admin/vendor/jquery-easing/jquery.easing.min.js"></script>
 
     <script src="admin/js/sb-admin-2.min.js"></script>
-
+    <script>
+        // Sidebar toggle functionality
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menuToggle');
+        const topbar = document.getElementById('topbar');
+        const contentWrapper = document.getElementById('contentWrapper');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !menuToggle.contains(e.target) &&
+                sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+        
+        // User dropdown toggle
+        const userDropdownToggle = document.getElementById('userDropdownToggle');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+        
+        userDropdownToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking elsewhere
+        document.addEventListener('click', () => {
+            if (userDropdownMenu.classList.contains('show')) {
+                userDropdownMenu.classList.remove('show');
+            }
+        });
+        
+        // Prevent closing when clicking inside dropdown
+        userDropdownMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+        
+        // Export functionality
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            // This would typically call a backend route to generate the Excel file
+            alert('Exporting progress data as Excel file...');
+            // Example: window.location.href = '/export-progress';
+        });
+    </script>
 </body>
 
 
