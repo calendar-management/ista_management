@@ -31,20 +31,24 @@ class FormateurController extends Controller
         return view('admin.gestion_formateur', compact('formateurs'));
     }
     public function search(Request $request)
-    {
-        $search = $request->input('search');
-        $auth = auth()->user();
+{
+    $search = $request->input('search');
+    $auth = auth()->user();
 
-        $formateurs = User::where('role', 'formateur')
-            ->where('etablissement', $auth->etablissement)
-            ->when($search, function ($query, $search) {
-                return $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('matricule', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            })->paginate(10);
+    $formateurs = User::where('role', 'formateur')
+        ->where('etablissement', $auth->etablissement)
+        ->when($search, function ($query, $search) {
+            return $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('matricule', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        })
+        ->paginate(10);
 
-        return view('admin.gestion_formateur', compact('formateurs'));
-    }
+    return view('admin.gestion_formateur', compact('formateurs'));
+}
+
     public function add(Request $request)
     {
         $auth = auth()->user();
