@@ -2,6 +2,7 @@
     ['label'=>'Gestion Formateurs','route'=>'gestion_formateur','class'=>'','icon'=>'fas fa-users'],
     ['label'=>'Gestion Calendrier','route'=>'gestion_calendrier','class'=>'active','icon'=>'fas fa-calendar-alt'],
     ['label'=>'Dashboard','route'=>'dashboard','class'=>'','icon'=>'fas fa-chart-bar'],
+    ['label'=>'Ajouter Formateur','route'=>'add_formateur','class'=>'','icon'=>'fas fa-user-plus'],
 ]">
 @if (session("ajouter_succ"))
     <script>

@@ -1,6 +1,9 @@
-@extends('admin.bar')
-
-@section('main')
+<x-bar :navlinks="[
+    ['label'=>'Gestion Formateurs','route'=>'gestion_formateur','class'=>'','icon'=>'fas fa-users'],
+    ['label'=>'Gestion Calendrier','route'=>'gestion_calendrier','class'=>'','icon'=>'fas fa-calendar-alt'],
+    ['label'=>'Dashboard','route'=>'dashboard','class'=>'','icon'=>'fas fa-chart-bar'],
+    ['label'=>'Ajouter Formateur','route'=>'add_formateur','class'=>'active','icon'=>'fas fa-user-plus'],
+]">
 @if (session("add_frm_success"))
     <script>
         alert("{{ session("add_frm_success") }}")
@@ -32,4 +35,4 @@
             </form>
         </div>
     </div>
-@endsection
+</x-bar>
