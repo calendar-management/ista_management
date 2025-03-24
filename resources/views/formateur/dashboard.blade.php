@@ -659,13 +659,6 @@
             <main>
                 <div class="header">
                     <h2 class="page-title">Your Groups</h2>
-                    
-                    <div class="actions">
-                        <button id="exportBtn" class="export-btn">
-                            <i class="fas fa-file-export"></i>
-                            <span>Export Progress</span>
-                        </button>
-                    </div>
                 </div>
                 
                 <div class="groups-container">

@@ -20,59 +20,7 @@ use Carbon\Carbon;
 
 class ModuleController extends Controller
 {
-
-
-
-    /**
-     * Update weekly progress for a module
-     */
-    // public function updateWeeklyProgress(Request $request)
-    // {
-    //     $request->validate([
-    //         'moduleId' => 'required|integer',
-    //         'weekIndex' => 'required|integer',
-    //         'hoursCompleted' => 'required|numeric',
-    //         'status' => 'nullable|string|in:completed,absent,pending' // Added status field
-    //     ]);
-
-    //     $teachingId = $request->moduleId;
-    //     $weekIndex = $request->weekIndex;
-    //     $hoursCompleted = $request->hoursCompleted;
-    //     $status = $request->status ?? 'completed'; // Default to completed if not provided
-
-    //     // Verify the teaching belongs to the authenticated user
-    //     $teaching = Teaching::where('id_teaching', $teachingId)
-    //         ->where('id_user', Auth::id())
-    //         ->firstOrFail();
-
-    //     // Find or create progress record
-    //     $progress = Progress::firstOrCreate(
-    //         ['id_teaching' => $teachingId], // Match against this
-    //         [
-    //             'hours_completed' => 0, // Default value if creating
-    //             'hours_affected' => json_encode([]) // Default empty JSON if creating
-    //         ]
-    //     );
-
-    //     // Decode the hours_affected JSON
-    //     $hoursAffected = json_decode($progress->hours_affected, true);
-
-    //     // Update the hours for the specific week
-    //     $hoursAffected[$weekIndex] = $hoursCompleted;
-    //     dd($hoursAffected);
-
-    //     // Recalculate total hours completed
-    //     $totalHours = array_sum($hoursAffected);
-
-    //     // Update the progress record
-    //     $progress->hours_affected = json_encode($hoursAffected);
-    //     $progress->hours_completed = $totalHours;
-    //     $progress->save();
-
-
-    //     // Return updated module data
-    //     return $this->getModuleDetails($teachingId);
-    // }
+ 
 
     public function updateWeeklyProgress(Request $request)
     {
@@ -137,6 +85,8 @@ class ModuleController extends Controller
         // Return updated module details
         return $this->getModuleDetails($teachingId);
     }
+
+    
 
     /**
      * Update a module's dates (start date or exam date)
