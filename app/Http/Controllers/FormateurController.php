@@ -51,6 +51,9 @@ class FormateurController extends Controller
 
     public function add(Request $request)
     {
+        $request->validate([
+            'email' => ['required','unique:users,email']
+        ]);
         $auth = auth()->user();
         User::create([
             'name' => $request->name,

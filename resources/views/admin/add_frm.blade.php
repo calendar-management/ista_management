@@ -18,16 +18,19 @@
                 @csrf
                 <div class="mb-3">
                     <label for="name" class="form-label">Nom</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
+                    <input type="text" class="form-control" value="{{old('name')}}" id="name" name="name" required>
                 </div>
 
                 <div class="mb-3">
                     <label for="matricule" class="form-label">Matricule</label>
-                    <input type="text" class="form-control" id="matricule" name="matricule" required>
+                    <input type="text" class="form-control" value="{{old('matricule')}}" id="matricule" name="matricule" required>
                 </div>
                 <div class="mb-3">
                     <label for="Email" class="form-label">Login</label>
-                    <input type="text" class="form-control" id="email" name="email" required>
+                    <input type="text" class="form-control" value="{{old('email')}}" id="email" name="email" required>
+                    @error('email')
+                        <p class="text-danger ml-3">Ce login est déjà utilisé par un autre utilisateur</p>
+                    @enderror
                 </div>
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary">Ajouter</button>
