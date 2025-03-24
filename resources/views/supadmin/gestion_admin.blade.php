@@ -7,7 +7,7 @@
                 alert("{{ session('delete_success') }}");
             </script>
         @endif
-        <h1 class="text-success my-3">Gestion Des Administrateurs:</h1>
+        <h1 class="text-success my-3 fs-2">Gestion Des Administrateurs:</h1>
         
         <div class="d-flex justify-content-end m-4">
             <a href="/add_admin" class="btn btn-primary">Ajouter Administrateur</a>
