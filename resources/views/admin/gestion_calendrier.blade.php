@@ -1,12 +1,14 @@
-@extends("admin.bar")
-
-@section("main")
+<x-bar :navlinks="[
+    ['label'=>'Gestion Formateurs','route'=>'gestion_formateur','class'=>'','icon'=>'fas fa-users'],
+    ['label'=>'Gestion Calendrier','route'=>'gestion_calendrier','class'=>'active','icon'=>'fas fa-calendar-alt'],
+    ['label'=>'Dashboard','route'=>'dashboard','class'=>'','icon'=>'fas fa-chart-bar'],
+]">
 @if (session("ajouter_succ"))
     <script>
         alert("{{ session("ajouter_succ") }}")
     </script>
 @endif
-    <div>
+    <div class="text-center">
         <h1 class="text-success m-3">Gestion Des Vacances:</h1>
 
         <div class="container">
@@ -52,4 +54,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-bar>

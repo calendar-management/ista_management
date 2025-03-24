@@ -13,6 +13,9 @@ use App\Models\Formateur;
 use App\Models\User;
 use App\Models\Groupe;
 use App\Models\Module;
+use App\Models\Progress;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -48,7 +51,7 @@ class FormateurController extends Controller
         User::create([
             'name' => $request->name,
             'matricule' => $request->matricule,
-            'email' => $request->email.'hello',
+            'email' => $request->email . 'hello',
             'password' => bcrypt("12345678"),
             'etablissement' => $auth->etablissement,
         ]);
@@ -97,9 +100,10 @@ class FormateurController extends Controller
                         // Case 1: The "Formateur Syn" is empty or is the same as "Formateur Présentiel"
                         case (empty($nameSyn) || $nameSyn === $namePres):
                             $formateur = User::firstOrCreate(
-                                ['email' => $emailPres."test",
-                                'etablissement' => $auth->etablissement,                               
-                            ], // Find by email
+                                [
+                                    'email' => $emailPres . "test",
+                                    'etablissement' => $auth->etablissement,
+                                ], // Find by email
                                 [
                                     'matricule' => $emailPres,
                                     'name' => $namePres,
@@ -123,10 +127,12 @@ class FormateurController extends Controller
                                 ]
                             );
                             $module = Module::firstOrCreate(
-                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue(),
-                                'etablissement' => $auth->etablissement,
-                                
-                            ], // Check both values
+                                [
+                                    'code_module' => $cells[6]->getValue(),
+                                    'name' => $cells[7]->getValue(),
+                                    'etablissement' => $auth->etablissement,
+
+                                ], // Check both values
                                 [
                                     'hours' => $cells[15]->getValue(),
                                     'mh_presentiel' => $cells[13]->getValue(),
@@ -152,9 +158,10 @@ class FormateurController extends Controller
                         // Case 2: The "Formateur Syn" is different from the "Formateur Présentiel"
                         case (!empty($nameSyn) && $nameSyn !== $namePres):
                             $formateur = User::firstOrCreate(
-                                ['email' => $emailPres.'test',
-                                    'etablissement' => $auth->etablissement,                               
-                            ], // Find by email
+                                [
+                                    'email' => $emailPres . 'test',
+                                    'etablissement' => $auth->etablissement,
+                                ], // Find by email
                                 [
                                     'matricule' => $emailPres,
                                     'name' => $namePres,
@@ -179,10 +186,12 @@ class FormateurController extends Controller
                                 ]
                             );
                             $module = Module::firstOrCreate(
-                                ['code_module' => $cells[6]->getValue(), 'name' => $cells[7]->getValue(),
-                                'etablissement' => $auth->etablissement,
-                                
-                            ], // Check both values
+                                [
+                                    'code_module' => $cells[6]->getValue(),
+                                    'name' => $cells[7]->getValue(),
+                                    'etablissement' => $auth->etablissement,
+
+                                ], // Check both values
                                 [
                                     'mh_presentiel' => $cells[13]->getValue(),
                                     'mh_distanciel' => $cells[14]->getValue(),
@@ -204,8 +213,9 @@ class FormateurController extends Controller
                             // Insert "Formateur Syn" only if their email and name exist
                             if (!empty($emailSyn) && !empty($nameSyn)) {
                                 $formateur2 = User::firstOrCreate(
-                                    ['email' => $emailSyn.'test',
-                                    'etablissement' => $auth->etablissement,                               
+                                    [
+                                        'email' => $emailSyn . 'test',
+                                        'etablissement' => $auth->etablissement,
                                     ], // Find by email
                                     [
                                         'matricule' => $emailSyn,
@@ -302,55 +312,40 @@ class FormateurController extends Controller
         return back()->with('success', 'Formateur deleted avec succès');
     }
 
-    // public function progress(int $id)
-    // {
-    //     $teacher = User::with([
-    //         'teachings.module',
-    //         'teachings.group',
-    //         'teachings.progress'
-    //     ])->findOrFail($id);
-    //     // dd($teacher);
-    //     // return view('admin.progress', compact('teacher'));
-    //     return view('admin.progress')->with('teacher', [
-    //         'module' => 'test',
-    //         'group' => 'test',
-    //         'progress' => 'test',
-    //     ]);
-    // }
 
     public function progress($id)
     {
         // Find the teacher
         $teacher = User::findOrFail($id);
-        
+
         // Get all teachings for this teacher with related models
         $teachings = Teaching::with(['module', 'group', 'fillier', 'progress', 'progress.customSessionDates'])
-                            ->where('id_user', $id)
-                            ->get();
-        
+            ->where('id_user', $id)
+            ->get();
+
         // Format data for the view
         $modules = [];
-        
+
         foreach ($teachings as $teaching) {
             // Skip if no progress record exists
             if (!$teaching->progress) {
                 continue;
             }
-            
+
             $progress = $teaching->progress;
             $module = $teaching->module;
             $group = $teaching->group;
-            
+
             // Calculate completion percentage
             $totalHours = $module->hours;
             $completedHours = $progress->hours_completed;
             $completionPercentage = $totalHours > 0 ? round(($completedHours / $totalHours) * 100, 1) : 0;
-            
+
             // Calculate remaining weeks
             $today = Carbon::now();
             $examDate = $progress->final_exam_date ? Carbon::parse($progress->final_exam_date) : null;
             $remainingWeeks = $examDate ? max(0, $today->diffInWeeks($examDate)) : null;
-            
+
             // Determine status
             $status = 'À jour';
             if ($examDate) {
@@ -362,10 +357,10 @@ class FormateurController extends Controller
                     $status = 'Non commencé';
                 }
             }
-            
+
             // Custom session dates if any
             $customDates = $progress->customSessionDates()->orderBy('week_index')->get();
-            
+
             $modules[] = [
                 'id_teaching' => $teaching->id_teaching,
                 'module_name' => $module->name,
@@ -385,7 +380,102 @@ class FormateurController extends Controller
                 'custom_session_dates' => $customDates
             ];
         }
-        
+
         return view('admin.progress', compact('teacher', 'modules'));
+    }
+
+    public function exportExcel($id)
+    {
+        // Fetch the teaching data associated with the user
+        $teachings = Teaching::where('id_user', $id)->get();
+        $user = User::find($id);
+
+        // Fetch progress data
+        $progressData = Progress::whereIn('id_teaching', $teachings->pluck('id_teaching'))->get();
+
+        // Prepare group and module data
+        $groupModuleData = [];
+        foreach ($teachings as $teaching) {
+            $group = Groupe::find($teaching->id_group);
+            $module = Module::find($teaching->id_module);
+            $progress = $progressData->firstWhere('id_teaching', $teaching->id_teaching);
+
+            $hoursAffected = $progress ? json_decode($progress->hours_affected, true) ?? [] : [];
+            $numWeeks = count($hoursAffected);
+            $totalHours = $progress ? $progress->remaining_hours + $progress->hours_completed : 0;
+            $groupModuleData[] = [
+                'group_name' => $group ? $group->name : 'N/A',
+                'module_name' => $module ? $module->name : 'N/A',
+                'module_start_date' => $progress&&$progress->module_start_date!='1970-01-01' ? $progress->module_start_date : '',
+                'final_exam_date' => $progress ? $progress->final_exam_date : 'N/A',
+                'weeks' => $hoursAffected,
+                'total_hours' => $totalHours,
+            ];
+        }
+
+        // Now, generate the Excel file
+        $filePath = storage_path('app/public/' . $user->name . '.xlsx');
+        $writer = WriterEntityFactory::createWriter(Type::XLSX);
+        $writer->openToFile($filePath);
+
+        // Add first row for "Formateur Name"
+        $writer->addRow(WriterEntityFactory::createRow([
+            WriterEntityFactory::createCell('Formateur Name: ' . $user->name),
+        ], (new StyleBuilder())
+            ->setFontBold()
+            ->setFontSize(12)
+            ->setBackgroundColor('FFFF00') // Yellow background
+            ->build()));
+
+        // Create the header row dynamically based on the number of weeks
+        $header = [
+            WriterEntityFactory::createCell('Group Name'),
+            WriterEntityFactory::createCell('Module Name'),
+            WriterEntityFactory::createCell('Module Start Date'),
+            WriterEntityFactory::createCell('Final Exam Date'),
+        ];
+
+        // Determine max number of weeks
+        $maxWeeks = max(array_map(fn($data) => count($data['weeks']), $groupModuleData));
+
+        for ($i = 1; $i <= $maxWeeks; $i++) {
+            $header[] = WriterEntityFactory::createCell("Week $i");
+        }
+
+        // Add the header row
+        $writer->addRow(WriterEntityFactory::createRow($header, (new StyleBuilder())
+            ->setFontBold()
+            ->setFontSize(12)
+            ->setBackgroundColor('FFFF00') // Yellow background
+            ->build()));
+
+        // Add progress rows dynamically
+        foreach ($groupModuleData as $data) {
+            $row = [
+                WriterEntityFactory::createCell($data['group_name']),
+                WriterEntityFactory::createCell($data['module_name']),
+                WriterEntityFactory::createCell($data['module_start_date']),
+                WriterEntityFactory::createCell($data['final_exam_date']),
+            ];
+
+            // Add weekly progress dynamically
+            for ($i = 0; $i < $maxWeeks; $i++) {
+                if ($i < count($data['weeks'])) {
+                    $status = $data['weeks'][$i] > 0 ? 'Terminé' : ($data['weeks'][$i] === 0 ? 'Absent' : 'En attente');
+                } else {
+                    $status = ($i * $data['weeks'][0] < $data['total_hours']) ? '-' : '---'; // Fill remaining weeks correctly
+                }
+
+                $row[] = WriterEntityFactory::createCell($status);
+            }
+
+            $writer->addRow(WriterEntityFactory::createRow($row));
+        }
+
+        // Close the writer (this saves the file)
+        $writer->close();
+
+        // Return the Excel file for download
+        return response()->download($filePath);
     }
 }

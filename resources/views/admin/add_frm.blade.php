@@ -1,6 +1,6 @@
-@extends("admin.bar")
+@extends('admin.bar')
 
-@section("main")
+@section('main')
 @if (session("add_frm_success"))
     <script>
         alert("{{ session("add_frm_success") }}")

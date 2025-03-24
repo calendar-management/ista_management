@@ -37,6 +37,7 @@ Route::middleware(['auth','formateur'])->group(function (){
 });
 
 Route::middleware(['auth','admin'])->group(function (){
+    Route::get('/export-weekly-progress/{id}', [FormateurController::class, 'exportExcel'])->name('export.weekly_progress');
     Route::delete('/delete_formateur/{id}',[FormateurController::class,'destroy'])->name('formateurs.destroy');
     Route::get('/formateur_progress/{id}',[FormateurController::class,'progress'])->name('teacher.progress');
     Route::get('/edit_formateur/{id}',[FormateurController::class,'edit'])->name('edit_formateur');
