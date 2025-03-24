@@ -238,12 +238,7 @@ class ModuleController extends Controller
                     ]
                 );
 
-                // $teaching = ProgressWeekly::updateOrCreate(
-                //     [
-                //         'id_progress' => $progress->id_progress,
-
-                //     ]
-                // );
+            
 
                 // 3. Insert or update Custom Session Dates
                 if (!empty($module['customSessionDates'])) {
