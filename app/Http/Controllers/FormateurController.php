@@ -55,7 +55,7 @@ class FormateurController extends Controller
         User::create([
             'name' => $request->name,
             'matricule' => $request->matricule,
-            'email' => $request->email . 'hello',
+            'email' => $request->email,
             'password' => bcrypt("12345678"),
             'etablissement' => $auth->etablissement,
         ]);
@@ -105,7 +105,7 @@ class FormateurController extends Controller
                         case (empty($nameSyn) || $nameSyn === $namePres):
                             $formateur = User::firstOrCreate(
                                 [
-                                    'email' => $emailPres . "test",
+                                    'email' => $emailPres,
                                     'etablissement' => $auth->etablissement,
                                 ], // Find by email
                                 [
@@ -163,7 +163,7 @@ class FormateurController extends Controller
                         case (!empty($nameSyn) && $nameSyn !== $namePres):
                             $formateur = User::firstOrCreate(
                                 [
-                                    'email' => $emailPres . 'test',
+                                    'email' => $emailPres,
                                     'etablissement' => $auth->etablissement,
                                 ], // Find by email
                                 [
@@ -218,7 +218,7 @@ class FormateurController extends Controller
                             if (!empty($emailSyn) && !empty($nameSyn)) {
                                 $formateur2 = User::firstOrCreate(
                                     [
-                                        'email' => $emailSyn . 'test',
+                                        'email' => $emailSyn,
                                         'etablissement' => $auth->etablissement,
                                     ], // Find by email
                                     [
@@ -267,7 +267,7 @@ class FormateurController extends Controller
 
     public function downloadFile($filename)
     {
-        $filePath = storage_path("app/public/$filename"); // Correct path
+        $filePath = storage_path("app/public/$filename");
 
         if (!file_exists($filePath)) {
             abort(404, 'File not found');

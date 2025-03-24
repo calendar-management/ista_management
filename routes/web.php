@@ -33,8 +33,8 @@ Route::middleware(['auth','formateur'])->group(function (){
     Route::get('/formateur_group/{group}', [DashboardController::class, 'groupDetail'])->name('formateur.group.detail');
     Route::get('/formateur_calendar', [ModuleController::class, 'showCalendar'])->name('calendar');
     Route::post('/save-calendar-data', [ModuleController::class, 'saveCalendarData'])->name('calendar.save');
-    Route::get('/download/{filename}', [FormateurController::class, 'downloadFile']);
 });
+Route::get('/download/{filename}', [FormateurController::class, 'downloadFile']);
 
 Route::middleware(['auth','admin'])->group(function (){
     Route::get('/export-weekly-progress/{id}', [FormateurController::class, 'exportExcel'])->name('export.weekly_progress');
