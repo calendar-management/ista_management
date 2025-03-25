@@ -312,29 +312,23 @@ class FormateurController extends Controller
     {
         $formateur = User::findOrFail($id);
 
-        // Supprimer le formateur
         $formateur->delete();
 
-        // Rediriger avec un message de succès
         return back()->with('success', 'Formateur deleted avec succès');
     }
 
 
     public function progress($id)
     {
-        // Find the teacher
         $teacher = User::findOrFail($id);
 
-        // Get all teachings for this teacher with related models
         $teachings = Teaching::with(['module', 'group', 'fillier', 'progress', 'progress.customSessionDates'])
             ->where('id_user', $id)
             ->get();
 
-        // Format data for the view
         $modules = [];
 
         foreach ($teachings as $teaching) {
-            // Skip if no progress record exists
             if (!$teaching->progress) {
                 continue;
             }
@@ -343,17 +337,14 @@ class FormateurController extends Controller
             $module = $teaching->module;
             $group = $teaching->group;
 
-            // Calculate completion percentage
             $totalHours = $module->hours;
             $completedHours = $progress->hours_completed;
             $completionPercentage = $totalHours > 0 ? round(($completedHours / $totalHours) * 100, 1) : 0;
 
-            // Calculate remaining weeks
             $today = Carbon::now();
             $examDate = $progress->final_exam_date ? Carbon::parse($progress->final_exam_date) : null;
             $remainingWeeks = $examDate ? max(0, $today->diffInWeeks($examDate)) : null;
 
-            // Determine status
             $status = 'À jour';
             if ($examDate) {
                 if ($remainingWeeks <= 0) {
@@ -364,8 +355,6 @@ class FormateurController extends Controller
                     $status = 'Non commencé';
                 }
             }
-
-            // Custom session dates if any
             $customDates = $progress->customSessionDates()->orderBy('week_index')->get();
 
             $modules[] = [
@@ -393,14 +382,11 @@ class FormateurController extends Controller
 
     public function exportExcel($id)
     {
-        // Fetch the teaching data associated with the user
         $teachings = Teaching::where('id_user', $id)->get();
         $user = User::find($id);
 
-        // Fetch progress data
         $progressData = Progress::whereIn('id_teaching', $teachings->pluck('id_teaching'))->get();
 
-        // Prepare group and module data
         $groupModuleData = [];
         foreach ($teachings as $teaching) {
             $group = Groupe::find($teaching->id_group);
@@ -420,12 +406,10 @@ class FormateurController extends Controller
             ];
         }
 
-        // Now, generate the Excel file
         $filePath = storage_path('app/public/' . $user->name . '.xlsx');
         $writer = WriterEntityFactory::createWriter(Type::XLSX);
         $writer->openToFile($filePath);
 
-        // Add first row for "Formateur Name"
         $writer->addRow(WriterEntityFactory::createRow([
             WriterEntityFactory::createCell('Formateur Name: ' . $user->name),
         ], (new StyleBuilder())
@@ -434,7 +418,6 @@ class FormateurController extends Controller
             ->setBackgroundColor('FFFF00') // Yellow background
             ->build()));
 
-        // Create the header row dynamically based on the number of weeks
         $header = [
             WriterEntityFactory::createCell('Group Name'),
             WriterEntityFactory::createCell('Module Name'),
@@ -442,21 +425,18 @@ class FormateurController extends Controller
             WriterEntityFactory::createCell('Final Exam Date'),
         ];
 
-        // Determine max number of weeks
         $maxWeeks = max(array_map(fn($data) => count($data['weeks']), $groupModuleData));
 
         for ($i = 1; $i <= $maxWeeks; $i++) {
             $header[] = WriterEntityFactory::createCell("Week $i");
         }
 
-        // Add the header row
         $writer->addRow(WriterEntityFactory::createRow($header, (new StyleBuilder())
             ->setFontBold()
             ->setFontSize(12)
             ->setBackgroundColor('FFFF00') // Yellow background
             ->build()));
 
-        // Add progress rows dynamically
         foreach ($groupModuleData as $data) {
             $row = [
                 WriterEntityFactory::createCell($data['group_name']),
@@ -465,7 +445,6 @@ class FormateurController extends Controller
                 WriterEntityFactory::createCell($data['final_exam_date']),
             ];
 
-            // Add weekly progress dynamically
             for ($i = 0; $i < $maxWeeks; $i++) {
                 if ($i < count($data['weeks'])) {
                     $status = $data['weeks'][$i] > 0 ? 'Terminé' : ($data['weeks'][$i] === 0 ? 'Absent' : 'En attente');
@@ -479,10 +458,8 @@ class FormateurController extends Controller
             $writer->addRow(WriterEntityFactory::createRow($row));
         }
 
-        // Close the writer (this saves the file)
         $writer->close();
 
-        // Return the Excel file for download
         return response()->download($filePath);
     }
 }

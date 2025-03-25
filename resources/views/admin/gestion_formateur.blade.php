@@ -15,19 +15,14 @@
                 <div>
                     <div class="d-flex justify-content-between align-items-center flex-wrap">
                         <h1 class="text-success m-3">Gestion Des Formateurs:</h1>
-                        <a href="{{ url('/download/AvancementProgramme_exemple.xlsx') }}" class="btn btn-primary m-3">
-                            <i class="fas fa-download me-2"></i>Télécharger un exemple de fichier
-                        </a>
                     </div>
                     
                     <div class="border p-4 m-2 m-md-4 rounded shadow bg-light">
+                        <a href="{{ url('/download/AvancementProgramme_exemple.xlsx') }}" class="btn btn-primary m-3">
+                            <i class="fas fa-download me-2"></i>Télécharger un exemple de fichier
+                        </a>
                         <div class="row align-items-center">
-                            <div class="col-md-5 text-center text-md-start mb-3 mb-md-0">
-                                <a href="/add_formateur" class="btn btn-primary w-100">
-                                    <i class="fas fa-user-plus me-2"></i>Ajouter Formateur
-                                </a>
-                            </div>
-
+                            
                             <div class="col-12 d-md-none my-3 border-bottom"></div>
 
                             <div class="col-md-1 d-none d-md-block">
@@ -57,6 +52,8 @@
                             </div>
                         </div>
                     </div>
+                    
+                    
 
                     <div class="mb-3 search">
                         <form action="{{ route('formateurs.search') }}" method="GET" class="form-inline">

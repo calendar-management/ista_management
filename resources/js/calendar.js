@@ -29,8 +29,6 @@ $(document).ready(function() {
             this.setupUnsavedChangesWarning();
             this.updateCalendar();
             this.setUnsavedChanges(false);
-            console.log("Initial module data:", this.prepareModulesForDatabase());
-            console.log("Holiday data:", this.holidays);
         }
         
         // Fetch module data from the database (mock)
@@ -521,9 +519,7 @@ $(document).ready(function() {
         // Save data to database
         saveToDatabase() {
             const moduleData = this.prepareModulesForDatabase(); // Get modified data
-            
-            console.log("Saving to database:", moduleData);
-            
+                        
             // Disable button and show loading spinner
             this.$saveBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
             this.$saveBtn.prop('disabled', true);
@@ -541,7 +537,6 @@ $(document).ready(function() {
                     _token: $('meta[name="csrf-token"]').attr('content') 
                 },
                 success: (response) => {
-                    console.log("Save response:", response);
                     this.showSaveSuccess();
                     this.setUnsavedChanges(false);
                     this.$saveBtn.html('<i class="fas fa-save mr-1"></i> Save All Changes');

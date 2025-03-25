@@ -58,7 +58,7 @@
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white d-flex align-items-center">
                 <i class="fas fa-users-cog me-3 fs-4"></i>
-                <h1 class="card-title mb-0 fs-5">Administrator Management</h1>
+                <h1 class="card-title mb-0 fs-5">Gestion des Administrateurs</h1>
             </div>
             
             <div class="card-body">
