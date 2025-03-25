@@ -4,6 +4,7 @@
     ['label'=>'Dashboard','route'=>'dashboard','class'=>'','icon'=>'fas fa-chart-bar'],
     ['label'=>'Ajouter Formateur','route'=>'add_formateur','class'=>'','icon'=>'fas fa-user-plus'],
 ]">
+@vite('resources/js/vacances.js')
 @if (session("ajouter_succ"))
     <script>
         alert("{{ session("ajouter_succ") }}")

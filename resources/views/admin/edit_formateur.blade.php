@@ -17,8 +17,11 @@
             </div>
 
             <div class="mb-3">
-                <label for="email" class="form-label">Email:</label>
+                <label for="email" class="form-label">Login:</label>
                 <input type="text" name="email" class="form-control" value="{{ $formateur->email }}" required>
+                @error('email')
+                        <p class="text-danger ml-3">Ce login est déjà utilisé par un autre utilisateur</p>
+                @enderror
             </div>
 
             <button type="submit" class="btn btn-success">Mettre à jour</button>

@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formateur Dashboard</title>
+<x-bar :navlinks="[
+    ['label' => 'Calendrier', 'route' => 'formateur_calendar', 'class' => '', 'icon' => 'fas fa-calendar-alt'],
+    ['label' => 'Dashboard', 'route' => 'dashboard', 'class' => 'active', 'icon' => 'fas fa-chart-bar'],
+]">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -184,7 +181,7 @@
             cursor: pointer;
         }
 
-        
+
 
         .dropdown-toggle {
             display: flex;
@@ -193,9 +190,9 @@
             background: none;
             border: none;
             padding: 0.5rem;
-            gap:15px;
+            gap: 15px;
         }
-        
+
 
         /* Content */
         .content-wrapper {
@@ -272,7 +269,7 @@
             margin-bottom: 2rem;
         }
 
-        .group-card {
+        /* .group-card {
             background-color: white;
             border-radius: 12px;
             overflow: hidden;
@@ -349,7 +346,7 @@
             padding: 1.25rem;
         }
 
-        /* Module Grid */
+
         .modules-grid {
             display: grid;
             gap: 1rem;
@@ -411,6 +408,136 @@
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
+        } */
+
+        /* Enhanced Group Card Styles */
+        .group-card {
+            background-color: white;
+            border-radius: 16px;
+            /* Slightly larger border radius */
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            /* Softer, more pronounced shadow */
+            margin-bottom: 2rem;
+            /* More spacing between cards */
+            border: 1px solid #f1f5f9;
+            /* Subtle border for definition */
+            transition: all 0.3s ease;
+        }
+
+        .group-card:hover {
+            transform: translateY(-6px);
+            /* Increased hover lift */
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+            /* More pronounced shadow on hover */
+        }
+
+        .card-header {
+            background-color: #f8fafc;
+            /* Subtle background for header */
+            padding: 1.5rem;
+            /* Increased padding */
+            border-bottom: 1px solid #e2e8f0;
+            /* Clearer separation */
+        }
+
+        .group-header {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            /* More space between elements */
+        }
+
+        @media (min-width: 768px) {
+            .group-header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .group-title {
+            font-size: 1.35rem;
+            /* Slightly larger title */
+            font-weight: 700;
+            /* Bolder font weight */
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .group-subtitle {
+            color: #475569;
+            /* Slightly darker subtitle color */
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .badge {
+            background-color: #e0f2fe;
+            /* Lighter blue background */
+            color: #1d4ed8;
+            /* Darker blue text */
+            padding: 0.3rem 0.85rem;
+            /* Slightly larger badge */
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .badge:hover {
+            background-color: #dbeafe;
+            transform: scale(1.05);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            /* Increased padding */
+            background-color: #ffffff;
+            /* Pure white background */
+        }
+
+        /* Module Card Enhancements */
+        .module-card {
+            background-color: #f9fafb;
+            /* Very light gray background */
+            border: 1px solid #e5e7eb;
+            /* Subtle border */
+            border-radius: 12px;
+            /* Slightly rounded corners */
+            padding: 1.5rem;
+            /* More padding */
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .module-card:hover::before {
+            opacity: 1;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.06);
+            border-color: #cbd5e1;
+        }
+
+        .status-badge {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .status-completed {
@@ -533,11 +660,31 @@
             margin-bottom: 1.5rem;
         }
 
-        /* Responsive Adjustments */
-        @media (max-width: 1024px) {
+        .modules-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .modules-grid {
+                grid-template-columns: 1fr;
+                /* Single column by default */
+            }
+        }
+
+        @media (min-width: 1024px) {
             .modules-grid {
                 grid-template-columns: repeat(2, 1fr);
+                /* Two columns on large screens */
+                gap: 1.5rem;
+                /* Increased gap between columns */
             }
+        }
+
+        .module-card {
+            width: 100%;
+            /* Ensure full width within grid cell */
+            max-width: 100%;
         }
 
         @media (max-width: 768px) {
@@ -584,226 +731,101 @@
             outline-offset: 2px;
         }
     </style>
-    
-</head>
 
-<body>
-    <div id="wrapper">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2 class="user-role" style="color: white; font-size: 1.5rem; font-weight: bold;">{{ ucfirst(auth()->user()->role) }}</h2>
-            </div>
-            
-            <div class="user-info">
-                <div class="avatar">
-                    <span>{{ substr(auth()->user()->name ?? 'U', 0, 1) }}</span>
-                </div>
-                <div class="user-details">
-                    <span class="user-name">{{ auth()->user()->name ?? 'User Name' }}</span>
-                    <span class="user-email">{{ auth()->user()->email ?? 'email@example.com' }}</span>
-                </div>
-            </div>
-            
-            <div class="sidebar-divider"></div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="/profile" class="nav-link">
-                        <i class="fas fa-user-circle"></i>
-                        <span>Profile</span>
-                    </a>
-                </li>
-                <li class="nav-item active">
-                    <a href="/formateur_dashboard" class="nav-link">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/formateur_calendar" class="nav-link">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Calendrier</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <form action="{{ route('logout') }}" method="post">
-                        @csrf
-                        <button type="submit" class="nav-link">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Logout</span>
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </aside>
 
-        <!-- Topbar -->
-        <header class="topbar" id="topbar">
-            <button id="menuToggle" class="menu-toggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div></div>
-            <div class="user-dropdown">
-                <div id="userDropdownToggle" class="dropdown-toggle">
-                    <span class="user-name-display">{{ auth()->user()->name }}</span>
-                    <div class="user-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Content -->
-        <div class="content-wrapper" id="contentWrapper">
-            <main>
-                <div class="header">
-                    <h2 class="page-title">Your Groups</h2>
-                </div>
-                
-                <div class="groups-container">
-                    @if ($groups->isEmpty())
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <h3 class="empty-title">No groups assigned yet</h3>
-                            <p class="empty-text">You currently don't have any groups assigned to you.</p>
-                            <button class="export-btn">Request Group Assignment</button>
-                        </div>
-                    @else
-                        @foreach ($groups as $group)
-                            <div class="group-card">
-                                <div class="card-header">
-                                    <div class="group-header">
-                                        <div>
-                                            <h3 class="group-title">{{ $group['name'] }}</h3>
-                                            <p class="group-subtitle">{{ $group['fillier'] }} - {{ $group['niveau'] }}</p>
-                                        </div>
-                                        <div class="group-meta">
-                                            <span class="badge">{{ count($group['modules']) }} Modules</span>
-                                            <button class="options-btn">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="card-body">
-                                    <div class="modules-grid">
-                                        @foreach ($group['modules'] as $module)
-                                            <div class="module-card">
-                                                <div class="module-header">
-                                                    <div>
-                                                        <h4 class="module-title">{{ $module['name'] }}</h4>
-                                                        <p class="module-code">Code: {{ $module['code'] }}</p>
-                                                    </div>
-                                                    <span class="status-badge 
-                                                        {{ $module['completed_hours'] >= $module['total_hours']
-                                                            ? 'status-completed'
-                                                            : ($module['completed_hours'] > 0
-                                                                ? 'status-in-progress'
-                                                                : 'status-not-started') }}">
-                                                        {{ $module['completed_hours'] >= $module['total_hours']
-                                                            ? 'Completed'
-                                                            : ($module['completed_hours'] > 0
-                                                                ? 'In Progress'
-                                                                : 'Not Started') }}
-                                                    </span>
-                                                </div>
-                                                
-                                                <div class="module-stats">
-                                                    <div class="stat-item">
-                                                        <p class="stat-label">Total Hours</p>
-                                                        <p class="stat-value">{{ $module['total_hours'] }}</p>
-                                                    </div>
-                                                    <div class="stat-item">
-                                                        <p class="stat-label">Completed</p>
-                                                        <p class="stat-value">{{ $module['completed_hours'] }}</p>
-                                                    </div>
-                                                    <div class="stat-item">
-                                                        <p class="stat-label">Exam Date</p>
-                                                        <p class="stat-value">{{ $module['exam_date'] ?? 'Not set' }}</p>
-                                                    </div>
-                                                    <div class="stat-item">
-                                                        <p class="stat-label">Progress</p>
-                                                        <p class="stat-value">{{ number_format(($module['completed_hours'] / $module['total_hours']) * 100, 1) }}%</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="progress-container">
-                                                    <span class="progress-label">Progress Totale</span>
-                                                    <span class="progress-percentage">{{ number_format(($module['completed_hours'] / $module['total_hours']) * 100, 1) }}%</span>
-                                                    <progress value="{{ $module['completed_hours'] }}" max="{{ $module['total_hours'] }}"></progress>
-                                                    <p class="progress-text">{{ $module['completed_hours'] }}h/{{ $module['total_hours'] }}h</p>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    @endif
-                </div>
-            </main>
+    <main>
+        <div class="header">
+            <h2 class="page-title">Vos Groupes</h2>
         </div>
-    </div>
 
-    <script>
-        // Sidebar toggle functionality
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        const topbar = document.getElementById('topbar');
-        const contentWrapper = document.getElementById('contentWrapper');
-        
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('mobile-open');
-        });
-        
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768 && 
-                !sidebar.contains(e.target) && 
-                !menuToggle.contains(e.target) &&
-                sidebar.classList.contains('mobile-open')) {
-                sidebar.classList.remove('mobile-open');
-            }
-        });
-        
-        // User dropdown toggle
-        const userDropdownToggle = document.getElementById('userDropdownToggle');
-        const userDropdownMenu = document.getElementById('userDropdownMenu');
-        
-        userDropdownToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            userDropdownMenu.classList.toggle('show');
-        });
-        
-        // Close dropdown when clicking elsewhere
-        document.addEventListener('click', () => {
-            if (userDropdownMenu.classList.contains('show')) {
-                userDropdownMenu.classList.remove('show');
-            }
-        });
-        
-        // Prevent closing when clicking inside dropdown
-        userDropdownMenu.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('mobile-open');
-            }
-        });
-        
-        // Export functionality
-        document.getElementById('exportBtn').addEventListener('click', function() {
-            // This would typically call a backend route to generate the Excel file
-            alert('Exporting progress data as Excel file...');
-            // Example: window.location.href = '/export-progress';
-        });
-    </script>
-</body>
-</html>
+        <div class="groups-container">
+            @if ($groups->isEmpty())
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="empty-title">Aucun groupe assigné pour le moment</h3>
+                    <p class="empty-text">Vous n'avez actuellement aucun groupe assigné.</p>
+                    <button class="export-btn">Demander une assignation de groupe</button>
+                </div>
+            @else
+                @foreach ($groups as $group)
+                    <div class="group-card">
+                        <div class="card-header">
+                            <div class="group-header">
+                                <div>
+                                    <h3 class="group-title">{{ $group['name'] }}</h3>
+                                    <p class="group-subtitle">{{ $group['fillier'] }} - {{ $group['niveau'] }}</p>
+                                </div>
+                                <div class="group-meta">
+                                    <span class="badge">{{ count($group['modules']) }} Modules</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="modules-grid">
+                                @foreach ($group['modules'] as $module)
+                                    <div class="module-card">
+                                        <div class="module-header">
+                                            <div>
+                                                <h4 class="module-title">{{ $module['name'] }}</h4>
+                                                <p class="module-code">Code : {{ $module['code'] }}</p>
+                                            </div>
+                                            <span
+                                                class="status-badge 
+                                            {{ $module['completed_hours'] >= $module['total_hours']
+                                                ? 'status-completed'
+                                                : ($module['completed_hours'] > 0
+                                                    ? 'status-in-progress'
+                                                    : 'status-not-started') }}">
+                                                {{ $module['completed_hours'] >= $module['total_hours']
+                                                    ? 'Terminé'
+                                                    : ($module['completed_hours'] > 0
+                                                        ? 'En cours'
+                                                        : 'Non commencé') }}
+                                            </span>
+                                        </div>
+
+                                        <div class="module-stats">
+                                            <div class="stat-item">
+                                                <p class="stat-label">Heures totales</p>
+                                                <p class="stat-value">{{ $module['total_hours'] }}</p>
+                                            </div>
+                                            <div class="stat-item">
+                                                <p class="stat-label">Complété</p>
+                                                <p class="stat-value">{{ $module['completed_hours'] }}</p>
+                                            </div>
+                                            <div class="stat-item">
+                                                <p class="stat-label">Date d'examen</p>
+                                                <p class="stat-value">{{ $module['exam_date'] ?? 'Non définie' }}</p>
+                                            </div>
+                                            <div class="stat-item">
+                                                <p class="stat-label">Progression</p>
+                                                <p class="stat-value">
+                                                    {{ number_format(($module['completed_hours'] / $module['total_hours']) * 100, 1) }}%
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="progress-container">
+                                            <span class="progress-label">Progression totale</span>
+                                            <span
+                                                class="progress-percentage">{{ number_format(($module['completed_hours'] / $module['total_hours']) * 100, 1) }}%</span>
+                                            <progress value="{{ $module['completed_hours'] }}"
+                                                max="{{ $module['total_hours'] }}"></progress>
+                                            <p class="progress-text">
+                                                {{ $module['completed_hours'] }}h/{{ $module['total_hours'] }}h</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+        </div>
+    </main>
+
+
+</x-bar>

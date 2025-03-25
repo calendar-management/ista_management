@@ -296,7 +296,7 @@ class FormateurController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|max:255',
+            'email' => 'required|string|max:255|unique:users,email',
         ]);
 
         $formateur = User::findOrFail($id);
@@ -379,7 +379,7 @@ class FormateurController extends Controller
                 'completed_hours' => $completedHours,
                 'remaining_hours' => $progress->remaining_hours,
                 'completion_percentage' => $completionPercentage,
-                'start_date' => $progress->module_start_date ? Carbon::parse($progress->module_start_date)->format('d/m/Y') : 'Non défini',
+                'start_date' => $progress->module_start_date==='1970-01-01'? 'Non défini' : $progress->module_start_date,
                 'exam_date' => $examDate ? $examDate->format('d/m/Y') : 'Non défini',
                 'weekly_hours' => $progress->weekly_hours,
                 'remaining_weeks' => $remainingWeeks,

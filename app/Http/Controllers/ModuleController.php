@@ -36,15 +36,11 @@ class ModuleController extends Controller
         $hoursCompleted = $request->hoursCompleted;
         $status = $request->status ?? 'completed';
 
-        // Verify the teaching belongs to the authenticated user
         $teaching = Teaching::where('id_teaching', $teachingId)
             ->where('id_user', Auth::id())
             ->firstOrFail();
 
-        // Get the total hours for this module
-        $totalModuleHours = $teaching->hours; // Assuming 'hours' is the field storing total hours
-
-        // Find or create progress record
+        $totalModuleHours = $teaching->hours;
         $progress = Progress::firstOrCreate(
             ['id_teaching' => $teachingId],
             [
@@ -53,16 +49,13 @@ class ModuleController extends Controller
             ]
         );
 
-        // Decode the hours_affected JSON
         $hoursAffected = json_decode($progress->hours_affected, true) ?: [];
 
-        // Calculate current total excluding the week we're updating
         $currentTotal = array_sum($hoursAffected);
         if (isset($hoursAffected[$weekIndex])) {
             $currentTotal -= $hoursAffected[$weekIndex];
         }
 
-        // Check if the new hours would exceed total module hours
         if ($currentTotal + $hoursCompleted > $totalModuleHours) {
             return response()->json([
                 'success' => false,
@@ -352,7 +345,7 @@ class ModuleController extends Controller
 
         // Ensure dates are Carbon instances before formatting
         $moduleStartDate = $progress && $progress->module_start_date ? \Carbon\Carbon::parse($progress->module_start_date) : null;
-        $finalExamDate = $progress && $progress->exam_date ? \Carbon\Carbon::parse($progress->exam_date) : null;
+        $finalExamDate = $progress && $progress->final_exam_date ? \Carbon\Carbon::parse($progress->final_exam_date) : null;
 
         return [
             'id' => $teaching->id_teaching,

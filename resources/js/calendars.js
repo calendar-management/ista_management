@@ -34,15 +34,8 @@ $(document).ready(function() {
         }
         
         // Fetch module data from the database (mock)
-        // Fetch module data from the database
         fetchModules() {
-            // Check if data is defined
-            if (typeof data !== 'undefined') {
-                return data;
-            } else {
-                console.warn("Module data not found. Using empty array.");
-                return [];
-            }
+            return data;
         }
         // Add this method after fetchModules()
         fetchHolidays() {
@@ -75,43 +68,18 @@ $(document).ready(function() {
         
         // Prepare module data for database
         prepareModulesForDatabase() {
-            return this.modules.map(module => {
-                // Create a copy of the module data
-                const moduleData = {
-                    moduleId: module.id,
-                    moduleName: module.name,
-                    startDate: this.formatDate(module.startDate),
-                    examDate: module.examDate ? this.formatDate(new Date(module.examDate)) : null,
-                    completedHours: module.completedHours,
-                    weeklyProgress: module.weeklyProgress,
-                    totalHours: module.totalHours,
-                    weeklyHours: module.weeklyHours,
-                    remainingHours: module.totalHours - module.completedHours,
-                    customSessionDates: module.customSessionDates
-                };
-                
-                // Add the exam date as the last session if it exists
-                if (module.examDate) {
-                    const weeksNeeded = Math.ceil(module.totalHours / module.weeklyHours);
-                    const lastSessionIndex = weeksNeeded;
-                    
-                    // Ensure customSessionDates array exists
-                    if (!moduleData.customSessionDates) {
-                        moduleData.customSessionDates = [];
-                    }
-                    
-                    // Make sure the array is long enough
-                    while (moduleData.customSessionDates.length <= lastSessionIndex) {
-                        moduleData.customSessionDates.push(null);
-                    }
-                    
-                    // Set the exam date as the last session
-                    moduleData.customSessionDates[lastSessionIndex] = module.examDate;
-                    moduleData.finalExamDate = module.examDate;
-                }
-                
-                return moduleData;
-            });
+            return this.modules.map(module => ({
+                moduleId: module.id,
+                moduleName: module.name,
+                startDate: this.formatDate(module.startDate),
+                examDate: module.examDate ? this.formatDate(new Date(module.examDate)) : null,
+                completedHours: module.completedHours,
+                weeklyProgress: module.weeklyProgress,
+                totalHours: module.totalHours,
+                weeklyHours: module.weeklyHours,
+                remainingHours: module.totalHours - module.completedHours,
+                customSessionDates: module.customSessionDates
+            }));
         }
         
         // Update weekly progress for a module
@@ -166,60 +134,59 @@ $(document).ready(function() {
                     </div>
                 </div>
                 <div class="mt-3">
-                    <strong>Date de début :</strong> ${this.formatDate(new Date(module.startDate), 'display')}<br>
-                    ${module.examDate ? `<strong>Date d'examen :</strong> ${this.formatDate(new Date(module.examDate), 'display')}` : ''}
+                    <strong>Start Date:</strong> ${this.formatDate(new Date(module.startDate), 'display')}<br>
+                    ${module.examDate ? `<strong>Exam Date:</strong> ${this.formatDate(new Date(module.examDate), 'display')}` : ''}
                 </div>
             `);
         }
         
         // Update progress for all modules
-            updateAllModulesProgress() {
-                let html = `
-                    <div class="card mt-4 mb-4">
-                        <div class="card-header">
-                            <h4>Progression de tous les modules</h4>
-                        </div>
-                        <div class="card-body">
-                `;
-                
-                this.modules.forEach(module => {
-                    const cappedCompletedHours = Math.min(module.completedHours, module.totalHours);
-                    const remainingHours = Math.max(module.totalHours - cappedCompletedHours, 0);
-                    const progressPercentage = Math.min((cappedCompletedHours / module.totalHours * 100).toFixed(1), 100);
-                    
-                    html += `
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <h5>${module.name}</h5>
-                                <span>${cappedCompletedHours}/${module.totalHours} heures (${remainingHours} restantes)</span>
-                            </div>
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar bg-success" role="progressbar"
-                                    style="width: ${progressPercentage}%;"
-                                    aria-valuenow="${cappedCompletedHours}"
-                                    aria-valuemin="0"
-                                    aria-valuemax="${module.totalHours}">
-                                    ${progressPercentage}%
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
+        updateAllModulesProgress() {
+            let html = `
+                <div class="card mt-4 mb-4">
+                    <div class="card-header">
+                        <h4>All Modules Progress</h4>
+                    </div>
+                    <div class="card-body">
+            `;
+            
+            this.modules.forEach(module => {
+                const progressPercentage = (module.completedHours / module.totalHours * 100).toFixed(1);
+                const remainingHours = module.totalHours - module.completedHours;
                 
                 html += `
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <h5>${module.name}</h5>
+                            <span>${module.completedHours}/${module.totalHours} hours (${remainingHours} remaining)</span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                style="width: ${progressPercentage}%;"
+                                aria-valuenow="${module.completedHours}"
+                                aria-valuemin="0"
+                                aria-valuemax="${module.totalHours}">
+                                ${progressPercentage}%
+                            </div>
                         </div>
                     </div>
                 `;
-                
-                // Create the container if it doesn't exist
-                if ($('#allModulesProgressContainer').length === 0) {
-                    $('<div id="allModulesProgressContainer"></div>').insertAfter('#weeklyUpdateContainer');
-                }
-                
-                $('#allModulesProgressContainer').html(html);
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            // Create the container if it doesn't exist
+            if ($('#allModulesProgressContainer').length === 0) {
+                $('<div id="allModulesProgressContainer"></div>').insertAfter('#weeklyUpdateContainer');
             }
+            
+            $('#allModulesProgressContainer').html(html);
+        }
         
-        // Get week dates for a module, maintaining original weekday after holidays
+        // Get week dates for a module
         getWeekDates(moduleId, numberOfWeeks) {
             const module = this.modules.find(m => m.id === moduleId);
             if (!module) return [];
@@ -227,70 +194,46 @@ $(document).ready(function() {
             const startDate = new Date(module.startDate);
             startDate.setHours(12, 0, 0, 0);
             
-            // Get the original weekday (0-6, where 0 is Sunday)
-            const originalWeekday = startDate.getDay();
-            
-            const weekDates = [];
-            let currentDate = new Date(startDate);
-            
-            for (let i = 0; i < numberOfWeeks; i++) {
+            return Array.from({ length: numberOfWeeks }, (_, i) => {
                 // Check if this week has a custom date
                 if (module.customSessionDates && module.customSessionDates[i]) {
-                    weekDates.push(new Date(module.customSessionDates[i]));
+                    return new Date(module.customSessionDates[i]);
                 } else {
-                    // For the first week, use the start date
-                    if (i === 0) {
-                        weekDates.push(new Date(currentDate));
-                        continue;
-                    }
-                    
-                    // For subsequent weeks, add 7 days to the previous date
-                    currentDate = new Date(weekDates[i-1]);
-                    currentDate.setDate(currentDate.getDate() + 7);
-                    
-                    // Check if this date falls on a holiday
-                    if (this.isHolidayDate(currentDate)) {
-                        // Find the next available date with the same weekday
-                        while (this.isHolidayDate(currentDate)) {
-                            // Move to the next week
-                            currentDate.setDate(currentDate.getDate() + 7);
-                        }
-                    }
-                    
-                    weekDates.push(new Date(currentDate));
+                    // Otherwise use calculated date
+                    const weekDate = new Date(startDate);
+                    weekDate.setDate(startDate.getDate() + (i * 7));
+                    return weekDate;
                 }
-            }
-            
-            return weekDates;
-        }   
+            });
+        }
         
         // Create a form for updating weekly hours
         createWeeklyUpdateForm() {
             $('#weeklyUpdateContainer').html(`
                 <div class="weekly-update-form p-3 border rounded">
-                    <h4>Mettre à jour les heures hebdomadaires</h4>
+                    <h4>Update Weekly Hours</h4>
                     <div class="form-group">
-                        <label for="moduleSelect">Sélectionner un module :</label>
+                        <label for="moduleSelect">Select Module:</label>
                         <select id="moduleSelect" class="form-control">
                             ${this.modules.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="weekSelect">Numéro de semaine :</label>
+                        <label for="weekSelect">Week Number:</label>
                         <select id="weekSelect" class="form-control">
                             <!-- Will be dynamically populated -->
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="hoursCompleted">Heures effectuées :</label>
+                        <label for="hoursCompleted">Hours Completed:</label>
                         <input type="number" id="hoursCompleted" class="form-control" min="0" max="40" step="0.5">
                     </div>
                     <div class="form-row">
                         <div class="col">
-                            <button id="updateProgressBtn" class="btn btn-primary btn-block">Enregistrer les heures</button>
+                            <button id="updateProgressBtn" class="btn btn-primary btn-block">Save Hours</button>
                         </div>
                         <div class="col">
-                            <button id="markAbsentBtn" class="btn btn-warning btn-block">Marquer comme 0 (Absent)</button>
+                            <button id="markAbsentBtn" class="btn btn-warning btn-block">Mark as 0 (Absent)</button>
                         </div>
                     </div>
                     <div id="updateStatus" class="mt-2"></div>
@@ -340,12 +283,12 @@ $(document).ready(function() {
                 if (result) {
                     $('#updateStatus').html(`
                         <div class="alert alert-success">
-                            <strong>Succès !</strong> La semaine ${weekIndex+1} a été mise à jour avec ${hoursCompleted} heures.
-                            <br><small>Souvenez-vous de cliquer sur "Enregistrer toutes les modifications" pour sauvegarder.</small>
+                            <strong>Success!</strong> Week ${weekIndex+1} updated with ${hoursCompleted} hours.
+                            <br><small>Remember to click "Save All Changes" to save to database.</small>
                         </div>
                     `);
                 } else {
-                    $('#updateStatus').html('<div class="alert alert-danger">Échec de la mise à jour de la progression</div>');
+                    $('#updateStatus').html('<div class="alert alert-danger">Failed to update progress</div>');
                 }
             });
             
@@ -387,7 +330,7 @@ $(document).ready(function() {
                             display: flex;
                             flex-diraction: column;
                         }
-                        .save-notification { margin-bottom: 10px; }
+                        .save-notification { margin-bottom: 0; }
                         .fc-event.module-start {color: #000000; background-color: #ffff; border-color: #007bff; }
                         .fc-event.module-exam {color: #000000; background-color: #dc3545; border-color: #dc3545; }
                         .fc-event.progress {color: #000000; background-color: #28a745; border-color: #28a745; }
@@ -438,7 +381,7 @@ $(document).ready(function() {
                 // Module start event
                 events.push({
                     id: 'start_' + module.id,
-                    title: `${module.name} - Starts`,
+                    title: module.name + ' - Starts',
                     start: startDate,
                     allDay: true,
                     className: 'module-start',
@@ -561,7 +504,7 @@ $(document).ready(function() {
         showSaveSuccess() {
             const notification = $(`
                 <div class="alert alert-success save-notification" role="alert">
-                    <strong>Succès !</strong>Modifications enregistrées.
+                    <strong>Success!</strong> All changes saved to database.
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -577,7 +520,7 @@ $(document).ready(function() {
         showSaveError(error) {
             const notification = $(`
                 <div class="alert alert-danger save-notification" role="alert">
-                    <strong>Erreur !</strong> Échec de l'enregistrement les modifications. Veuillez réessayer.
+                    <strong>Error!</strong> Failed to save changes to database. Please try again.
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -598,7 +541,7 @@ $(document).ready(function() {
                 if ($('#unsavedChangesAlert').length === 0) {
                     $('#saveNotificationArea').append(`
                         <div class="alert alert-warning" id="unsavedChangesAlert" role="alert">
-                            <strong>Modifications non enregistrées !</strong> 
+                            <strong>Unsaved Changes!</strong> Click "Save All Changes" to save your changes to the database.
                         </div>
                     `);
                 }
@@ -612,7 +555,7 @@ $(document).ready(function() {
         updateModuleDate(moduleId, dateType, newDate) {
             // First check if the new date falls on a holiday
             if (this.isHolidayDate(newDate)) {
-                alert("Vous ne pouvez pas planifier d'événements pendant les périodes de congé.");
+                alert("You cannot schedule events during holiday periods.");
                 return false;
             }
             
@@ -624,10 +567,6 @@ $(document).ready(function() {
                 const weeklyHours = this.modules[moduleIndex].weeklyHours;
                 return this.updateModuleStartDate(moduleId, newDate, weeklyHours);
             } else if (dateType === 'module-exam') {
-                // Add validation for exam date
-                if (!this.validateExamDate(moduleId)) {
-                    return false;
-                }
                 this.modules[moduleIndex].examDate = this.formatDate(newDate);
             }
             
@@ -663,23 +602,6 @@ $(document).ready(function() {
             return true;
         }
         
-
-        validateExamDate(moduleId) {
-            const module = this.modules.find(m => m.id === moduleId);
-            if (!module) return false;
-            
-            // Calculate completion percentage
-            const completionPercentage = (module.completedHours / module.totalHours) * 100;
-            
-            // Check if completion is at least 95%
-            if (completionPercentage < 95) {
-                alert(`Vous ne pouvez pas programmer un examen avant d'avoir terminé au moins 95% du module. Progression actuelle: ${completionPercentage.toFixed(1)}%`);
-                return false;
-            }
-            
-            return true;
-        }
-
         // Update progress session date
         updateProgressSessionDate(moduleId, weekIndex, newDate) {
             // First check if the new date falls on a holiday
@@ -697,6 +619,7 @@ $(document).ready(function() {
                 return false;
             }
             
+            // Rest of the existing method...
             // Create the customSessionDates array if needed
             if (!this.modules[moduleIndex].customSessionDates) {
                 this.modules[moduleIndex].customSessionDates = [];
@@ -707,15 +630,14 @@ $(document).ready(function() {
                 this.modules[moduleIndex].customSessionDates.push(null);
             }
             
-            // Update only the specific week's custom date
+            // Update the specific week's custom date
             this.modules[moduleIndex].customSessionDates[weekIndex] = this.formatDate(newDate);
             
-            // Only refresh calendar without re-calculating all sessions
-            this.updateCalendar();
+            this.refreshUI();
             
             // Update week selector if this is the current module
             if (parseInt($('#moduleSelect').val()) === moduleId) {
-                this.updateWeekSelectOptions(moduleId);
+                $('#moduleSelect').trigger('change');
             }
             
             this.setUnsavedChanges(true);
@@ -724,7 +646,7 @@ $(document).ready(function() {
         
         // Create the dialog for adding events
         createAddEventDialog() {
-            const self = this;  
+            const self = this;
             
             if ($('#addEventModal').length === 0) {
                 $('body').append(`
@@ -732,17 +654,17 @@ $(document).ready(function() {
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title">Ajouter un événement</h5>
+                                    <h5 class="modal-title">Add Event</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="form-group">
-                                        <label for="eventTypeSelect">Type d'événement :</label>
+                                        <label for="eventTypeSelect">Event Type:</label>
                                         <select id="eventTypeSelect" class="form-control">
-                                            <option value="module-start">Début du module</option>
-                                            <option value="module-exam">Examen du module</option>
+                                            <option value="module-start">Module Start</option>
+                                            <option value="module-exam">Module Exam</option>
                                             <option value="session">Session</option>
                                         </select>
                                     </div>
@@ -753,11 +675,11 @@ $(document).ready(function() {
                                         </select>
                                     </div>
                                     <div class="form-group" id="weeklyHoursGroup" style="display: none;">
-                                        <label for="weeklyHoursInput">Heures hebdomadaires :</label>
+                                        <label for="weeklyHoursInput">Weekly Hours:</label>
                                         <input type="number" id="weeklyHoursInput" class="form-control" min="1" max="40" step="0.5">
                                     </div>
                                     <div class="form-group" id="weekNumberGroup" style="display: none;">
-                                        <label for="eventWeekSelect">Numéro de semaine :</label>
+                                        <label for="eventWeekSelect">Week Number:</label>
                                         <select id="eventWeekSelect" class="form-control">
                                             <!-- Will be populated dynamically -->
                                         </select>
@@ -768,8 +690,8 @@ $(document).ready(function() {
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                                    <button type="button" class="btn btn-primary" id="saveEventBtn">Enregistrer</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="saveEventBtn">Save</button>
                                 </div>
                             </div>
                         </div>
@@ -827,7 +749,7 @@ $(document).ready(function() {
                     const eventType = $('#eventTypeSelect').val();
                     const eventDate = new Date($('#eventDate').val());
                     let updated = false;
-                
+                    
                     if (eventType === 'module-start') {
                         // Get the weekly hours value
                         const weeklyHours = parseFloat($('#weeklyHoursInput').val());
@@ -836,18 +758,9 @@ $(document).ready(function() {
                         const weekIndex = parseInt($('#eventWeekSelect').val());
                         updated = self.updateProgressSessionDate(moduleId, weekIndex, eventDate);
                     } else if (eventType === 'module-exam') {
-                        // Add validation for exam date
-                        const module = self.modules.find(m => m.id === moduleId);
-                        if (module) {
-                            const completionPercentage = (module.completedHours / module.totalHours) * 100;
-                            if (completionPercentage < 95) {
-                                alert(`Vous ne pouvez pas programmer un examen avant d'avoir terminé au moins 95% du module. Progression actuelle: ${completionPercentage.toFixed(1)}%`);
-                                return;
-                            }
-                        }
                         updated = self.updateModuleDate(moduleId, eventType, eventDate);
                     }
-                
+                    
                     if (updated) {
                         $('#addEventModal').modal('hide');
                         self.setUnsavedChanges(true);
@@ -874,9 +787,6 @@ $(document).ready(function() {
             if (!isNaN(weeklyHours) && weeklyHours > 0) {
                 this.modules[moduleIndex].weeklyHours = weeklyHours;
             }
-            
-            // Clear custom session dates so they'll be recalculated based on new start date
-            this.modules[moduleIndex].customSessionDates = [];
             
             this.refreshUI(moduleId);
             
@@ -916,10 +826,10 @@ $(document).ready(function() {
             $(`
                 <div class="mt-4 card mb-4" id="saveChangesCard">
                     <div class="card-body">
-                        <div class="d-flex flex-column align-items-center">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div id="saveNotificationArea"></div>
                             <button id="saveAllChangesBtn" class="btn btn-outline-primary" disabled>
-                                <i class="fas fa-save mr-1"></i> Enregistrer toutes les modifications
+                                <i class="fas fa-save mr-1"></i> Save All Changes
                             </button>
                             
                         </div>
@@ -946,7 +856,7 @@ $(document).ready(function() {
             
             $(window).on('beforeunload', function() {
                 if (self.hasUnsavedChanges) {
-                    return "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter sans enregistrer ?";
+                    return "You have unsaved changes. Are you sure you want to leave without saving?";
                 }
             });
         }
@@ -974,7 +884,7 @@ $(document).ready(function() {
                     
                     // Prevent adding events on holiday dates
                     if (isHoliday) {
-                        alert("Vous ne pouvez pas planifier d'événements pendant les périodes de congé.");
+                        alert("You cannot schedule events during holiday periods.");
                         return;
                     } else {
                         $('#eventDate').val(self.formatDate(start));
@@ -1006,15 +916,9 @@ $(document).ready(function() {
                     
                     let updated = false;
                     
-                    if (event.type === 'module-start') {
-                        // Module start events affect all related sessions
-                        updated = self.updateModuleStartDate(event.moduleId, event.start, 
-                                                           self.modules.find(m => m.id === event.moduleId).weeklyHours);
-                    } else if (event.type === 'module-exam') {
-                        // Exam date events move independently
+                    if (event.type === 'module-start' || event.type === 'module-exam') {
                         updated = self.updateModuleDate(event.moduleId, event.type, event.start);
                     } else if (event.type === 'week') {
-                        // Week sessions move independently
                         updated = self.updateProgressSessionDate(event.moduleId, event.weekIndex, event.start);
                     }
                     
@@ -1037,7 +941,7 @@ $(document).ready(function() {
                     } else if (calEvent.type === 'module-exam') {
                         // Show confirmation dialog for exam deletion
                         const moduleName = self.modules.find(m => m.id === calEvent.moduleId)?.name || 'this module';
-                        if (confirm("Êtes-vous sûr de vouloir supprimer la date d'examen pour ${moduleName} ?")) {
+                        if (confirm(`Are you sure you want to delete the exam date for ${moduleName}?`)) {
                             const deleted = self.deleteExamDate(calEvent.moduleId);
                             if (deleted) {
                                 self.setUnsavedChanges(true);

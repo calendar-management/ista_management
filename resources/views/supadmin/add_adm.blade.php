@@ -1,6 +1,8 @@
-@extends("supadmin.bar")
-
-@section("main")
+<x-bar :navlinks="[
+    ['label'=>'Gestion Admins','route'=>'gestion_adm','class'=>'','icon'=>'fas fa-users'],
+    ['label'=>'Dashboard','route'=>'dashboard','class'=>'','icon'=>'fas fa-chart-bar'],
+    ['label'=>'Ajouter Admin','route'=>'add_admin','class'=>'active','icon'=>'fas fa-user-plus'],
+]">
     <div class="container">
         <h1 class="text-success my-3">Ajouter Nouveau Administrateur:</h1>
 
@@ -33,4 +35,4 @@
             </form>
         </div>
     </div>
-@endsection
+</x-bar>
