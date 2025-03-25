@@ -16,3 +16,5 @@
 # /.fleet
 # /.idea
 # /.vscode
+
+! public/AvancementProgramme_exemple.xlsx
