@@ -7,7 +7,7 @@
         <h1 class="text-success my-3">Ajouter Nouveau Administrateur:</h1>
 
         <div class="card shadow p-4 mt-5">
-            <form action="{{ route('add_admin') }}" method="POST">
+            <form action="{{ url('add_admin') }}" method="POST">
                 @csrf
                 <div class="mb-3">
                     <label for="name" class="form-label">Nom</label>
