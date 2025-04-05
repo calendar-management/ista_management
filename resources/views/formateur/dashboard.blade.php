@@ -746,7 +746,6 @@
                     </div>
                     <h3 class="empty-title">Aucun groupe assigné pour le moment</h3>
                     <p class="empty-text">Vous n'avez actuellement aucun groupe assigné.</p>
-                    <button class="export-btn">Demander une assignation de groupe</button>
                 </div>
             @else
                 @foreach ($groups as $group)
