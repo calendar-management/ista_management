@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-20a47b95.css",
+    "file": "assets/app-6a8b3d22.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -8,5 +8,15 @@
     "file": "assets/app-a750c50a.js",
     "isEntry": true,
     "src": "resources/js/app.js"
+  },
+  "resources/js/calendar.js": {
+    "file": "assets/calendar-31715d78.js",
+    "isEntry": true,
+    "src": "resources/js/calendar.js"
+  },
+  "resources/js/vacances.js": {
+    "file": "assets/vacances-8ed77172.js",
+    "isEntry": true,
+    "src": "resources/js/vacances.js"
   }
 }
