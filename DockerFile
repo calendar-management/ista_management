@@ -18,7 +18,7 @@ RUN composer install --no-dev --optimize-autoloader
 # Install Node.js dependencies and build assets
 RUN npm install && npm run build
 
-# Laravel setup
+# Laravel setup (run any additional setup like caches)
 RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
@@ -28,7 +28,7 @@ RUN php artisan config:cache && \
 # Final image: clean runtime
 FROM php:8.1-cli-alpine
 
-# Needed PHP extensions
+# Install PHP extensions needed for Laravel
 RUN apk add --no-cache \
     php-mbstring php-xml php-bcmath php-curl php-mysqli php-pdo_mysql php-tokenizer bash
 
@@ -37,8 +37,8 @@ WORKDIR /app
 # Copy from build image
 COPY --from=build /app /app
 
-# Expose port
+# Expose port for the application
 EXPOSE 8000
 
-# Start Laravel app
+# Start Laravel app (serve from /public folder)
 CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
