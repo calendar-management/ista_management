@@ -1,0 +1,1 @@
+<img src="<?php echo e(asset('assets/OFPPT_Logo.png')); ?>" alt="" style="width: 80px;margin-top:5px"><?php /**PATH C:\school\stage\calendar_ista\calendar_ista\ista_management\resources\views/components/application-logo.blade.php ENDPATH**/ ?>
