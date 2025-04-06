@@ -57,14 +57,41 @@ $(document).ready(function () {
         });
     }
 
+    // function updateDynamicField(eventType) {
+    //     var fieldHTML = '';
+    //     if (eventType === 'stage') {
+    //         fieldHTML = `
+    //             <label for="groupSelect">Select Group:</label>
+    //             <select id="groupSelect" name="groupSelect" class="form-control">
+    //                 ${groups.map(group => `<option value="${group.id}">${group.name}</option>`).join('')}
+    //             </select>
+    //         `;
+    //     } else if (eventType === 'regional') {
+    //         fieldHTML = `
+    //             <label for="filiereSelect">Select Filiere:</label>
+    //             <select id="filiereSelect" name="filiereSelect" class="form-control">
+    //                 ${filieres.map(filiere => `<option value="${filiere.id}">${filiere.name}</option>`).join('')}
+    //             </select>
+    //         `;
+    //     }
+    //     $('#dynamicField').html(fieldHTML);
+    // }
+
     function updateDynamicField(eventType) {
         var fieldHTML = '';
         if (eventType === 'stage') {
             fieldHTML = `
-                <label for="groupSelect">Select Group:</label>
-                <select id="groupSelect" name="groupSelect" class="form-control">
-                    ${groups.map(group => `<option value="${group.id}">${group.name}</option>`).join('')}
-                </select>
+                <div class="form-group">
+                    <label>Select Groups:</label>
+                    <div class="checkbox-container">
+                        ${groups.map(group => `
+                            <div class="form-check">
+                                <input type="checkbox" id="group_${group.id}" name="groupSelect[]" value="${group.id}" class="form-check-input">
+                                <label class="form-check-label" for="group_${group.id}">${group.name}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
             `;
         } else if (eventType === 'regional') {
             fieldHTML = `
@@ -76,7 +103,7 @@ $(document).ready(function () {
         }
         $('#dynamicField').html(fieldHTML);
     }
-
+    
     function updateCalendar() {
         $('#calendar').fullCalendar('removeEvents');
         var events = holidays.map((holiday) => {

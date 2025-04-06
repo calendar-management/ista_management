@@ -19,7 +19,7 @@ use Carbon\Carbon;
 
 class ModuleController extends Controller
 {
- 
+
 
     public function updateWeeklyProgress(Request $request)
     {
@@ -74,7 +74,7 @@ class ModuleController extends Controller
         return $this->getModuleDetails($teachingId);
     }
 
-    
+
 
     public function updateModuleDate(Request $request)
     {
@@ -103,7 +103,7 @@ class ModuleController extends Controller
         return $this->getModuleDetails($teachingId);
     }
 
- 
+
     public function updateProgressSessionDate(Request $request)
     {
         $request->validate([
@@ -143,7 +143,7 @@ class ModuleController extends Controller
         return $this->getModuleDetails($teachingId);
     }
 
-   
+
     public function updateSessionStatus(Request $request)
     {
         $request->validate([
@@ -204,7 +204,7 @@ class ModuleController extends Controller
                     ]
                 );
 
-            
+
 
                 if (!empty($module['customSessionDates'])) {
                     CustomSessionDate::where('id_progress', $progress->id_progress)->delete();
@@ -256,7 +256,7 @@ class ModuleController extends Controller
 
 
 
-    
+
     public function getModuleDetails($teachingId)
     {
         $teaching = Teaching::with(['module', 'progress.weeklyProgress'])
@@ -267,7 +267,7 @@ class ModuleController extends Controller
         return $this->formatModuleData($teaching);
     }
 
- 
+
     private function formatModuleData($teaching)
     {
         $progress = $teaching->progress;
@@ -283,7 +283,7 @@ class ModuleController extends Controller
             }
         }
 
-        $weeklyHours = $progress->weekly_hours ?? 5; 
+        $weeklyHours = $progress->weekly_hours ?? 5;
 
         $totalWeeks = ceil($teaching->module->hours / $weeklyHours);
 
@@ -294,7 +294,7 @@ class ModuleController extends Controller
 
         $customSessionDates = [];
         if ($progress) {
-            $customDates = $progress->customSessionDates; 
+            $customDates = $progress->customSessionDates;
             foreach ($customDates as $date) {
                 $customSessionDates[$date->week_index] = $date->session_date;
             }
@@ -316,20 +316,73 @@ class ModuleController extends Controller
             'customSessionDates' => $customSessionDates
         ];
     }
+    // private function formatHolidayData($holiday)
+    // {
+    //     return [
+    //         'id' => $holiday->id_vacance,
+    //         'name' => $holiday->description_vacance,
+    //         'startDate' => $holiday->date_debut,
+    //         'endDate' => $holiday->date_fin,
+    //     ];
+    // }
+
     private function formatHolidayData($holiday)
     {
+        $additionalInfo = '';
+        $affectedGroups = [];
+
+        if ($holiday->type === 'stage' && $holiday->group) {
+            $affectedGroups[] = $holiday->group->name;
+        } elseif ($holiday->type === 'regional' && $holiday->fillier) {
+            $additionalInfo = 'Fillière: ' . $holiday->fillier->name;
+        }
+
         return [
             'id' => $holiday->id_vacance,
             'name' => $holiday->description_vacance,
             'startDate' => $holiday->date_debut,
             'endDate' => $holiday->date_fin,
+            'type' => $holiday->type,
+            'additionalInfo' => $additionalInfo,
+            'affectedGroups' => $affectedGroups,
+            'id_group' => $holiday->id_group,
+            'id_fillier' => $holiday->id_fillier
         ];
     }
+
+    // private function getHolidaysForUser($userId)
+    // {
+    //     $userGroups = Teaching::where('id_user', $userId)
+    //         ->with('group.fillier') 
+    //         ->get();
+
+    //     $groupIds = $userGroups->pluck('group.id_group')->toArray();
+    //     $filliereIds = $userGroups->pluck('group.fillier.id_fillier')->unique()->toArray();
+
+    //     $globalHolidays = Vacance::where('type', 'vacance')->get();
+
+    //     $groupHolidays = Vacance::where('type', 'stage')
+    //         ->whereIn('id_group', $groupIds)
+    //         ->get();
+
+    //     $examHolidays = Vacance::where('type', 'regional')
+    //         ->whereIn('id_fillier', $filliereIds)
+    //         ->get();
+
+    //     $holidays = $globalHolidays->merge($groupHolidays)->merge($examHolidays);
+
+    //     $formattedHolidays = [];
+    //     foreach ($holidays as $holiday) {
+    //         $formattedHolidays[] = $this->formatHolidayData($holiday);
+    //     }
+
+    //     return $formattedHolidays;
+    // }
 
     private function getHolidaysForUser($userId)
     {
         $userGroups = Teaching::where('id_user', $userId)
-            ->with('group.fillier') 
+            ->with('group.fillier')
             ->get();
 
         $groupIds = $userGroups->pluck('group.id_group')->toArray();
@@ -339,10 +392,12 @@ class ModuleController extends Controller
 
         $groupHolidays = Vacance::where('type', 'stage')
             ->whereIn('id_group', $groupIds)
+            ->with('group') // Eager load the group relation
             ->get();
 
         $examHolidays = Vacance::where('type', 'regional')
             ->whereIn('id_fillier', $filliereIds)
+            ->with('fillier') // Eager load the fillier relation
             ->get();
 
         $holidays = $globalHolidays->merge($groupHolidays)->merge($examHolidays);
@@ -375,5 +430,74 @@ class ModuleController extends Controller
         $holidays = $this->getHolidaysForUser($userId);
 
         return view('formateur.calendar', compact('modules', 'holidays'));
+    }
+
+
+    public function addSessionDuringStage(Request $request)
+    {
+        $request->validate([
+            'moduleId' => 'required|integer',
+            'date' => 'required|date_format:Y-m-d',
+            'hoursCompleted' => 'required|numeric|min:0',
+        ]);
+
+        $teachingId = $request->moduleId;
+        $sessionDate = $request->date;
+        $hoursCompleted = $request->hoursCompleted;
+
+        $teaching = Teaching::where('id_teaching', $teachingId)
+            ->where('id_user', Auth::id())
+            ->firstOrFail();
+
+        // Check if the group is actually not on stage for this date
+        $groupOnStage = Vacance::where('type', 'stage')
+            ->where('id_group', $teaching->id_group)
+            ->whereDate('date_debut', '<=', $sessionDate)
+            ->whereDate('date_fin', '>=', $sessionDate)
+            ->exists();
+
+        if ($groupOnStage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This group is on stage for this date'
+            ], 422);
+        }
+
+        // Calculate the week index based on module start date
+        $progress = Progress::firstOrCreate(
+            ['id_teaching' => $teachingId],
+            ['hours_completed' => 0, 'hours_affected' => json_encode([])]
+        );
+
+        if (!$progress->module_start_date) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please set a module start date first'
+            ], 422);
+        }
+
+        $startDate = Carbon::parse($progress->module_start_date);
+        $sessionDateObj = Carbon::parse($sessionDate);
+        $weekIndex = $startDate->diffInWeeks($sessionDateObj);
+
+        // Add the session to the progress
+        $hoursAffected = json_decode($progress->hours_affected, true) ?: [];
+        $existingHours = isset($hoursAffected[$weekIndex]) ? $hoursAffected[$weekIndex] : 0;
+        $hoursAffected[$weekIndex] = $existingHours + $hoursCompleted;
+
+        $progress->hours_affected = json_encode($hoursAffected);
+        $progress->hours_completed = array_sum($hoursAffected);
+        $progress->save();
+
+        // Add custom session date
+        DB::table('custom_session_dates')->updateOrInsert(
+            [
+                'id_progress' => $progress->id_progress,
+                'week_index' => $weekIndex
+            ],
+            ['session_date' => $sessionDate]
+        );
+
+        return $this->getModuleDetails($teachingId);
     }
 }

@@ -1,15 +1,35 @@
 <x-bar :navlinks="[
-    ['label'=>'Gestion Formateurs','route'=>'gestion_formateur','class'=>'','icon'=>'fas fa-users'],
-    ['label'=>'Gestion Calendrier','route'=>'gestion_calendrier','class'=>'active','icon'=>'fas fa-calendar-alt'],
-    ['label'=>'Dashboard','route'=>'dashboard','class'=>'','icon'=>'fas fa-chart-bar'],
-    ['label'=>'Ajouter Formateur','route'=>'add_formateur','class'=>'','icon'=>'fas fa-user-plus'],
+    ['label' => 'Gestion Formateurs', 'route' => 'gestion_formateur', 'class' => '', 'icon' => 'fas fa-users'],
+    [
+        'label' => 'Gestion Calendrier',
+        'route' => 'gestion_calendrier',
+        'class' => 'active',
+        'icon' => 'fas fa-calendar-alt',
+    ],
+    ['label' => 'Dashboard', 'route' => 'dashboard', 'class' => '', 'icon' => 'fas fa-chart-bar'],
+    ['label' => 'Ajouter Formateur', 'route' => 'add_formateur', 'class' => '', 'icon' => 'fas fa-user-plus'],
 ]">
-@vite('resources/js/vacances.js')
-@if (session("ajouter_succ"))
-    <script>
-        alert("{{ session("ajouter_succ") }}")
-    </script>
-@endif
+
+    <style>
+        .checkbox-container {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .form-check {
+            margin-bottom: 8px;
+        }
+    </style>
+
+    @vite('resources/js/vacances.js')
+    @if (session('ajouter_succ'))
+        <script>
+            alert("{{ session('ajouter_succ') }}")
+        </script>
+    @endif
     <div class="text-center">
         <h1 class="text-success m-3">Gestion Des Vacances:</h1>
 
@@ -34,11 +54,12 @@
                         </div>
                         <div class="form-group">
                             <label for="holidayStartDate">Date De Début:</label>
-                            <input type="date" id="holidayStartDate" name="holidayStartDate" class="form-control" required>
+                            <input type="date" id="holidayStartDate" name="holidayStartDate" class="form-control"
+                                required>
                         </div>
                         <div class="form-group">
                             <label for="holidayEndDate">Date De Fin:</label>
-                            <input type="date" id="holidayEndDate" name="holidayEndDate" class="form-control" >
+                            <input type="date" id="holidayEndDate" name="holidayEndDate" class="form-control">
                         </div>
                         <div class="form-group" id="dynamicField"></div>
                         <div class="form-group">
@@ -57,3 +78,15 @@
         </div>
     </div>
 </x-bar>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM fully loaded");
+        // Test if jQuery is working
+        if (typeof $ === 'function') {
+            console.log("jQuery is working");
+        } else {
+            console.log("jQuery is NOT working");
+        }
+    });
+</script>

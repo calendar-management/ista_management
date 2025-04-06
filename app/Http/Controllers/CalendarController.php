@@ -23,28 +23,83 @@ class CalendarController extends Controller
         ]);
     }
 
+    
+    // public function add(Request $request){
+    //     $validated = $request->validate([
+    //         'holidayStartDate' => 'required|date',
+    //         'holidayEndDate' => 'nullable|date|after_or_equal:holidayStartDate',
+    //         'eventType' => 'required|string',
+    //         'groupSelect' => 'nullable|array',  // Changed to array
+    //         'groupSelect.*' => 'nullable|string',  // Validate each array element
+    //         'filiereSelect' => 'nullable|string',
+    //         'holidayDescription' => 'nullable|string',
+    //     ]);
+        
+    //     // If stage type and groups are selected, create multiple records
+    //     if ($validated['eventType'] === 'stage' && !empty($validated['groupSelect'])) {
+    //         foreach ($validated['groupSelect'] as $groupId) {
+    //             Vacance::create([
+    //                 'description_vacance' => $validated['holidayDescription'] ?? null,
+    //                 'type' => $validated['eventType'],
+    //                 'id_group' => $groupId,
+    //                 'date_debut' => $validated['holidayStartDate'],
+    //                 'etablissement' => 'test',
+    //                 'date_fin' => $validated['holidayEndDate'] ?? $validated['holidayStartDate'], 
+    //                 'id_fillier' => null,
+    //             ]);
+    //         }
+    //     } else {
+    //         // Original logic for other event types
+    //         Vacance::create([
+    //             'description_vacance' => $validated['holidayDescription'] ?? null,
+    //             'type' => $validated['eventType'],
+    //             'id_group' => is_array($validated['groupSelect'] ?? null) ? null : ($validated['groupSelect'] ?? null),
+    //             'date_debut' => $validated['holidayStartDate'],
+    //             'etablissement' => 'test',
+    //             'date_fin' => $validated['holidayEndDate'] ?? $validated['holidayStartDate'], 
+    //             'id_fillier' => $validated['filiereSelect'] ?? null,
+    //         ]);
+    //     }
+    
+    //     return back()->with('ajouter_succ', 'Ajouté avec succès!');
+    // }
+
     public function add(Request $request){
-            
         $validated = $request->validate([
             'holidayStartDate' => 'required|date',
             'holidayEndDate' => 'nullable|date|after_or_equal:holidayStartDate',
             'eventType' => 'required|string',
-            'groupSelect' => 'nullable|string',
+            'groupSelect' => 'nullable|array',
+            'groupSelect.*' => 'nullable|integer',
             'filiereSelect' => 'nullable|string',
             'holidayDescription' => 'nullable|string',
         ]);
         
-        
-        Vacance::create([
-            'description_vacance' => $validated['holidayDescription'] ?? null,
-            'type' => $validated['eventType'],
-            'id_group' => $validated['groupSelect'] ?? null,
-            'date_debut' => $validated['holidayStartDate'],
-            'etablissement'=>'test',
-            'date_fin' => $validated['holidayEndDate'] ?? $validated['holidayStartDate'], 
-            'id_fillier' => $validated['filiereSelect'] ?? null,
-        ]);
-        
+        // If it's a stage event and groups are selected
+        if ($validated['eventType'] === 'stage' && !empty($request->groupSelect)) {
+            foreach ($request->groupSelect as $groupId) {
+                Vacance::create([
+                    'description_vacance' => $validated['holidayDescription'] ?? null,
+                    'type' => $validated['eventType'],
+                    'id_group' => $groupId,
+                    'date_debut' => $validated['holidayStartDate'],
+                    'etablissement' => 'test',
+                    'date_fin' => $validated['holidayEndDate'] ?? $validated['holidayStartDate'],
+                    'id_fillier' => null,
+                ]);
+            }
+        } else {
+            // For other event types
+            Vacance::create([
+                'description_vacance' => $validated['holidayDescription'] ?? null,
+                'type' => $validated['eventType'],
+                'id_group' => $request->has('groupSelect') && !is_array($request->groupSelect) ? $request->groupSelect : null,
+                'date_debut' => $validated['holidayStartDate'],
+                'etablissement' => 'test',
+                'date_fin' => $validated['holidayEndDate'] ?? $validated['holidayStartDate'],
+                'id_fillier' => $validated['filiereSelect'] ?? null,
+            ]);
+        }
     
         return back()->with('ajouter_succ', 'Ajouté avec succès!');
     }

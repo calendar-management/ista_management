@@ -33,6 +33,9 @@ Route::middleware(['auth','formateur'])->group(function (){
     Route::get('/formateur_group/{group}', [DashboardController::class, 'groupDetail'])->name('formateur.group.detail');
     Route::get('/formateur_calendar', [ModuleController::class, 'showCalendar'])->name('calendar');
     Route::post('/save-calendar-data', [ModuleController::class, 'saveCalendarData'])->name('calendar.save');
+    Route::post('/formateur/add-session-during-stage', [ModuleController::class, 'addSessionDuringStage'])
+    ->name('formateur.add_session_during_stage')
+    ->middleware('auth');
 });
 Route::get('/download/{filename}', [FormateurController::class, 'downloadFile']);
 

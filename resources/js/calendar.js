@@ -1,6 +1,10 @@
 $(document).ready(function() {
     // Calendar App - manages formateurs modules, progress tracking and scheduling
     class CalendarApp {
+
+
+        
+//////////////////////////////////////hello world
         constructor() {
             this.date = new Date();
             this.hasUnsavedChanges = false;
@@ -501,18 +505,65 @@ $(document).ready(function() {
         }
 
         generateHolidayEvents() {
-            return this.holidays.map(holiday => ({
-                id: 'holiday_' + holiday.id,
-                title: holiday.name,
-                start: holiday.startDate,
-                end: holiday.endDate,
-                allDay: true,
-                className: 'holiday-event',
-                color: 'color:rgb(255, 244, 245);' ,
-                editable: false, // Holidays cannot be moved
-                type: 'holiday',
-                rendering: 'background' // Makes the event appear as a colored background
-            }));
+            return this.holidays.map(holiday => {
+                // Set color and styling based on holiday type
+                let backgroundColor, borderColor, textColor, title;
+                
+                switch(holiday.type) {
+                    case 'vacance':
+                        backgroundColor = 'rgba(255, 244, 245, 0.7)';
+                        borderColor = '#ff8a93';
+                        textColor = '#dd2c41';
+                        title = `🏖️ ${holiday.name}`;
+                        break;
+                    case 'stage':
+                        backgroundColor = 'rgba(232, 245, 233, 0.7)';
+                        borderColor = '#81c784';
+                        textColor = '#2e7d32';
+                        title = `🏢 Stage: ${holiday.name}`;
+                        if (holiday.affectedGroups && holiday.affectedGroups.length > 0) {
+                            title += ` (${holiday.affectedGroups.join(', ')})`;
+                        }
+                        break;
+                    case 'regional':
+                        backgroundColor = 'rgba(227, 242, 253, 0.7)';
+                        borderColor = '#64b5f6';
+                        textColor = '#1565c0';
+                        title = `📝 ${holiday.name}`;
+                        if (holiday.additionalInfo) {
+                            title += ` (${holiday.additionalInfo})`;
+                        }
+                        break;
+                    default:
+                        backgroundColor = 'rgba(255, 244, 245, 0.7)';
+                        borderColor = '#ff8a93';
+                        textColor = '#000';
+                        title = holiday.name;
+                }
+                
+                // Add one day to end date for proper display (fullCalendar exclusive end date)
+                const endDate = new Date(holiday.endDate);
+                endDate.setDate(endDate.getDate() + 1);
+                
+                return {
+                    id: 'holiday_' + holiday.id,
+                    title: title,
+                    start: holiday.startDate,
+                    end: endDate.toISOString().split('T')[0],
+                    allDay: true,
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor,
+                    textColor: textColor,
+                    className: `holiday-event holiday-${holiday.type}`,
+                    editable: false,
+                    type: 'holiday',
+                    extendedProps: {
+                        holidayType: holiday.type,
+                        additionalInfo: holiday.additionalInfo,
+                        affectedGroups: holiday.affectedGroups
+                    }
+                };
+            });
         }
 
         
@@ -1044,8 +1095,13 @@ $(document).ready(function() {
                 events: []
             });
         }
+
+        
     }
     
     // Initialize the app
     const calendarApp = new CalendarApp();
 });
+
+
+
