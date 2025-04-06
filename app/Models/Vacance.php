@@ -19,6 +19,7 @@ class Vacance extends Model
         'date_fin',
         'id_group',
         'id_fillier',
+        'etablissement'
     ];
     
     protected $casts = [

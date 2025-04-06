@@ -25,7 +25,6 @@ class CalendarController extends Controller
 
     public function add(Request $request){
             
-    
         $validated = $request->validate([
             'holidayStartDate' => 'required|date',
             'holidayEndDate' => 'nullable|date|after_or_equal:holidayStartDate',
@@ -41,6 +40,7 @@ class CalendarController extends Controller
             'type' => $validated['eventType'],
             'id_group' => $validated['groupSelect'] ?? null,
             'date_debut' => $validated['holidayStartDate'],
+            'etablissement'=>'test',
             'date_fin' => $validated['holidayEndDate'] ?? $validated['holidayStartDate'], 
             'id_fillier' => $validated['filiereSelect'] ?? null,
         ]);
