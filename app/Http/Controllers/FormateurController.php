@@ -31,28 +31,28 @@ class FormateurController extends Controller
         return view('admin.gestion_formateur', compact('formateurs'));
     }
     public function search(Request $request)
-{
-    $search = $request->input('search');
-    $auth = auth()->user();
+    {
+        $search = $request->input('search');
+        $auth = auth()->user();
 
-    $formateurs = User::where('role', 'formateur')
-        ->where('etablissement', $auth->etablissement)
-        ->when($search, function ($query, $search) {
-            return $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matricule', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        })
-        ->paginate(10);
+        $formateurs = User::where('role', 'formateur')
+            ->where('etablissement', $auth->etablissement)
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('matricule', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->paginate(10);
 
-    return view('admin.gestion_formateur', compact('formateurs'));
-}
+        return view('admin.gestion_formateur', compact('formateurs'));
+    }
 
     public function add(Request $request)
     {
         $request->validate([
-            'email' => ['required','unique:users,email']
+            'email' => ['required', 'unique:users,email']
         ]);
         $auth = auth()->user();
         User::create([
@@ -368,7 +368,7 @@ class FormateurController extends Controller
                 'completed_hours' => $completedHours,
                 'remaining_hours' => $progress->remaining_hours,
                 'completion_percentage' => $completionPercentage,
-                'start_date' => $progress->module_start_date==='1970-01-01'? 'Non défini' : $progress->module_start_date,
+                'start_date' => $progress->module_start_date === '1970-01-01' ? 'Non défini' : $progress->module_start_date,
                 'exam_date' => $examDate ? $examDate->format('d/m/Y') : 'Non défini',
                 'weekly_hours' => $progress->weekly_hours,
                 'remaining_weeks' => $remainingWeeks,
@@ -399,7 +399,7 @@ class FormateurController extends Controller
             $groupModuleData[] = [
                 'group_name' => $group ? $group->name : 'N/A',
                 'module_name' => $module ? $module->name : 'N/A',
-                'module_start_date' => $progress&&$progress->module_start_date!='1970-01-01' ? $progress->module_start_date : '',
+                'module_start_date' => $progress && $progress->module_start_date != '1970-01-01' ? $progress->module_start_date : '',
                 'final_exam_date' => $progress ? $progress->final_exam_date : 'N/A',
                 'weeks' => $hoursAffected,
                 'total_hours' => $totalHours,

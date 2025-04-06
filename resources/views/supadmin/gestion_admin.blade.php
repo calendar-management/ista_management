@@ -67,9 +67,6 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="text-center">
-                                    <i class="fas fa-hashtag me-2"></i>ID
-                                </th>
-                                <th class="text-center">
                                     <i class="fas fa-user me-2"></i>Name
                                 </th>
                                 <th class="text-center">
@@ -86,7 +83,6 @@
                         <tbody>
                             @foreach ($administrateurs as $administrateur)
                                 <tr>
-                                    <td class="text-center align-middle">{{ $administrateur->id }}</td>
                                     <td class="text-center align-middle">{{ $administrateur->name }}</td>
                                     <td class="text-center align-middle">{{ $administrateur->email }}</td>
                                     <td class="text-center align-middle">{{ $administrateur->etablissement }}</td>
