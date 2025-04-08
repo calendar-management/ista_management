@@ -19,6 +19,7 @@ class Teaching extends Model
         'id_fillier',
         'type_seance',
         'creneau',
+        'etablissement'
     ];
     
     protected $casts = [

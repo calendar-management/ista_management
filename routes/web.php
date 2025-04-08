@@ -66,6 +66,7 @@ Route::middleware(['auth','super_admin'])->group(function (){
     Route::get('/edit_adm/{id}', [AdministrateurController::class, 'edit'])->name('edit_adm');
     Route::put('/edit_adm/{id}', [AdministrateurController::class, 'update'])->name("update_admin");
     Route::delete('/delete_admin/{id}', [AdministrateurController::class, 'delete'])->name("delete_admin");
+    Route::delete('/reset_db/{id}', [AdministrateurController::class, 'reset_db'])->name('reset_db');
 });
 
 Route::middleware('auth')->group(function () {

@@ -17,6 +17,7 @@ use App\Models\Progress;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 
@@ -66,205 +67,412 @@ class FormateurController extends Controller
         return back()->with("add_frm_success", "ajouter $nm avec success!!");
     }
 
+    // public function import(Request $request)
+    // {
+    //     set_time_limit(300);
+    //     $auth = auth()->user();
+    //     $request->validate([
+    //         'data' => 'required|mimes:xlsx,xls,csv|max:2048',
+    //     ]);
+
+    //     $file = $request->file('data');
+    //     $filePath = $file->storeAs('uploads', $file->getClientOriginalName());
+    //     $fullPath = storage_path("app/" . $filePath);
+
+    //     $reader = ReaderEntityFactory::createReaderFromFile($fullPath);
+    //     $reader->open($fullPath);
+
+    //     $data = [];
+    //     $data2 = [];
+    //     $firstRow = true;
+    //     try {
+    //         foreach ($reader->getSheetIterator() as $sheet) {
+    //             foreach ($sheet->getRowIterator() as $row) {
+    //                 if ($firstRow) {
+    //                     $firstRow = false;
+    //                     continue;
+    //                 }
+
+    //                 $cells = $row->getCells();
+
+    //                 $emailPres = trim($cells[9]->getValue() ?? '');
+    //                 $namePres = trim($cells[10]->getValue() ?? '');
+    //                 $emailSyn = trim($cells[11]->getValue() ?? '');
+    //                 $nameSyn = trim($cells[12]->getValue() ?? '');
+
+    //                 // Skip row if essential information is missing
+    //                 if (empty($emailPres) || empty($namePres)) {
+    //                     continue;
+    //                 }
+
+    //                 // Find or create formateur using email+etablissement as the unique pair
+    //                 $formateur = User::firstOrCreate(
+    //                     [
+    //                         'email' => $emailPres,
+    //                         'etablissement' => $auth->etablissement,
+    //                     ],
+    //                     [
+    //                         'matricule' => $emailPres, // Using email as matricule if not specified
+    //                         'name' => $namePres,
+    //                         'password' => bcrypt("12345678"),
+    //                     ]
+    //                 );
+
+    //                 // Create or find fillier
+    //                 $fillier = Fillier::firstOrCreate(
+    //                     [
+    //                         'code_fillier' => $cells[1]->getValue(),
+    //                         'etablissement' => $auth->etablissement,
+    //                     ],
+    //                     [
+    //                         'name' => $cells[2]->getValue(),
+    //                     ]
+    //                 );
+
+    //                 // Create or find groupe
+    //                 $groupe = Groupe::firstOrCreate(
+    //                     [
+    //                         'name' => $cells[4]->getValue(),
+    //                         'id_fillier' => $fillier->id_fillier,
+    //                         'niveau' => $cells[0]->getValue(),
+    //                         'etablissement' => $auth->etablissement,
+    //                     ],
+    //                     [
+    //                         'effectif' => $cells[5]->getValue(),
+    //                     ]
+    //                 );
+
+    //                 // Create or find module
+    //                 $module = Module::firstOrCreate(
+    //                     [
+    //                         'code_module' => $cells[6]->getValue(),
+    //                         'etablissement' => $auth->etablissement,
+    //                     ],
+    //                     [
+    //                         'name' => $cells[7]->getValue(),
+    //                         'hours' => $cells[15]->getValue() ?? ($cells[13]->getValue() + $cells[14]->getValue()),
+    //                         'mh_presentiel' => $cells[13]->getValue(),
+    //                         'mh_distanciel' => $cells[14]->getValue(),
+    //                         'regional' => $cells[8]->getValue(),
+    //                     ]
+    //                 );
+
+    //                 switch (true) {
+    //                     // Case 1: The "Formateur Syn" is empty or is the same as "Formateur Présentiel"
+    //                     case (empty($nameSyn) || $nameSyn === $namePres):
+    //                         $teaching = Teaching::firstOrCreate(
+    //                             [
+    //                                 'id_user' => $formateur->id,
+    //                                 'id_group' => $groupe->id_group,
+    //                                 'id_module' => $module->id_module,
+    //                                 'id_fillier' => $fillier->id_fillier,
+    //                                 'creneau' => $cells[3]->getValue(),
+    //                                 'type_seance' => "totale",
+    //                             ]
+    //                         );
+    //                         $data[] = $formateur;
+    //                         $data2[] = $teaching;
+    //                         break;
+
+    //                     // Case 2: The "Formateur Syn" is different from the "Formateur Présentiel"
+    //                     case (!empty($nameSyn) && $nameSyn !== $namePres):
+    //                         $teaching = Teaching::firstOrCreate(
+    //                             [
+    //                                 'id_user' => $formateur->id,
+    //                                 'id_group' => $groupe->id_group,
+    //                                 'id_module' => $module->id_module,
+    //                                 'id_fillier' => $fillier->id_fillier,
+    //                                 'creneau' => $cells[3]->getValue(),
+    //                                 'type_seance' => "presentiel",
+    //                             ]
+    //                         );
+
+    //                         // Insert "Formateur Syn" only if their email and name exist
+    //                         if (!empty($emailSyn) && !empty($nameSyn)) {
+    //                             // Find or create the second formateur using email+etablissement as unique pair
+    //                             $formateur2 = User::firstOrCreate(
+    //                                 [
+    //                                     'email' => $emailSyn,
+    //                                     'etablissement' => $auth->etablissement,
+    //                                 ],
+    //                                 [
+    //                                     'matricule' => $emailSyn, // Using email as matricule if not specified
+    //                                     'name' => $nameSyn,
+    //                                     'password' => bcrypt("12345678"),
+    //                                 ]
+    //                             );
+
+    //                             $teaching2 = Teaching::firstOrCreate(
+    //                                 [
+    //                                     'id_user' => $formateur2->id,
+    //                                     'id_group' => $groupe->id_group,
+    //                                     'id_module' => $module->id_module,
+    //                                     'id_fillier' => $fillier->id_fillier,
+    //                                     'creneau' => $cells[3]->getValue(),
+    //                                     'type_seance' => "distanciel",
+    //                                 ]
+    //                             );
+    //                             $data[] = $formateur2;
+    //                             $data2[] = $teaching2;
+    //                         }
+
+    //                         $data[] = $formateur;
+    //                         break;
+    //                 }
+    //             }
+    //         }
+    //     } finally {
+    //         $reader->close(); // Ensures the file is always closed
+    //     }
+
+    //     // Check if this is an AJAX request
+    //     if ($request->ajax()) {
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Les données ont été insérées avec succès!',
+    //             'count' => count($data)
+    //         ]);
+    //     }
+
+    //     // For regular form submission
+    //     return back()->with('import_success', 'Les données ont été insérées avec succès!');
+    // }
+
     public function import(Request $request)
     {
-        set_time_limit(300);
+        set_time_limit(600); // Increased to 10 minutes for larger imports
         $auth = auth()->user();
+
+        // Validate the request
         $request->validate([
-            'data' => 'required|mimes:xlsx,xls,csv|max:2048',
+            'data' => 'required|mimes:xlsx,xls,csv|max:5120', // Increased max size to 5MB
         ]);
 
         $file = $request->file('data');
-        $filePath = $file->storeAs('uploads', $file->getClientOriginalName());
+        $filePath = $file->storeAs('uploads/temp', $file->getClientOriginalName());
         $fullPath = storage_path("app/" . $filePath);
 
-        $reader = ReaderEntityFactory::createReaderFromFile($fullPath);
-        $reader->open($fullPath);
+        // Initialize counters and arrays for reporting
+        $stats = [
+            'users_created' => 0,
+            'users_existing' => 0,
+            'teachings_created' => 0,
+            'rows_processed' => 0,
+            'rows_skipped' => 0,
+            'errors' => []
+        ];
 
-        $data = [];
-        $data2 = []; // Added this line to prevent undefined variable error
-        $firstRow = true;
         try {
+            $reader = ReaderEntityFactory::createReaderFromFile($fullPath);
+            $reader->open($fullPath);
+
+            DB::beginTransaction(); // Start transaction to ensure data integrity
+
+            $firstRow = true;
             foreach ($reader->getSheetIterator() as $sheet) {
-                foreach ($sheet->getRowIterator() as $row) {
-                    if ($firstRow) {
-                        $firstRow = false;
-                        continue;
-                    }
+                foreach ($sheet->getRowIterator() as $rowIndex => $row) {
+                    try {
+                        // Skip header row
+                        if ($firstRow) {
+                            $firstRow = false;
+                            continue;
+                        }
 
-                    $cells = $row->getCells();
+                        $stats['rows_processed']++;
+                        $cells = $row->getCells();
 
-                    $emailPres = trim($cells[9]->getValue() ?? '');
-                    $namePres = trim($cells[10]->getValue() ?? '');
-                    $emailSyn = trim($cells[11]->getValue() ?? '');
-                    $nameSyn = trim($cells[12]->getValue() ?? '');
+                        // Extract values with proper trim and null handling
+                        $niveau = trim($cells[0]->getValue() ?? '');
+                        $codeFillier = trim($cells[1]->getValue() ?? '');
+                        $nameFillier = trim($cells[2]->getValue() ?? '');
+                        $creneau = trim($cells[3]->getValue() ?? '');
+                        $nameGroupe = trim($cells[4]->getValue() ?? '');
+                        $effectif = intval($cells[5]->getValue() ?? 0);
+                        $codeModule = trim($cells[6]->getValue() ?? '');
+                        $nameModule = trim($cells[7]->getValue() ?? '');
+                        $regional = trim($cells[8]->getValue() ?? '');
+                        $emailPres = trim($cells[9]->getValue() ?? '');
+                        $namePres = trim($cells[10]->getValue() ?? '');
+                        $emailSyn = trim($cells[11]->getValue() ?? '');
+                        $nameSyn = trim($cells[12]->getValue() ?? '');
+                        $mhPresentiel = floatval($cells[13]->getValue() ?? 0);
+                        $mhDistanciel = floatval($cells[14]->getValue() ?? 0);
+                        $totalHours = floatval($cells[15]->getValue() ?? ($mhPresentiel + $mhDistanciel));
 
-                    if (empty($emailPres) || empty($namePres)) {
-                        continue;
-                    }
+                        // Validate essential data
+                        if (
+                            empty($emailPres) || empty($namePres) || empty($codeFillier) ||
+                            empty($nameGroupe) || empty($codeModule) || empty($nameModule)
+                        ) {
+                            $stats['rows_skipped']++;
+                            continue;
+                        }
 
-                    switch (true) {
-                        // Case 1: The "Formateur Syn" is empty or is the same as "Formateur Présentiel"
-                        case (empty($nameSyn) || $nameSyn === $namePres):
-                            $formateur = User::firstOrCreate(
-                                [
-                                    'email' => $emailPres,
-                                    'etablissement' => $auth->etablissement,
-                                ], // Find by email
-                                [
-                                    'matricule' => $emailPres,
-                                    'name' => $namePres,
-                                    'password' => bcrypt("12345678"),
-                                ]
-                            );
-                            $fillier = Fillier::firstOrCreate(
-                                [
-                                    'code_fillier' => $cells[1]->getValue(),
-                                    'name' => $cells[2]->getValue(),
-                                    'etablissement' => $auth->etablissement,
-                                ]
-                            );
-                            $groupe = Groupe::firstOrCreate(
-                                [
-                                    'name' => $cells[4]->getValue(),
-                                    'id_fillier' => $fillier->id_fillier,
-                                    'niveau' => $cells[0]->getValue(),
-                                    'effectif' => $cells[5]->getValue(),
-                                    'etablissement' => $auth->etablissement,
-                                ]
-                            );
-                            $module = Module::firstOrCreate(
-                                [
-                                    'code_module' => $cells[6]->getValue(),
-                                    'name' => $cells[7]->getValue(),
-                                    'etablissement' => $auth->etablissement,
+                        // Find or create formateur using email+etablissement as the unique pair
+                        $formateur = $this->findOrCreateUser($emailPres, $namePres, $auth->etablissement, $stats);
 
-                                ], // Check both values
-                                [
-                                    'hours' => $cells[15]->getValue(),
-                                    'mh_presentiel' => $cells[13]->getValue(),
-                                    'mh_distanciel' => $cells[14]->getValue(),
-                                    'regional' => $cells[8]->getValue(),
-                                ]
-                            );
+                        // Create or find fillier
+                        $fillier = Fillier::firstOrCreate(
+                            [
+                                'code_fillier' => $codeFillier,
+                                'etablissement' => $auth->etablissement,
+                            ],
+                            [
+                                'name' => $nameFillier,
+                            ]
+                        );
 
+                        // Create or find groupe
+                        $groupe = Groupe::firstOrCreate(
+                            [
+                                'name' => $nameGroupe,
+                                'id_fillier' => $fillier->id_fillier,
+                                'niveau' => $niveau,
+                                'etablissement' => $auth->etablissement,
+                            ],
+                            [
+                                'effectif' => $effectif,
+                            ]
+                        );
+
+                        // Create or find module
+                        $module = Module::firstOrCreate(
+                            [
+                                'code_module' => $codeModule,
+                                'etablissement' => $auth->etablissement,
+                            ],
+                            [
+                                'name' => $nameModule,
+                                'hours' => $totalHours,
+                                'mh_presentiel' => $mhPresentiel,
+                                'mh_distanciel' => $mhDistanciel,
+                                'regional' => $regional,
+                            ]
+                        );
+
+                        // Handle teaching assignments based on presence of synchronous teacher
+                        if (empty($nameSyn) || $nameSyn === $namePres) {
+                            // Case 1: No synchronous teacher or same as presentiel teacher
                             $teaching = Teaching::firstOrCreate(
                                 [
                                     'id_user' => $formateur->id,
                                     'id_group' => $groupe->id_group,
                                     'id_module' => $module->id_module,
                                     'id_fillier' => $fillier->id_fillier,
-                                    'creneau' => $cells[3]->getValue(),
+                                    'creneau' => $creneau,
                                     'type_seance' => "totale",
-                                ]
-                            );
-                            $data[] = $formateur;
-                            $data2[] = $teaching;
-                            break;
-
-                        // Case 2: The "Formateur Syn" is different from the "Formateur Présentiel"
-                        case (!empty($nameSyn) && $nameSyn !== $namePres):
-                            $formateur = User::firstOrCreate(
-                                [
-                                    'email' => $emailPres,
-                                    'etablissement' => $auth->etablissement,
-                                ], // Find by email
-                                [
-                                    'matricule' => $emailPres,
-                                    'name' => $namePres,
-                                    'password' => bcrypt("12345678"),
-                                ]
-                            );
-
-                            $fillier = Fillier::firstOrCreate(
-                                [
-                                    'code_fillier' => $cells[1]->getValue(),
-                                    'name' => $cells[2]->getValue(),
                                     'etablissement' => $auth->etablissement,
                                 ]
                             );
-                            $groupe = Groupe::firstOrCreate(
-                                [
-                                    'name' => $cells[4]->getValue(),
-                                    'id_fillier' => $fillier->id_fillier,
-                                    'niveau' => $cells[0]->getValue(),
-                                    'effectif' => $cells[5]->getValue(),
-                                    'etablissement' => $auth->etablissement,
-                                ]
-                            );
-                            $module = Module::firstOrCreate(
-                                [
-                                    'code_module' => $cells[6]->getValue(),
-                                    'name' => $cells[7]->getValue(),
-                                    'etablissement' => $auth->etablissement,
-
-                                ], // Check both values
-                                [
-                                    'mh_presentiel' => $cells[13]->getValue(),
-                                    'mh_distanciel' => $cells[14]->getValue(),
-                                    'hours' => $cells[13]->getValue() + $cells[14]->getValue(),
-                                    'regional' => $cells[8]->getValue(),
-                                ]
-                            );
-
+                            $stats['teachings_created']++;
+                        } else {
+                            // Case 2: Different synchronous teacher
                             $teaching = Teaching::firstOrCreate(
                                 [
                                     'id_user' => $formateur->id,
                                     'id_group' => $groupe->id_group,
                                     'id_module' => $module->id_module,
                                     'id_fillier' => $fillier->id_fillier,
-                                    'creneau' => $cells[3]->getValue(),
+                                    'creneau' => $creneau,
                                     'type_seance' => "presentiel",
+                                    'etablissement' => $auth->etablissement,
                                 ]
                             );
-                            // Insert "Formateur Syn" only if their email and name exist
+                            $stats['teachings_created']++;
+
+                            // Create synchronous teacher if email and name provided
                             if (!empty($emailSyn) && !empty($nameSyn)) {
-                                $formateur2 = User::firstOrCreate(
-                                    [
-                                        'email' => $emailSyn,
-                                        'etablissement' => $auth->etablissement,
-                                    ], // Find by email
-                                    [
-                                        'matricule' => $emailSyn,
-                                        'name' => $nameSyn,
-                                        'password' => bcrypt("12345678"),
-                                        'etablissement' => $auth->etablissement,
-                                    ]
-                                );
+                                $formateur2 = $this->findOrCreateUser($emailSyn, $nameSyn, $auth->etablissement, $stats);
+
                                 $teaching2 = Teaching::firstOrCreate(
                                     [
                                         'id_user' => $formateur2->id,
                                         'id_group' => $groupe->id_group,
                                         'id_module' => $module->id_module,
                                         'id_fillier' => $fillier->id_fillier,
-                                        'creneau' => $cells[3]->getValue(),
+                                        'creneau' => $creneau,
                                         'type_seance' => "distanciel",
+                                        'etablissement' => $auth->etablissement,
                                     ]
                                 );
-                                $data[] = $formateur2;
-                                $data2[] = $teaching2;
+                                $stats['teachings_created']++;
                             }
-
-                            $data[] = $formateur;
-                            break;
+                        }
+                    } catch (\Exception $e) {
+                        $stats['errors'][] = "Error in row {$rowIndex}: " . $e->getMessage();
                     }
                 }
             }
+
+            DB::commit(); // Commit transaction if everything was successful
+        } catch (\Exception $e) {
+            DB::rollBack(); // Roll back on error
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Import failed: ' . $e->getMessage()
+                ], 500);
+            }
+            return back()->with('error', 'Import failed: ' . $e->getMessage());
         } finally {
-            $reader->close(); // Ensures the file is always closed
+            if (isset($reader)) {
+                $reader->close(); // Ensure file is closed
+            }
+
+            // Clean up the temp file
+            // if (file_exists($fullPath)) {
+            //     \Storage::delete($filePath);
+            // }
         }
 
-        // Check if this is an AJAX request
+        // Generate response message
+        $message = "Import successful. Processed {$stats['rows_processed']} rows: " .
+            "Created {$stats['users_created']} new users, " .
+            "Used {$stats['users_existing']} existing users, " .
+            "Created {$stats['teachings_created']} teaching assignments.";
+
+        if (!empty($stats['errors'])) {
+            $message .= " Encountered " . count($stats['errors']) . " errors.";
+        }
+
+        // Return appropriate response based on request type
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Les données ont été insérées avec succès!',
-                'count' => count($data)
+                'message' => $message,
+                'stats' => $stats
             ]);
         }
 
         // For regular form submission
-        return back()->with('import_success', 'Les données ont été insérées avec succès!');
+        return back()->with('import_success', $message);
+    }
+
+    /**
+     * Helper function to find or create a user
+     */
+    private function findOrCreateUser($email, $name, $etablissement, &$stats)
+    {
+        $existingUser = User::where('email', $email)
+            ->where('etablissement', $etablissement)
+            ->first();
+
+        if ($existingUser) {
+            $stats['users_existing']++;
+            return $existingUser;
+        }
+
+        $user = User::create([
+            'matricule' => $email, // Using email as matricule
+            'name' => $name,
+            'email' => $email,
+            'password' => bcrypt("12345678"),
+            'etablissement' => $etablissement,
+            'role' => 'formateur', // Setting a default role for imported users
+        ]);
+
+        $stats['users_created']++;
+        return $user;
     }
 
 

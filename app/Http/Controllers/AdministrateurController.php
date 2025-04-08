@@ -2,8 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomSessionDate;
+use App\Models\Fillier;
+use App\Models\Groupe;
+use App\Models\Module;
+use App\Models\Progress;
+use App\Models\Teaching;
 use Illuminate\Http\Request;
-use App\Models\User; 
+use App\Models\User;
+use App\Models\Vacance;
+use Illuminate\Support\Facades\DB;
 
 class AdministrateurController extends Controller
 {
@@ -48,6 +56,28 @@ class AdministrateurController extends Controller
         $nom= $administrateur->name;
         $administrateur->delete();
         return back()->with('delete_success',"supprimer $nom avec success");
+    }
+
+    public function reset_db($id)
+    {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        $admin = User::findOrFail($id);
+        $etablissement = $admin->etablissement;
+
+        User::where('role', 'formateur')->where('etablissement', $etablissement)->delete();
+
+        Fillier::where('etablissement', $etablissement)->delete();
+        Groupe::where('etablissement', $etablissement)->delete();
+        Module::where('etablissement', $etablissement)->delete();
+        Teaching::where('etablissement', $etablissement)->delete();
+        Progress::where('etablissement', $etablissement)->delete();
+        Vacance::where('etablissement', $etablissement)->delete();
+        CustomSessionDate::where('etablissement', $etablissement)->delete();
+        
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        
+        return back()->with('reset_success', 'Base de données réinitialisée avec succès');
     }
 
 }

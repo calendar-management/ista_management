@@ -114,6 +114,5 @@
                 </div>
             </div>
         
-        <!-- Dark overlay when sidebar is active (mobile) -->
         <div class="overlay"></div>
 </x-bar>

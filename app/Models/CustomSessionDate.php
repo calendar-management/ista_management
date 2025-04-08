@@ -14,7 +14,8 @@ class CustomSessionDate extends Model
     protected $fillable = [
         'id_progress',
         'week_index',
-        'session_date'
+        'session_date',
+        'etablissement'
     ];
 
     public function progress()
