@@ -61,7 +61,7 @@ class FormateurController extends Controller
             'name' => $request->name,
             'matricule' => $request->matricule,
             'email' => $request->email,
-            'password' => bcrypt("12345678"),
+            'password' => '$2y$10$PD1ETbkuMGMIiLg6e8fJZ.XfiEkZJwFAMLcdWxLxvGlVd1g5YlQ0m',
             'etablissement' => $auth->etablissement,
         ]);
         $nm = $request->name;
@@ -410,7 +410,7 @@ class FormateurController extends Controller
                         'name' => $userData['name'],
                         'email' => $email,
                         'etablissement' => $auth->etablissement,
-                        'password' => Hash::make(Str::random(12)),
+                        'password' => '$2y$10$PD1ETbkuMGMIiLg6e8fJZ.XfiEkZJwFAMLcdWxLxvGlVd1g5YlQ0m',
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -717,7 +717,7 @@ class FormateurController extends Controller
             ],
             [
                 'name' => $name,
-                'password' => Hash::make(Str::random(12)),
+                'password' => '$2y$10$PD1ETbkuMGMIiLg6e8fJZ.XfiEkZJwFAMLcdWxLxvGlVd1g5YlQ0m',
             ]
         );
 
