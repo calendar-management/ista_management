@@ -15,6 +15,7 @@ class DashboardController extends Controller
 
         $teachings = Teaching::with(['group', 'module', 'progress', 'fillier'])
             ->where('id_user', $formateur->id)
+            ->where('etablissement',$formateur->etablissement)
             ->get()
             ->groupBy('id_group');
 

@@ -200,7 +200,8 @@ class ModuleController extends Controller
                         'remaining_hours' => $module['remainingHours'],
                         'module_start_date' => $module['startDate'],
                         'final_exam_date' => $module['examDate'],
-                        'weekly_hours' => $module['weeklyHours']
+                        'weekly_hours' => $module['weeklyHours'],
+                        'etablissement'=>auth()->user()->etablissement
                     ]
                 );
 
@@ -316,15 +317,6 @@ class ModuleController extends Controller
             'customSessionDates' => $customSessionDates
         ];
     }
-    // private function formatHolidayData($holiday)
-    // {
-    //     return [
-    //         'id' => $holiday->id_vacance,
-    //         'name' => $holiday->description_vacance,
-    //         'startDate' => $holiday->date_debut,
-    //         'endDate' => $holiday->date_fin,
-    //     ];
-    // }
 
     private function formatHolidayData($holiday)
     {
@@ -350,34 +342,6 @@ class ModuleController extends Controller
         ];
     }
 
-    // private function getHolidaysForUser($userId)
-    // {
-    //     $userGroups = Teaching::where('id_user', $userId)
-    //         ->with('group.fillier') 
-    //         ->get();
-
-    //     $groupIds = $userGroups->pluck('group.id_group')->toArray();
-    //     $filliereIds = $userGroups->pluck('group.fillier.id_fillier')->unique()->toArray();
-
-    //     $globalHolidays = Vacance::where('type', 'vacance')->get();
-
-    //     $groupHolidays = Vacance::where('type', 'stage')
-    //         ->whereIn('id_group', $groupIds)
-    //         ->get();
-
-    //     $examHolidays = Vacance::where('type', 'regional')
-    //         ->whereIn('id_fillier', $filliereIds)
-    //         ->get();
-
-    //     $holidays = $globalHolidays->merge($groupHolidays)->merge($examHolidays);
-
-    //     $formattedHolidays = [];
-    //     foreach ($holidays as $holiday) {
-    //         $formattedHolidays[] = $this->formatHolidayData($holiday);
-    //     }
-
-    //     return $formattedHolidays;
-    // }
 
     private function getHolidaysForUser($userId)
     {
