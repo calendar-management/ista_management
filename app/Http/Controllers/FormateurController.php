@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Models\Fillier;
@@ -20,6 +21,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -68,215 +71,7 @@ class FormateurController extends Controller
         return back()->with("add_frm_success", "ajouter $nm avec success!!");
     }
 
-    // public function import(Request $request)
-    // {
-    //     set_time_limit(600); // Increased to 10 minutes for larger imports
-    //     $auth = auth()->user();
 
-    //     // Validate the request
-    //     $request->validate([
-    //         'data' => 'required|mimes:xlsx,xls,csv|max:5120', // Increased max size to 5MB
-    //     ]);
-
-    //     $file = $request->file('data');
-    //     $filePath = $file->storeAs('uploads/temp', $file->getClientOriginalName());
-    //     $fullPath = storage_path("app/" . $filePath);
-
-    //     // Initialize counters and arrays for reporting
-    //     $stats = [
-    //         'users_created' => 0,
-    //         'users_existing' => 0,
-    //         'teachings_created' => 0,
-    //         'rows_processed' => 0,
-    //         'rows_skipped' => 0,
-    //         'errors' => []
-    //     ];
-
-    //     try {
-    //         $reader = ReaderEntityFactory::createReaderFromFile($fullPath);
-    //         $reader->open($fullPath);
-
-    //         DB::beginTransaction(); // Start transaction to ensure data integrity
-
-    //         $firstRow = true;
-    //         foreach ($reader->getSheetIterator() as $sheet) {
-    //             foreach ($sheet->getRowIterator() as $rowIndex => $row) {
-    //                 try {
-    //                     // Skip header row
-    //                     if ($firstRow) {
-    //                         $firstRow = false;
-    //                         continue;
-    //                     }
-
-    //                     $stats['rows_processed']++;
-    //                     $cells = $row->getCells();
-
-    //                     // Extract values with proper trim and null handling
-    //                     $niveau = trim($cells[0]->getValue() ?? '');
-    //                     $codeFillier = trim($cells[1]->getValue() ?? '');
-    //                     $nameFillier = trim($cells[2]->getValue() ?? '');
-    //                     $creneau = trim($cells[3]->getValue() ?? '');
-    //                     $nameGroupe = trim($cells[4]->getValue() ?? '');
-    //                     $effectif = intval($cells[5]->getValue() ?? 0);
-    //                     $codeModule = trim($cells[6]->getValue() ?? '');
-    //                     $nameModule = trim($cells[7]->getValue() ?? '');
-    //                     $regional = trim($cells[8]->getValue() ?? '');
-    //                     $emailPres = trim($cells[9]->getValue() ?? '');
-    //                     $namePres = trim($cells[10]->getValue() ?? '');
-    //                     $emailSyn = trim($cells[11]->getValue() ?? '');
-    //                     $nameSyn = trim($cells[12]->getValue() ?? '');
-    //                     $mhPresentiel = floatval($cells[13]->getValue() ?? 0);
-    //                     $mhDistanciel = floatval($cells[14]->getValue() ?? 0);
-    //                     $totalHours = floatval($cells[15]->getValue() ?? ($mhPresentiel + $mhDistanciel));
-
-    //                     // Validate essential data
-    //                     if (
-    //                         empty($emailPres) || empty($namePres) || empty($codeFillier) ||
-    //                         empty($nameGroupe) || empty($codeModule) || empty($nameModule)
-    //                     ) {
-    //                         $stats['rows_skipped']++;
-    //                         continue;
-    //                     }
-
-    //                     // Find or create formateur using email+etablissement as the unique pair
-    //                     $formateur = $this->findOrCreateUser($emailPres, $namePres, $auth->etablissement, $stats);
-
-    //                     // Create or find fillier
-    //                     $fillier = Fillier::firstOrCreate(
-    //                         [
-    //                             'code_fillier' => $codeFillier,
-    //                             'etablissement' => $auth->etablissement,
-    //                         ],
-    //                         [
-    //                             'name' => $nameFillier,
-    //                         ]
-    //                     );
-
-    //                     // Create or find groupe
-    //                     $groupe = Groupe::firstOrCreate(
-    //                         [
-    //                             'name' => $nameGroupe,
-    //                             'id_fillier' => $fillier->id_fillier,
-    //                             'niveau' => $niveau,
-    //                             'etablissement' => $auth->etablissement,
-    //                         ],
-    //                         [
-    //                             'effectif' => $effectif,
-    //                         ]
-    //                     );
-
-    //                     // Create or find module
-    //                     $module = Module::firstOrCreate(
-    //                         [
-    //                             'code_module' => $codeModule,
-    //                             'etablissement' => $auth->etablissement,
-    //                         ],
-    //                         [
-    //                             'name' => $nameModule,
-    //                             'hours' => $totalHours,
-    //                             'mh_presentiel' => $mhPresentiel,
-    //                             'mh_distanciel' => $mhDistanciel,
-    //                             'regional' => $regional,
-    //                         ]
-    //                     );
-
-    //                     // Handle teaching assignments based on presence of synchronous teacher
-    //                     if (empty($nameSyn) || $nameSyn === $namePres) {
-    //                         // Case 1: No synchronous teacher or same as presentiel teacher
-    //                         $teaching = Teaching::firstOrCreate(
-    //                             [
-    //                                 'id_user' => $formateur->id,
-    //                                 'id_group' => $groupe->id_group,
-    //                                 'id_module' => $module->id_module,
-    //                                 'id_fillier' => $fillier->id_fillier,
-    //                                 'creneau' => $creneau,
-    //                                 'type_seance' => "totale",
-    //                                 'etablissement' => $auth->etablissement,
-    //                             ]
-    //                         );
-    //                         $stats['teachings_created']++;
-    //                     } else {
-    //                         // Case 2: Different synchronous teacher
-    //                         $teaching = Teaching::firstOrCreate(
-    //                             [
-    //                                 'id_user' => $formateur->id,
-    //                                 'id_group' => $groupe->id_group,
-    //                                 'id_module' => $module->id_module,
-    //                                 'id_fillier' => $fillier->id_fillier,
-    //                                 'creneau' => $creneau,
-    //                                 'type_seance' => "presentiel",
-    //                                 'etablissement' => $auth->etablissement,
-    //                             ]
-    //                         );
-    //                         $stats['teachings_created']++;
-
-    //                         // Create synchronous teacher if email and name provided
-    //                         if (!empty($emailSyn) && !empty($nameSyn)) {
-    //                             $formateur2 = $this->findOrCreateUser($emailSyn, $nameSyn, $auth->etablissement, $stats);
-
-    //                             $teaching2 = Teaching::firstOrCreate(
-    //                                 [
-    //                                     'id_user' => $formateur2->id,
-    //                                     'id_group' => $groupe->id_group,
-    //                                     'id_module' => $module->id_module,
-    //                                     'id_fillier' => $fillier->id_fillier,
-    //                                     'creneau' => $creneau,
-    //                                     'type_seance' => "distanciel",
-    //                                     'etablissement' => $auth->etablissement,
-    //                                 ]
-    //                             );
-    //                             $stats['teachings_created']++;
-    //                         }
-    //                     }
-    //                 } catch (\Exception $e) {
-    //                     $stats['errors'][] = "Error in row {$rowIndex}: " . $e->getMessage();
-    //                 }
-    //             }
-    //         }
-
-    //         DB::commit(); // Commit transaction if everything was successful
-    //     } catch (\Exception $e) {
-    //         DB::rollBack(); // Roll back on error
-    //         if ($request->ajax()) {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Import failed: ' . $e->getMessage()
-    //             ], 500);
-    //         }
-    //         return back()->with('error', 'Import failed: ' . $e->getMessage());
-    //     } finally {
-    //         if (isset($reader)) {
-    //             $reader->close(); // Ensure file is closed
-    //         }
-
-    //         // Clean up the temp file
-    //         // if (file_exists($fullPath)) {
-    //         //     \Storage::delete($filePath);
-    //         // }
-    //     }
-
-    //     // Generate response message
-    //     $message = "Import successful. Processed {$stats['rows_processed']} rows: " .
-    //         "Created {$stats['users_created']} new users, " .
-    //         "Used {$stats['users_existing']} existing users, " .
-    //         "Created {$stats['teachings_created']} teaching assignments.";
-
-    //     if (!empty($stats['errors'])) {
-    //         $message .= " Encountered " . count($stats['errors']) . " errors.";
-    //     }
-
-    //     // Return appropriate response based on request type
-    //     if ($request->ajax()) {
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => $message,
-    //             'stats' => $stats
-    //         ]);
-    //     }
-
-    //     // For regular form submission
-    //     return back()->with('import_success', $message);
-    // }
 
     public function import(Request $request)
     {
@@ -309,13 +104,6 @@ class FormateurController extends Controller
         $moduleCache = [];
         $teachingCache = [];
 
-        // Arrays to batch insert
-        $filliersToCreate = [];
-        $groupesToCreate = [];
-        $modulesToCreate = [];
-        $teachingsToCreate = [];
-        $usersToCreate = [];
-
         try {
             $reader = ReaderEntityFactory::createReaderFromFile($fullPath);
             $reader->open($fullPath);
@@ -337,6 +125,13 @@ class FormateurController extends Controller
 
                         $stats['rows_processed']++;
                         $cells = $row->getCells();
+
+                        // Check if we have enough cells
+                        if (count($cells) < 16) {
+                            $stats['rows_skipped']++;
+                            $stats['errors'][] = "Row {$rowIndex} has insufficient data";
+                            continue;
+                        }
 
                         // Extract values with proper trim and null handling
                         $niveau = trim($cells[0]->getValue() ?? '');
@@ -362,6 +157,7 @@ class FormateurController extends Controller
                             empty($nameGroupe) || empty($codeModule) || empty($nameModule)
                         ) {
                             $stats['rows_skipped']++;
+                            $stats['errors'][] = "Row {$rowIndex} is missing essential data";
                             continue;
                         }
 
@@ -385,32 +181,86 @@ class FormateurController extends Controller
                             'totalHours' => $totalHours,
                         ];
 
-                        // Collect unique emails, filliers, groups, modules for batch processing
-                        $this->collectUniqueEmails($emailPres, $emailSyn, $userCache);
-                        $this->collectUniqueFilliers($codeFillier, $nameFillier, $auth->etablissement, $fillierCache);
-                        $this->collectUniqueModules($codeModule, $nameModule, $totalHours, $mhPresentiel, $mhDistanciel, $regional, $auth->etablissement, $moduleCache);
+                        // Collect unique emails for users
+                        if (!empty($emailPres)) {
+                            if (!isset($userCache[$emailPres])) {
+                                $userCache[$emailPres] = [
+                                    'email' => $emailPres,
+                                    'name' => $namePres
+                                ];
+                            }
+                        }
+
+                        if (!empty($emailSyn) && $emailSyn != $emailPres) {
+                            if (!isset($userCache[$emailSyn])) {
+                                $userCache[$emailSyn] = [
+                                    'email' => $emailSyn,
+                                    'name' => $nameSyn
+                                ];
+                            }
+                        }
+
+                        // Collect unique filliers for THIS etablissement
+                        $fillierKey = $codeFillier . '_' . $auth->etablissement;
+                        if (!empty($codeFillier)) {
+                            if (!isset($fillierCache[$fillierKey])) {
+                                $fillierCache[$fillierKey] = [
+                                    'code' => $codeFillier,
+                                    'name' => $nameFillier
+                                ];
+                            }
+                        }
+
+                        // Collect unique modules for THIS etablissement
+                        $moduleKey = $codeModule . '_' . $auth->etablissement;
+                        if (!empty($codeModule)) {
+                            if (!isset($moduleCache[$moduleKey])) {
+                                $moduleCache[$moduleKey] = [
+                                    'code' => $codeModule,
+                                    'name' => $nameModule,
+                                    'hours' => $totalHours,
+                                    'mh_presentiel' => $mhPresentiel,
+                                    'mh_distanciel' => $mhDistanciel,
+                                    'regional' => $regional
+                                ];
+                            }
+                        }
                     } catch (\Exception $e) {
                         $stats['errors'][] = "Error in row {$rowIndex}: " . $e->getMessage();
                     }
                 }
             }
 
-            // Batch process all unique emails to find existing users
-            $existingUsers = $this->batchFindUsers(array_keys($userCache), $auth->etablissement);
+            // If we have no valid rows, abort early
+            if (empty($rowData)) {
+                throw new \Exception("No valid data rows found in the file.");
+            }
+
+            Log::info("Processing import with " . count($rowData) . " valid rows");
+
+            // Batch find existing users within THIS establishment only
+            $emails = array_keys($userCache);
+
+            $existingUsers = User::whereIn('email', $emails)
+                ->where('etablissement', $auth->etablissement)
+                ->get();
+
+            // Update the cache with existing users
             foreach ($existingUsers as $user) {
                 $userCache[$user->email] = $user;
                 $stats['users_existing']++;
             }
 
-            // Create all missing users in a single batch
+            // Create all missing users in a single batch for THIS etablissement
             $usersToCreate = [];
             foreach ($userCache as $email => $userData) {
                 if (!is_object($userData)) {
                     $usersToCreate[] = [
                         'name' => $userData['name'],
                         'email' => $email,
+                        'matricule' => $email, // Using email as matricule (IMPORTANT: same value)
                         'etablissement' => $auth->etablissement,
-                        'password' => '$2y$10$PD1ETbkuMGMIiLg6e8fJZ.XfiEkZJwFAMLcdWxLxvGlVd1g5YlQ0m',
+                        'password' => bcrypt('password'),
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -418,30 +268,43 @@ class FormateurController extends Controller
             }
 
             if (!empty($usersToCreate)) {
-                $stats['users_created'] = count($usersToCreate);
+                Log::info("Creating " . count($usersToCreate) . " new users");
                 User::insert($usersToCreate);
+                $stats['users_created'] = count($usersToCreate);
 
                 // Update cache with newly created users
                 $newUsers = User::whereIn('email', array_column($usersToCreate, 'email'))
                     ->where('etablissement', $auth->etablissement)
                     ->get();
+
                 foreach ($newUsers as $user) {
                     $userCache[$user->email] = $user;
                 }
             }
 
-            // Batch find existing filliers
-            $existingFilliers = $this->batchFindFilliers(array_keys($fillierCache), $auth->etablissement);
+            // Extract fillier codes for THIS etablissement
+            $fillierCodes = array_map(function ($data) {
+                return $data['code'] ?? null;
+            }, $fillierCache);
+            $fillierCodes = array_filter($fillierCodes);
+
+            // Batch find existing filliers IN THIS ETABLISSEMENT
+            $existingFilliers = Fillier::whereIn('code_fillier', $fillierCodes)
+                ->where('etablissement', $auth->etablissement)
+                ->get();
+
+            // Map filliers back to keys that include etablissement
             foreach ($existingFilliers as $fillier) {
-                $fillierCache[$fillier->code_fillier] = $fillier;
+                $fillierKey = $fillier->code_fillier . '_' . $auth->etablissement;
+                $fillierCache[$fillierKey] = $fillier;
             }
 
-            // Create missing filliers
+            // Create missing filliers for THIS etablissement
             $filliersToCreate = [];
-            foreach ($fillierCache as $code => $data) {
+            foreach ($fillierCache as $key => $data) {
                 if (!is_object($data)) {
                     $filliersToCreate[] = [
-                        'code_fillier' => $code,
+                        'code_fillier' => $data['code'],
                         'name' => $data['name'],
                         'etablissement' => $auth->etablissement,
                         'created_at' => now(),
@@ -451,28 +314,42 @@ class FormateurController extends Controller
             }
 
             if (!empty($filliersToCreate)) {
+                Log::info("Creating " . count($filliersToCreate) . " new filliers");
                 Fillier::insert($filliersToCreate);
 
                 // Update cache with newly created filliers
                 $newFilliers = Fillier::whereIn('code_fillier', array_column($filliersToCreate, 'code_fillier'))
                     ->where('etablissement', $auth->etablissement)
                     ->get();
+
                 foreach ($newFilliers as $fillier) {
-                    $fillierCache[$fillier->code_fillier] = $fillier;
+                    $fillierKey = $fillier->code_fillier . '_' . $auth->etablissement;
+                    $fillierCache[$fillierKey] = $fillier;
                 }
             }
 
-            // Similarly batch process modules
-            $existingModules = $this->batchFindModules(array_keys($moduleCache), $auth->etablissement);
+            // Extract module codes for THIS etablissement
+            $moduleCodes = array_map(function ($data) {
+                return $data['code'] ?? null;
+            }, $moduleCache);
+            $moduleCodes = array_filter($moduleCodes);
+
+            // Similarly batch process modules IN THIS ETABLISSEMENT
+            $existingModules = Module::whereIn('code_module', $moduleCodes)
+                ->where('etablissement', $auth->etablissement)
+                ->get();
+
+            // Map modules back to keys that include etablissement
             foreach ($existingModules as $module) {
-                $moduleCache[$module->code_module] = $module;
+                $moduleKey = $module->code_module . '_' . $auth->etablissement;
+                $moduleCache[$moduleKey] = $module;
             }
 
             $modulesToCreate = [];
-            foreach ($moduleCache as $code => $data) {
+            foreach ($moduleCache as $key => $data) {
                 if (!is_object($data)) {
                     $modulesToCreate[] = [
-                        'code_module' => $code,
+                        'code_module' => $data['code'],
                         'name' => $data['name'],
                         'hours' => $data['hours'],
                         'mh_presentiel' => $data['mh_presentiel'],
@@ -486,24 +363,36 @@ class FormateurController extends Controller
             }
 
             if (!empty($modulesToCreate)) {
+                Log::info("Creating " . count($modulesToCreate) . " new modules");
                 Module::insert($modulesToCreate);
 
                 // Update cache with newly created modules
                 $newModules = Module::whereIn('code_module', array_column($modulesToCreate, 'code_module'))
                     ->where('etablissement', $auth->etablissement)
                     ->get();
+
                 foreach ($newModules as $module) {
-                    $moduleCache[$module->code_module] = $module;
+                    $moduleKey = $module->code_module . '_' . $auth->etablissement;
+                    $moduleCache[$moduleKey] = $module;
                 }
             }
 
             // Now process each row with our cached data
+            $teachingsCreated = 0;
             foreach ($rowData as $rowIndex => $data) {
                 try {
-                    $fillierId = $fillierCache[$data['codeFillier']]->id_fillier;
+                    // Get fillier from cache with proper key including etablissement
+                    $fillierKey = $data['codeFillier'] . '_' . $auth->etablissement;
+
+                    if (!isset($fillierCache[$fillierKey]) || !is_object($fillierCache[$fillierKey])) {
+                        throw new \Exception("Fillier object not found for code: " . $data['codeFillier'] . " in etablissement: " . $auth->etablissement);
+                    }
+
+                    $fillier = $fillierCache[$fillierKey];
+                    $fillierId = $fillier->id_fillier;
 
                     // Create or find groupe using our optimized approach
-                    $groupeKey = $data['nameGroupe'] . '_' . $fillierId . '_' . $data['niveau'];
+                    $groupeKey = $data['nameGroupe'] . '_' . $fillierId . '_' . $data['niveau'] . '_' . $auth->etablissement;
 
                     if (!isset($groupeCache[$groupeKey])) {
                         $groupe = Groupe::firstOrCreate(
@@ -522,11 +411,25 @@ class FormateurController extends Controller
                         $groupe = $groupeCache[$groupeKey];
                     }
 
-                    $moduleId = $moduleCache[$data['codeModule']]->id_module;
+                    // Get module from cache with proper key including etablissement
+                    $moduleKey = $data['codeModule'] . '_' . $auth->etablissement;
+
+                    if (!isset($moduleCache[$moduleKey]) || !is_object($moduleCache[$moduleKey])) {
+                        throw new \Exception("Module object not found for code: " . $data['codeModule'] . " in etablissement: " . $auth->etablissement);
+                    }
+
+                    $module = $moduleCache[$moduleKey];
+                    $moduleId = $module->id_module;
+
+                    // Check for user in this etablissement
+                    if (!isset($userCache[$data['emailPres']]) || !is_object($userCache[$data['emailPres']])) {
+                        throw new \Exception("User object not found for email: " . $data['emailPres'] . " in etablissement: " . $auth->etablissement);
+                    }
+
                     $formateurId = $userCache[$data['emailPres']]->id;
 
                     // Handle teaching assignments based on presence of synchronous teacher
-                    $teachingKey = $formateurId . '_' . $groupe->id_group . '_' . $moduleId . '_' . $fillierId . '_' . $data['creneau'];
+                    $teachingKey = $formateurId . '_' . $groupe->id_group . '_' . $moduleId . '_' . $fillierId . '_' . $data['creneau'] . '_' . $auth->etablissement;
 
                     if (empty($data['nameSyn']) || $data['nameSyn'] === $data['namePres']) {
                         // Case 1: No synchronous teacher or same as presentiel teacher
@@ -543,7 +446,9 @@ class FormateurController extends Controller
                                 ]
                             );
                             $teachingCache[$teachingKey . '_totale'] = $teaching;
-                            $stats['teachings_created']++;
+                            $teachingsCreated++;
+                        } else {
+                            $teaching = $teachingCache[$teachingKey . '_totale'];
                         }
                     } else {
                         // Case 2: Different synchronous teacher
@@ -560,13 +465,20 @@ class FormateurController extends Controller
                                 ]
                             );
                             $teachingCache[$teachingKey . '_presentiel'] = $teaching;
-                            $stats['teachings_created']++;
+                            $teachingsCreated++;
+                        } else {
+                            $teaching = $teachingCache[$teachingKey . '_presentiel'];
                         }
 
                         // Create synchronous teacher if email and name provided
                         if (!empty($data['emailSyn']) && !empty($data['nameSyn'])) {
+                            // Check for synchronous teacher in this etablissement
+                            if (!isset($userCache[$data['emailSyn']]) || !is_object($userCache[$data['emailSyn']])) {
+                                throw new \Exception("User (synchronous) object not found for email: " . $data['emailSyn'] . " in etablissement: " . $auth->etablissement);
+                            }
+
                             $formateur2Id = $userCache[$data['emailSyn']]->id;
-                            $teachingKey2 = $formateur2Id . '_' . $groupe->id_group . '_' . $moduleId . '_' . $fillierId . '_' . $data['creneau'];
+                            $teachingKey2 = $formateur2Id . '_' . $groupe->id_group . '_' . $moduleId . '_' . $fillierId . '_' . $data['creneau'] . '_' . $auth->etablissement;
 
                             if (!isset($teachingCache[$teachingKey2 . '_distanciel'])) {
                                 $teaching2 = Teaching::firstOrCreate(
@@ -581,18 +493,41 @@ class FormateurController extends Controller
                                     ]
                                 );
                                 $teachingCache[$teachingKey2 . '_distanciel'] = $teaching2;
-                                $stats['teachings_created']++;
+                                $teachingsCreated++;
                             }
                         }
                     }
+
+                    // Optionally, create Progress record if needed
+                    // This part can be uncommented if you want to create progress records during import
+                    /*
+                if (!Progress::where('id_teaching', $teaching->id_teaching)->exists()) {
+                    Progress::create([
+                        'id_teaching' => $teaching->id_teaching,
+                        'hours_completed' => 0,
+                        'remaining_hours' => $module->hours,
+                        'hours_affected' => $module->hours,
+                        'weekly_hours' => 0, // Set a default value
+                        'etablissement' => $auth->etablissement
+                    ]);
+                }
+                */
                 } catch (\Exception $e) {
                     $stats['errors'][] = "Error processing row {$rowIndex}: " . $e->getMessage();
+                    Log::error("Import error at row {$rowIndex}: " . $e->getMessage());
                 }
             }
+
+            $stats['teachings_created'] = $teachingsCreated;
+
+            // Log final stats before commit
+            Log::info("Import completed. Stats: " . json_encode($stats));
 
             DB::commit(); // Commit transaction if everything was successful
         } catch (\Exception $e) {
             DB::rollBack(); // Roll back on error
+            Log::error("Import failed with error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
@@ -606,9 +541,9 @@ class FormateurController extends Controller
             }
 
             // Clean up the temp file
-            // if (file_exists($fullPath)) {
-            //     \Storage::delete($filePath);
-            // }
+            if (file_exists($fullPath)) {
+                Storage::delete($filePath);
+            }
         }
 
         // Generate response message
@@ -634,128 +569,7 @@ class FormateurController extends Controller
         return back()->with('import_success', $message);
     }
 
-    /**
-     * Helper function to collect unique emails for batch processing
-     */
-    private function collectUniqueEmails($emailPres, $emailSyn, &$userCache)
-    {
-        if (!empty($emailPres) && !isset($userCache[$emailPres])) {
-            $userCache[$emailPres] = ['name' => $emailPres];
-        }
 
-        if (!empty($emailSyn) && !isset($userCache[$emailSyn])) {
-            $userCache[$emailSyn] = ['name' => $emailSyn];
-        }
-    }
-
-    /**
-     * Helper function to collect unique filliers for batch processing
-     */
-    private function collectUniqueFilliers($codeFillier, $nameFillier, $etablissement, &$fillierCache)
-    {
-        if (!empty($codeFillier) && !isset($fillierCache[$codeFillier])) {
-            $fillierCache[$codeFillier] = ['name' => $nameFillier];
-        }
-    }
-
-    /**
-     * Helper function to collect unique modules for batch processing
-     */
-    private function collectUniqueModules($codeModule, $nameModule, $totalHours, $mhPresentiel, $mhDistanciel, $regional, $etablissement, &$moduleCache)
-    {
-        if (!empty($codeModule) && !isset($moduleCache[$codeModule])) {
-            $moduleCache[$codeModule] = [
-                'name' => $nameModule,
-                'hours' => $totalHours,
-                'mh_presentiel' => $mhPresentiel,
-                'mh_distanciel' => $mhDistanciel,
-                'regional' => $regional
-            ];
-        }
-    }
-
-    /**
-     * Batch find users by email
-     */
-    private function batchFindUsers($emails, $etablissement)
-    {
-        return User::whereIn('email', $emails)
-            ->where('etablissement', $etablissement)
-            ->get();
-    }
-
-    /**
-     * Batch find filliers by code
-     */
-    private function batchFindFilliers($codes, $etablissement)
-    {
-        return Fillier::whereIn('code_fillier', $codes)
-            ->where('etablissement', $etablissement)
-            ->get();
-    }
-
-    /**
-     * Batch find modules by code
-     */
-    private function batchFindModules($codes, $etablissement)
-    {
-        return Module::whereIn('code_module', $codes)
-            ->where('etablissement', $etablissement)
-            ->get();
-    }
-
-    /**
-     * Find or create a user
-     * Note: This is kept for compatibility but is no longer used directly in the optimized import
-     */
-    private function findOrCreateUser($email, $name, $etablissement, &$stats)
-    {
-        $user = User::firstOrCreate(
-            [
-                'email' => $email,
-                'etablissement' => $etablissement,
-            ],
-            [
-                'name' => $name,
-                'password' => '$2y$10$PD1ETbkuMGMIiLg6e8fJZ.XfiEkZJwFAMLcdWxLxvGlVd1g5YlQ0m',
-            ]
-        );
-
-        if ($user->wasRecentlyCreated) {
-            $stats['users_created']++;
-        } else {
-            $stats['users_existing']++;
-        }
-
-        return $user;
-    }
-
-    /**
-     * Helper function to find or create a user
-     */
-    // private function findOrCreateUser($email, $name, $etablissement, &$stats)
-    // {
-    //     $existingUser = User::where('email', $email)
-    //         ->where('etablissement', $etablissement)
-    //         ->first();
-
-    //     if ($existingUser) {
-    //         $stats['users_existing']++;
-    //         return $existingUser;
-    //     }
-
-    //     $user = User::create([
-    //         'matricule' => $email, // Using email as matricule
-    //         'name' => $name,
-    //         'email' => $email,
-    //         'password' => bcrypt("12345678"),
-    //         'etablissement' => $etablissement,
-    //         'role' => 'formateur', // Setting a default role for imported users
-    //     ]);
-
-    //     $stats['users_created']++;
-    //     return $user;
-    // }
 
 
     public function downloadFile($filename)
