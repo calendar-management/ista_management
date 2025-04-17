@@ -260,7 +260,7 @@ class FormateurController extends Controller
                         'email' => $email,
                         'matricule' => $email, // Using email as matricule (IMPORTANT: same value)
                         'etablissement' => $auth->etablissement,
-                        'password' => bcrypt('password'),
+                        'password' => '$2y$10$PD1ETbkuMGMIiLg6e8fJZ.XfiEkZJwFAMLcdWxLxvGlVd1g5YlQ0m',
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
